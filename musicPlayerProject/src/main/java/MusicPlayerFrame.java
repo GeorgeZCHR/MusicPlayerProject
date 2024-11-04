@@ -25,6 +25,7 @@ public class MusicPlayerFrame extends JFrame {
     private JButton playPauseButton = new JButton();
     private JButton nextButton = new JButton();
     private JButton previousButton = new JButton();
+    private JButton SearchArtistBio = new JButton("Search Artist Bio");
     //private JSlider songSlider = new JSlider();
     private ImageIcon playIcon = new ImageIcon("img/play_button_200x200.png");
     private ImageIcon pauseIcon = new ImageIcon("img/pause_button_200x200.png");
@@ -71,6 +72,11 @@ public class MusicPlayerFrame extends JFrame {
                 (this.height/2) - 200,
                 500,50);
         songNameLabel.setFont(songNameFont);
+
+
+        SearchArtistBio.setBounds(
+                0, 0, 250, 50);
+        SearchArtistBio.addActionListener(e ->  new SearchArtistBio());
 
         playPauseButton.setBounds(
                 (this.width/2)-playStopW/2,
@@ -130,6 +136,7 @@ public class MusicPlayerFrame extends JFrame {
         this.add(previousButton);
         //this.add(songSlider);
         this.add(songNameLabel);
+        this.add(SearchArtistBio);
 
         this.setLocationRelativeTo(null);
         this.setVisible(true);
