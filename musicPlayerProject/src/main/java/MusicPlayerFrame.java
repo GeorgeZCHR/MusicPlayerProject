@@ -3,8 +3,14 @@ import javax.sound.sampled.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -26,6 +32,10 @@ public class MusicPlayerFrame extends JFrame {
     private JButton nextButton = new JButton();
     private JButton previousButton = new JButton();
     private JButton SearchArtistBio = new JButton("Search Artist Bio");
+    private JButton searchBioButton = new JButton("Search Bio of Artist");
+    private JTextArea bioTextArea = new JTextArea();
+    private JScrollPane scrollPane;
+    private JButton viewMoreButton = new JButton("View More Bio");
     //private JSlider songSlider = new JSlider();
     private ImageIcon playIcon = new ImageIcon("img/play_button_200x200.png");
     private ImageIcon pauseIcon = new ImageIcon("img/pause_button_200x200.png");
@@ -101,6 +111,30 @@ public class MusicPlayerFrame extends JFrame {
         previousButton.setIcon(previousIcon);
         previousButton.addActionListener(e -> previousMusic());
 
+        searchBioButton.setBounds(0,51,250,50);
+
+
+
+        bioTextArea.setWrapStyleWord(true);
+        bioTextArea.setLineWrap(true);
+        bioTextArea.setEditable(false);
+        scrollPane = new JScrollPane(bioTextArea);
+        scrollPane.setBounds(780,0,300,200);
+
+
+
+        viewMoreButton.setEnabled(false); // Initially disabled
+        viewMoreButton.setBounds(780,201,300,200);
+
+        // Add action listeners
+        searchBioButton.addActionListener(e -> {
+            searchArtistBio(viewMoreButton);
+        });
+
+        viewMoreButton.addActionListener(e -> {
+            openWikiPage();
+        });
+
         /*songSlider.setBounds((int)(this.width * 0.1),(int)(this.height-(this.height * 0.1)),
                 (int)(this.width * 0.8), 20);
         songSlider.setVisible(false);
@@ -140,6 +174,17 @@ public class MusicPlayerFrame extends JFrame {
 
         this.setLocationRelativeTo(null);
         this.setVisible(true);
+
+
+
+
+
+
+
+        // Create and add the search button
+
+
+
     }
 
     public void playPauseMusic() {
@@ -267,6 +312,68 @@ public class MusicPlayerFrame extends JFrame {
         }
         loadAudio();
         playPauseMusic();
+    }
+
+
+    private void searchArtistBio(JButton viewMoreButton) {
+        // Prompt the user to input an artist name
+        String artistName = JOptionPane.showInputDialog(this, "Enter the artist's name:", "Artist Bio Search", JOptionPane.QUESTION_MESSAGE);
+
+        if (artistName != null && !artistName.trim().isEmpty()) {
+            // Construct the Wikipedia API URL
+            String wikipediaApiUrl = "https://en.wikipedia.org/api/rest_v1/page/summary/" + artistName.replace(" ", "_");
+
+            try {
+                // Fetch and display the first paragraph of the bio
+                String bio = fetchFirstParagraph(wikipediaApiUrl);
+                bioTextArea.setText(bio);
+
+                // Enable the "View More Bio" button and store the Wikipedia page URL
+                viewMoreButton.setEnabled(true);
+                viewMoreButton.putClientProperty("wikiURL", "https://en.wikipedia.org/wiki/" + artistName.replace(" ", "_"));
+
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error fetching bio: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Please enter an artist's name.", "No Artist Entered", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private String fetchFirstParagraph(String apiUrl) throws IOException {
+        // Connect to Wikipedia API and fetch the summary
+        HttpURLConnection connection = (HttpURLConnection) new URL(apiUrl).openConnection();
+        connection.setRequestMethod("GET");
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+
+            // Parse the JSON response to get the first paragraph
+            String json = response.toString();
+            int startIdx = json.indexOf("\"extract\":\"") + 11;
+            int endIdx = json.indexOf("\",\"extract_html\"");
+            if (startIdx > 0 && endIdx > startIdx) {
+                return json.substring(startIdx, endIdx).replace("\\n", "\n");
+            }
+            return "No bio available for this artist.";
+        }
+    }
+
+    private void openWikiPage() {
+        String wikiURL = (String) ((JButton) getContentPane().getComponent(2)).getClientProperty("wikiURL");
+        if (wikiURL != null && Desktop.isDesktopSupported()) {
+            try {
+                Desktop.getDesktop().browse(new URI(wikiURL));
+            } catch (IOException | URISyntaxException e) {
+                JOptionPane.showMessageDialog(this, "Error opening browser: " + e.getMessage(), "Browser Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Desktop is not supported on this system.", "Unsupported Operation", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     public void loadSongs(String folderPath) {
