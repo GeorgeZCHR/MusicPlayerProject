@@ -1,3 +1,4 @@
+/*
 package main.java;
 
 import com.google.auth.oauth2.GoogleCredentials;
@@ -96,4 +97,4 @@ public class FirebaseAuthManager {
             return null;
         }
     }
-}
+}*/
