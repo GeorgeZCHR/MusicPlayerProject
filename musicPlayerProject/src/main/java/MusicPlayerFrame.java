@@ -45,24 +45,41 @@ public class MusicPlayerFrame extends JFrame {
     private AudioInputStream ais;
     private Clip clip;
     private List<Song> allSongs = new ArrayList();
+    private JList<String> mainPlaylist;
+    private JScrollPane mainPlaylistSP;
     private Timer sliderUpdateTimer;
     //private SongPlayer songPlayer;
     private Font songNameFont = new Font(Font.SANS_SERIF, Font.BOLD,30);
     public MusicPlayerFrame(int width, int height) {
+        this.width = width;
+        this.height = height;
+
         loadSongs("music/");
-        int i = 0;
+        int counter = 0;
         // For debugging
         for (Song song : allSongs) {
-            System.out.println("#" + i);
+            System.out.println("#" + counter);
             song.printData();
-            i++;
+            counter++;
             System.out.println("-----------");
         }
         currentSong = allSongs.get(currentSongNum);
-        //songPlayer = new SongPlayer(currentSong);
-        //loadAudio();
-        this.width = width;
-        this.height = height;
+        List<String> allSongsNames = new ArrayList<>();
+        for (int i = 0; i < allSongs.size(); i++) {
+            allSongsNames.add(allSongs.get(i).getName());
+        }
+        mainPlaylist = new JList<>(allSongsNames.toArray(new String[0]));
+        mainPlaylist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        mainPlaylist.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                goTo(mainPlaylist.getLeadSelectionIndex());
+            }
+        });
+
+        mainPlaylistSP = new JScrollPane(mainPlaylist);
+        mainPlaylistSP.setBounds((int)(this.width/2)-250,0,500,300);
+        mainPlaylistSP.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        mainPlaylistSP.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         // playIcon and pauseIcon must have same size
         int playStopW = playIcon.getIconWidth();
@@ -79,20 +96,20 @@ public class MusicPlayerFrame extends JFrame {
 
         songNameLabel.setBounds(
                 (this.width/2) - playStopW,
-                (this.height/2) - 200,
+                (int)(0.55 * this.height),
                 500,50);
         songNameLabel.setFont(songNameFont);
 
         playPauseButton.setBounds(
                 (this.width/2)-playStopW/2,
-                (this.height/2)-playStopH/2,
+                (int)(0.65 * this.height),
                 playStopW,playStopH);
         playPauseButton.setIcon(playIcon);
         playPauseButton.addActionListener(e -> playPauseMusic());
 
         nextButton.setBounds(
                 (this.width/2)+playStopW,
-                (this.height/2)-playStopH/2,
+                (int)(0.65 * this.height),
                 nextW,nextH);
         nextButton.setVisible(false);
         nextButton.setIcon(nextIcon);
@@ -100,7 +117,7 @@ public class MusicPlayerFrame extends JFrame {
 
         previousButton.setBounds(
                 (this.width/2)-2*playStopW,
-                (this.height/2)-playStopH/2,
+                (int)(0.65 * this.height),
                 previousW,previousH);
         previousButton.setVisible(false);
         previousButton.setIcon(previousIcon);
@@ -163,6 +180,7 @@ public class MusicPlayerFrame extends JFrame {
         this.add(SearchArtistBio);
         this.add(viewMoreButton);
         this.add(scrollPane);
+        this.add(mainPlaylistSP);
 
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -202,6 +220,18 @@ public class MusicPlayerFrame extends JFrame {
     public void previousMusic() {
         clip.close();
         previousSong();
+    }
+
+    private void goTo(int leadSelectionIndex) {
+        if (clip != null) {
+            clip.close();
+        }
+        framePosition = 0;
+        played = false;
+        started = false;
+        setCurSong(leadSelectionIndex);
+        loadAudio();
+        playPauseMusic();
     }
 
     /*public void changeFramesOfSong() {
@@ -296,7 +326,7 @@ public class MusicPlayerFrame extends JFrame {
     }
 
     public void searchArtistBio() {
-        ArtistBioSearcher abs;
+       /* ArtistBioSearcher abs;
         String artistName = JOptionPane.showInputDialog(this,
                 "Enter the artist's name:",
                 "Artist Bio Search", JOptionPane.QUESTION_MESSAGE);
@@ -316,7 +346,7 @@ public class MusicPlayerFrame extends JFrame {
             JOptionPane.showMessageDialog(this,
                     "Please enter an artist's name.",
                     "No Artist Entered", JOptionPane.WARNING_MESSAGE);
-        }
+        }*/
     }
 
     public void openWikiPage() {
