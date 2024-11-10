@@ -1,4 +1,3 @@
-package main.java;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.AudioDevice;
