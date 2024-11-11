@@ -326,7 +326,7 @@ public class MusicPlayerFrame extends JFrame {
     }
 
     public void searchArtistBio() {
-       /* ArtistBioSearcher abs;
+        ArtistBioSearcher abs;
         String artistName = JOptionPane.showInputDialog(this,
                 "Enter the artist's name:",
                 "Artist Bio Search", JOptionPane.QUESTION_MESSAGE);
@@ -346,7 +346,7 @@ public class MusicPlayerFrame extends JFrame {
             JOptionPane.showMessageDialog(this,
                     "Please enter an artist's name.",
                     "No Artist Entered", JOptionPane.WARNING_MESSAGE);
-        }*/
+        }
     }
 
     public void openWikiPage() {
