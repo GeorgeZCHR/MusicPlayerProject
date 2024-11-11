@@ -47,6 +47,10 @@ public class MusicPlayerFrame extends JFrame {
     private List<Song> allSongs = new ArrayList();
     private JList<String> mainPlaylist;
     private JScrollPane mainPlaylistSP;
+    private ImageIcon heartWhiteIcon = new ImageIcon("img/heart_white.png");//δηλωση εικονιδιων και του κουμπιου
+    private ImageIcon heartRedIcon = new ImageIcon("img/heart_red.png");
+    private JButton heartButton = new JButton();
+    private boolean isHearted = false;
     private Timer sliderUpdateTimer;
     //private SongPlayer songPlayer;
     private Font songNameFont = new Font(Font.SANS_SERIF, Font.BOLD,30);
@@ -96,8 +100,8 @@ public class MusicPlayerFrame extends JFrame {
 
         songNameLabel.setBounds(
                 (this.width/2) - playStopW,
-                (int)(0.55 * this.height),
-                500,50);
+                (int)(0.5 * this.height),
+                700,50);
         songNameLabel.setFont(songNameFont);
 
         playPauseButton.setBounds(
@@ -142,6 +146,16 @@ public class MusicPlayerFrame extends JFrame {
         viewMoreButton.setBounds(0,50,250,50);
         viewMoreButton.addActionListener(e -> openWikiPage());
 
+        heartButton.setBounds((int)(this.width * 0.85),(int)(this.height * 0.45),
+                heartWhiteIcon.getIconWidth(),
+                heartWhiteIcon.getIconHeight());
+        heartButton.setIcon(heartWhiteIcon);
+        heartButton.setBorderPainted(false);
+        heartButton.setContentAreaFilled(false);
+        heartButton.setFocusPainted(false);
+
+        heartButton.addActionListener(e -> toggleHeart());
+
         /*songSlider.setBounds((int)(this.width * 0.1),(int)(this.height-(this.height * 0.1)),
                 (int)(this.width * 0.8), 20);
         songSlider.setVisible(false);
@@ -150,10 +164,15 @@ public class MusicPlayerFrame extends JFrame {
         songSlider.addChangeListener(e -> changeFramesOfSong());*/
 
         // Create a timer that updates every 1000 milliseconds (1 second)
-        timer = new Timer(1000, new ActionListener() {
+        timer = new Timer(50, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 songNameLabel.setText(currentSong.getName());
+                if (currentSong.isHearted()) {
+                    heartButton.setIcon(heartRedIcon);
+                } else {
+                    heartButton.setIcon(heartWhiteIcon);
+                }
                 //songSlider.setMaximum(songSliderLength);
                 //System.out.println(e.getWhen());
                 /*System.out.println("Seconds : " + totalSeconds);
@@ -181,6 +200,7 @@ public class MusicPlayerFrame extends JFrame {
         this.add(viewMoreButton);
         this.add(scrollPane);
         this.add(mainPlaylistSP);
+        this.add(heartButton);
 
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -232,6 +252,17 @@ public class MusicPlayerFrame extends JFrame {
         setCurSong(leadSelectionIndex);
         loadAudio();
         playPauseMusic();
+    }
+
+    private void toggleHeart() {
+        if (currentSong.isHearted()) {
+            //heartButton.setIcon(heartRedIcon);
+            currentSong.setHearted(false);
+        } else {
+            //heartButton.setIcon(heartWhiteIcon);
+            currentSong.setHearted(true);
+        }
+        currentSong.addRemoveHeartFromName();
     }
 
     /*public void changeFramesOfSong() {
