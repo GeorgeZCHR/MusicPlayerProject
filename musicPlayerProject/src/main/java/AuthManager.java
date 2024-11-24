@@ -1,99 +1,151 @@
-package main.java;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.ContentType;
 
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseToken;
-import com.google.firebase.auth.UserRecord;
-import com.google.firebase.auth.UserRecord.CreateRequest;
-
-import java.io.FileInputStream;
+import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import org.json.JSONObject;
+public class AuthManager extends JFrame {
+    private static final String FIREBASE_API_KEY = "APIKEY"; // Replace with your API key
+    private CardLayout cardLayout;
+    private JPanel mainPanel;
+    private JTextField emailField, registerEmailField;
+    private JPasswordField passwordField, registerPasswordField;
 
-public class FirebaseAuthManager {
+    public AuthManager() {
+        setTitle("Firebase Authentication");
+        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
 
-    private static boolean initialized = false;
-    private static final String FIREBASE_AUTH_URL = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=";
-    private String apiKey;
+        cardLayout = new CardLayout();
+        mainPanel = new JPanel(cardLayout);
 
-    public FirebaseAuthManager(String serviceAccountPath, String databaseUrl, String apiKey) {
-        this.apiKey = apiKey;
-        if (!initialized) {
-            try {
-                FileInputStream serviceAccount = new FileInputStream(serviceAccountPath);
-                FirebaseOptions options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                        .setDatabaseUrl(databaseUrl)
-                        .build();
-                FirebaseApp.initializeApp(options);
-                initialized = true;
-            } catch (IOException e) {
-                e.printStackTrace();
+        // Add Login and Register Panels
+        mainPanel.add(createLoginPanel(), "login");
+        mainPanel.add(createRegisterPanel(), "register");
+
+        add(mainPanel);
+        setVisible(true);
+    }
+
+    private JPanel createLoginPanel() {
+        JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel emailLabel = new JLabel("Email:");
+        emailField = new JTextField();
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordField = new JPasswordField();
+
+        JButton loginButton = new JButton("Login");
+        loginButton.addActionListener(e -> loginUser());
+
+        JButton switchToRegisterButton = new JButton("Go to Register");
+        switchToRegisterButton.addActionListener(e -> cardLayout.show(mainPanel, "register"));
+
+        panel.add(emailLabel);
+        panel.add(emailField);
+        panel.add(passwordLabel);
+        panel.add(passwordField);
+        panel.add(loginButton);
+        panel.add(switchToRegisterButton);
+
+        return panel;
+    }
+
+    private JPanel createRegisterPanel() {
+        JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel emailLabel = new JLabel("Email:");
+        registerEmailField = new JTextField();
+        JLabel passwordLabel = new JLabel("Password:");
+        registerPasswordField = new JPasswordField();
+
+        JButton registerButton = new JButton("Register");
+        registerButton.addActionListener(e -> registerUser());
+
+        JButton switchToLoginButton = new JButton("Go to Login");
+        switchToLoginButton.addActionListener(e -> cardLayout.show(mainPanel, "login"));
+
+        panel.add(emailLabel);
+        panel.add(registerEmailField);
+        panel.add(passwordLabel);
+        panel.add(registerPasswordField);
+        panel.add(registerButton);
+        panel.add(switchToLoginButton);
+
+        return panel;
+    }
+
+    private void loginUser() {
+        String email = emailField.getText();
+        String password = new String(passwordField.getPassword());
+
+        String url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + FIREBASE_API_KEY;
+        String jsonPayload = String.format(
+                "{\"email\":\"%s\", \"password\":\"%s\", \"returnSecureToken\":true}",
+                email, password
+        );
+
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpPost post = new HttpPost(url);
+            post.setEntity(new StringEntity(jsonPayload, ContentType.APPLICATION_JSON));
+
+            try (CloseableHttpResponse response = client.execute(post)) {
+                int statusCode = response.getCode();
+                String responseBody = new String(response.getEntity().getContent().readAllBytes(), StandardCharsets.UTF_8);
+
+                if (statusCode == 200) {
+                    JOptionPane.showMessageDialog(this, "Login successful ");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Login failed: " + responseBody, "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "An error occurred " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    public String registerUser(String email, String password) {
-        CreateRequest request = new CreateRequest()
-                .setEmail(email)
-                .setPassword(password);
+    private void registerUser() {
+        String email = registerEmailField.getText();
+        String password = new String(registerPasswordField.getPassword());
 
-        try {
-            UserRecord userRecord = FirebaseAuth.getInstance().createUser(request);
-            return userRecord.getUid();
-        } catch (Exception e) {
+        String url = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=" + FIREBASE_API_KEY;
+        String jsonPayload = String.format(
+                "{\"email\":\"%s\", \"password\":\"%s\", \"returnSecureToken\":true}",
+                email, password
+        );
+
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpPost post = new HttpPost(url);
+            post.setEntity(new StringEntity(jsonPayload, ContentType.APPLICATION_JSON));
+
+            try (CloseableHttpResponse response = client.execute(post)) {
+                int statusCode = response.getCode();
+                String responseBody = new String(response.getEntity().getContent().readAllBytes(), StandardCharsets.UTF_8);
+
+                if (statusCode == 200) {
+                    JOptionPane.showMessageDialog(this, "Registration successful");
+                    cardLayout.show(mainPanel, "login");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Registration failed: " + responseBody, "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } catch (IOException e) {
             e.printStackTrace();
-            return null;
+            JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    public String loginUser(String email, String password) {
-        try {
-            URL url = new URL(FIREBASE_AUTH_URL + apiKey);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json; utf-8");
-            connection.setDoOutput(true);
-
-            JSONObject payload = new JSONObject();
-            payload.put("email", email);
-            payload.put("password", password);
-            payload.put("returnSecureToken", true);
-
-            try (OutputStream os = connection.getOutputStream()) {
-                byte[] input = payload.toString().getBytes(StandardCharsets.UTF_8);
-                os.write(input, 0, input.length);
-            }
-
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                String jsonResponse = new String(connection.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-                JSONObject responseJson = new JSONObject(jsonResponse);
-                return responseJson.getString("idToken");
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public String verifyToken(String idToken) {
-        try {
-            FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
-            return decodedToken.getUid();
-        } catch (FirebaseAuthException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(AuthManager::new);
     }
 }
