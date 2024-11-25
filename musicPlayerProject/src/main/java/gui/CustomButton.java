@@ -1,8 +1,9 @@
+package gui;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-class CustomButton extends JButton {
+public class CustomButton extends JButton {
     private final int RECT = 0;
     private final int OVAL = 1;
     private final int ROUND = 2;

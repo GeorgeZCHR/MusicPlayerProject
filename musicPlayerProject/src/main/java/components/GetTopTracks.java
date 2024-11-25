@@ -1,17 +1,20 @@
+package components;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.json.JSONObject;
 
-public class GetTopArtists {
-
+public class GetTopTracks {
     private static final String API_KEY = "eac20d41d85963c4201d881aff79d53d"; // Replace with your API key
     private static final String BASE_URL = "http://ws.audioscrobbler.com/2.0/";
 
-    public JsonObject getTopArtists() {
-        String urlString = BASE_URL + "?method=chart.gettopartists&api_key=" + API_KEY + "&format=json";
+    // Method to get top tracks and return as a JsonObject
+    public JSONObject getTopTracks() {
+        String urlString = BASE_URL + "?method=chart.gettoptracks&api_key=" + API_KEY + "&format=json"; // Update the method for top tracks
         StringBuilder response = new StringBuilder();
         Gson gson = new Gson(); // Create a Gson instance
 
@@ -33,15 +36,12 @@ public class GetTopArtists {
             }
 
             connection.disconnect();
-
-            // Parse the response string into a JsonObject
-            return gson.fromJson(response.toString(), JsonObject.class); // Return the JSON response as a JsonObject
+            return new JSONObject(response.toString());
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return null; // Return null if there's an error
+        return null; // If there's an error
     }
 }
-
