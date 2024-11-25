@@ -1,3 +1,5 @@
+package components;
+
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
@@ -145,7 +147,7 @@ public class AuthManager extends JFrame {
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(AuthManager::new);
-    }
+    /*public static void main(String[] args) {
+        SwingUtilities.invokeLater(components.AuthManager::new);
+    }*/
 }

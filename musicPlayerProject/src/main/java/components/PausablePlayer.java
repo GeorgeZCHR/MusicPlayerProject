@@ -1,3 +1,4 @@
+package components;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.AudioDevice;
@@ -142,7 +143,7 @@ public class PausablePlayer {
         Scanner scanner = new Scanner(System.in);
         try {
             FileInputStream input = new FileInputStream(songPath);
-            PausablePlayer player = new PausablePlayer(input);
+            components.PausablePlayer player = new components.PausablePlayer(input);
 
             String ans = scanner.next();
             // start playing

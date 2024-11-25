@@ -7,16 +7,16 @@ public class SongPlayer {
     private File file;
     private AudioInputStream ais;
     private Clip clip;
-    private Song song;
+    private containers.Song song;
     private boolean played = false;
     private boolean started = false;
     private boolean songFinished = false;
     private int framePosition = 0, songNum = 0, a = 0;
-    public SongPlayer(Song song) {
+    public SongPlayer(containers.Song song) {
         this.song = song;
     }
 
-    public void changeSong(Song song) {
+    public void changeSong(containers.Song song) {
         this.song = song;
     }
 
@@ -39,10 +39,10 @@ public class SongPlayer {
             clip.open(ais);
             clip.addLineListener(e -> {
                 if (e.getType() == LineEvent.Type.START) {
-                    System.out.println("Song : Start");
+                    System.out.println("containers.Song : Start");
                 } else if (e.getType() == LineEvent.Type.STOP) {
                     if (clip.getFramePosition() < clip.getFrameLength()) {
-                        System.out.println("Song : Stop");
+                        System.out.println("containers.Song : Stop");
                     } else {
                         a = 1;
                         played = false;
@@ -50,7 +50,7 @@ public class SongPlayer {
                         clip.close();
                     }
                 } else if (e.getType() == LineEvent.Type.CLOSE) {
-                    System.out.println("Song : Close");
+                    System.out.println("containers.Song : Close");
                     framePosition = 0;
                     started = false;
                 }
@@ -89,7 +89,7 @@ public class SongPlayer {
 
     // Getters
 
-    public Song getSong() { return song; }
+    public containers.Song getSong() { return song; }
     public boolean isPlayed() { return played; }
     public boolean isStarted() { return started; }
 

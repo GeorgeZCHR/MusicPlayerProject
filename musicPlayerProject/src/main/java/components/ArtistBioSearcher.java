@@ -1,3 +1,5 @@
+package components;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,7 +9,7 @@ import java.net.URL;
 public class ArtistBioSearcher {
     private String artistName;
     private String wikiURL;
-    ArtistBioSearcher(String artistName) {
+    public ArtistBioSearcher(String artistName) {
         this.artistName = artistName;
         wikiURL = "https://en.wikipedia.org/wiki/" + artistName.replace(" ", "_");
     }
@@ -19,7 +21,6 @@ public class ArtistBioSearcher {
             return fetchFirstParagraph(wikipediaApiUrl);
 
         } catch (IOException ex) {
-            System.err.println("Error fetching bio: ");
             return null;
         }
     }
