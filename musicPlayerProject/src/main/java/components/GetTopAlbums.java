@@ -1,9 +1,12 @@
+package components;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.json.JSONObject;
 
 public class GetTopAlbums {
 
@@ -11,7 +14,7 @@ public class GetTopAlbums {
     private static final String BASE_URL = "http://ws.audioscrobbler.com/2.0/";
 
     // Method to get top albums and return as a JsonObject
-    public JsonObject getTopAlbums() {
+    public JSONObject getTopAlbums() {
         String urlString = BASE_URL + "?method=chart.gettopalbums&api_key=" + API_KEY + "&format=json";
         StringBuilder response = new StringBuilder();
         Gson gson = new Gson(); // Create a Gson instance
@@ -34,12 +37,12 @@ public class GetTopAlbums {
             }
 
             connection.disconnect();
+            return new JSONObject(response.toString());
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Parse the response string into a JsonObject and return it
-        return gson.fromJson(response.toString(), JsonObject.class);
+        return null; // If there's an error
     }
 }
