@@ -137,6 +137,19 @@ public class MusicPlayerFrame extends JFrame {
     //---Discover Top Albums Content---
     private CustomButton getTopAlbums = new CustomButton(
             "Get Top Albums",orange_color, 20,20);
+
+
+
+
+    private JTextArea AlbumTextArea = new JTextArea();
+
+
+    private JScrollPane AlbumTextAreaSP = new JScrollPane(AlbumTextArea);
+
+
+
+
+
     //----------------
     private final Font songNameFont = new Font(Font.SANS_SERIF, Font.BOLD,30);
     private final Font myFont = new Font(Font.SANS_SERIF, Font.BOLD,20);
@@ -198,6 +211,7 @@ public class MusicPlayerFrame extends JFrame {
         initTopArtistsContent();
         initTopTracksContent();
         initTopAlbumsContent();
+        AlbumsWindow();
 
         //---Footer---
         // todo
@@ -286,6 +300,8 @@ public class MusicPlayerFrame extends JFrame {
         topTracksContent.add(getTopTracks);
 
         topAlbumsContent.add(getTopAlbums);
+        topAlbumsContent.add(AlbumTextAreaSP);
+
 
         this.add(header);
         this.add(footer);
@@ -680,8 +696,65 @@ public class MusicPlayerFrame extends JFrame {
             GetTopAlbums albums = new GetTopAlbums();
             //JsonObject jsonObject = albums.getTopAlbums();
             //System.out.println(jsonObject);
+
+
+            AlbumTextArea.setEnabled(false);
+            AlbumTextArea.setDisabledTextColor(DEFAULT_TEXT_COLOR);
+            // Ενεργοποίηση αναδίπλωσης γραμμής
+            AlbumTextArea.setLineWrap(true);
+            // Αναδίπλωση ανά λέξη για καλύτερη εμφάνιση
+            AlbumTextArea.setWrapStyleWord(true);
+            // Ρυθμιση της γραμματοσειράς για να είναι αναγνώσιμη
+            AlbumTextArea.setFont(new Font("SansSerif", Font.PLAIN, 14));
+            AlbumTextAreaSP = new JScrollPane(AlbumTextArea);
+            AlbumTextAreaSP.setVisible(false);
+            AlbumTextAreaSP.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+            AlbumTextAreaSP.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            AlbumTextAreaSP.setBounds((int)(0.02 * bioContent.getWidth()),
+                    (int)(0.2 * bioContent.getHeight()), (int)(0.96 * bioContent.getWidth()),
+                    (int)(0.8 * bioContent.getHeight()));
+            if (albums != null) {
+                AlbumTextArea.setText(albums.toString());
+                AlbumTextAreaSP.setVisible(true);
+            } else {
+                AlbumTextArea.setText("Failed to fetch data. Please check your network or API key.");
+            }
         });
     }
+
+    private void AlbumsWindow(){
+
+        GetTopAlbums albums = new GetTopAlbums();
+        //JsonObject jsonObject = albums.getTopAlbums();
+        //System.out.println(jsonObject);
+
+
+        AlbumTextArea.setEnabled(false);
+        AlbumTextArea.setDisabledTextColor(DEFAULT_TEXT_COLOR);
+        // Ενεργοποίηση αναδίπλωσης γραμμής
+        AlbumTextArea.setLineWrap(true);
+        // Αναδίπλωση ανά λέξη για καλύτερη εμφάνιση
+        AlbumTextArea.setWrapStyleWord(true);
+        // Ρυθμιση της γραμματοσειράς για να είναι αναγνώσιμη
+        AlbumTextArea.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        AlbumTextAreaSP = new JScrollPane(AlbumTextArea);
+        AlbumTextAreaSP.setVisible(false);
+        AlbumTextAreaSP.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        AlbumTextAreaSP.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        AlbumTextAreaSP.setBounds((int)(0.02 * bioContent.getWidth()),
+                (int)(0.2 * bioContent.getHeight()), (int)(0.96 * bioContent.getWidth()),
+                (int)(0.8 * bioContent.getHeight()));
+        if (albums != null) {
+            AlbumTextArea.setText(albums.toString());
+            AlbumTextAreaSP.setVisible(true);
+        } else {
+            AlbumTextArea.setText("Failed to fetch data. Please check your network or API key.");
+        }
+    }
+
+
+
+
 
     public void playPauseMusic() {
         nextButton.setVisible(true);
