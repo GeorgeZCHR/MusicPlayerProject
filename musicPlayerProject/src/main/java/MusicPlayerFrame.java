@@ -73,6 +73,14 @@ public class MusicPlayerFrame extends JFrame {
     private int framePosition = 0;
     private Song currentSong;
     private int currentSongNum = 0;
+
+
+
+
+    private JButton heartButton = new JButton("\uFE0F");
+    private boolean isHearted = false;
+
+
     private boolean songFinished = false;
     private JLabel songNameLabel = new JLabel();
     private CustomButton playPauseButton = new CustomButton("",orange_color,1);
@@ -169,7 +177,7 @@ public class MusicPlayerFrame extends JFrame {
 
         //---Header Options---
         menuShower.setBounds((int)(header.getWidth() * 0.02),(int)(header.getHeight() * 0.1),
-            (int)(header.getWidth() * 0.06),(int)(header.getHeight() * 0.8));
+                (int)(header.getWidth() * 0.06),(int)(header.getHeight() * 0.8));
         menuShower.setFocusable(false);
         menuShower.setFont(headerFont);
         menuShower.addActionListener(e -> changeMenu());
@@ -194,11 +202,21 @@ public class MusicPlayerFrame extends JFrame {
         //---Footer---
         // todo
 
+
+
+
         // Create a timer that updates every 1000 milliseconds (1 second)
         timer = new Timer(1000, e -> {
-        songNameLabel.setText(currentSong.getName());
-        //songSlider.setMaximum(songSliderLength);
-        //System.out.println(e.getWhen());
+
+            songNameLabel.setText(currentSong.getName());
+            /*if (currentSong.isHearted()) {
+                heartButton.setIcon(heartRedIcon);
+
+            } else {
+                heartButton.setIcon(heartWhiteIcon);
+            }*/
+            //songSlider.setMaximum(songSliderLength);
+            //System.out.println(e.getWhen());
             /*System.out.println("Seconds : " + totalSeconds);
             totalSeconds++;*/
             /*if (clip != null) {
@@ -231,6 +249,10 @@ public class MusicPlayerFrame extends JFrame {
         musicContent.add(previousButton);
         musicContent.add(songNameLabel);
         musicContent.add(mainPlaylistSP);
+
+        musicContent.add(heartButton);
+
+
 
         pagePL1.add(playlistNameLabel);
         pagePL1.add(playlistNameText);
@@ -275,6 +297,8 @@ public class MusicPlayerFrame extends JFrame {
         this.add(topArtistsContent);
         this.add(topTracksContent);
         this.add(topAlbumsContent);
+
+        //this.add(heartButton);
 
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -343,6 +367,17 @@ public class MusicPlayerFrame extends JFrame {
         previousButton.setText("⏪");
         previousButton.setFont(myFont);
         previousButton.addActionListener(e -> previousMusic());
+
+        heartButton.setBounds(
+                (int)(musicContent.getWidth() * 0.85),
+                (int)(musicContent.getHeight() * 0.45), 60,60);
+
+        previousButton.setVisible(false);
+        previousButton.setFocusable(false);
+        previousButton.setText("⏪");
+        heartButton.setFont(myFont);
+
+        heartButton.addActionListener(e -> toggleHeart());
 
         //---containers.Song Bar Slider---
         /*songSlider.setBounds((int)(musicContent.getWidth() * 0.02),
@@ -696,6 +731,19 @@ public class MusicPlayerFrame extends JFrame {
         playPauseMusic();
     }
 
+
+
+    private void toggleHeart() {
+        if (currentSong.isHearted()) {
+            heartButton.setText("\u2661");
+            currentSong.setHearted(false);
+        } else {
+            heartButton.setText("\uFE0F");
+            currentSong.setHearted(true);
+        }
+        currentSong.addRemoveHeartFromName();
+    }
+
     /*public void changeFramesOfSong() {
         if (clip != null) {
             int newPosition = songSlider.getValue();
@@ -782,6 +830,8 @@ public class MusicPlayerFrame extends JFrame {
         loadAudio();
         playPauseMusic();
     }
+
+
 
     public void searchArtistBio() {
         ArtistBioSearcher abs;
