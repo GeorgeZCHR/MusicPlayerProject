@@ -93,13 +93,6 @@ public class CustomButton extends JButton {
         }
     }
 
-    /*@Override
-    protected void paintBorder(Graphics g) {
-        // Optional custom border
-        g.setColor(Color.BLACK);
-        g.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
-    }*/
-
     // Getters
     public Color getColor() { return color; }
     public int getForm() { return form; }
