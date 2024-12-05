@@ -4,7 +4,6 @@ import containers.*;
 import gui.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.sound.sampled.*;
@@ -48,6 +47,7 @@ public class MusicPlayerFrame extends JFrame {
     private List<JScrollPane> allPlaylists = new ArrayList<>();
     private List<String> currentPlaylist = new ArrayList<>();
     private List<Song> currentPLSongs = new ArrayList<>();
+    private Playlist curPlaylist;
     //private SongPlayer songPlayer;
     //---Header---
     private CustomButton menuShower = new CustomButton("≡",orange_color,20,20);
@@ -89,17 +89,13 @@ public class MusicPlayerFrame extends JFrame {
     private JComboBox playlistSelector;
     //----------------
     //---Create Playlist Content---
-    private String playlistName;
     private JLabel playlistNameLabel = new JLabel("Playlist Name : ");
-    private JTextField playlistNameText = new JTextField();
-    private CustomButton next = new CustomButton("Next",orange_color,40,40);
-    private CustomButton back = new CustomButton("Back",orange_color,40,40);
+    private CustomTextField playlistNameText = new CustomTextField(orange_color,20,20);
     private SongSelector songSelectorForPlaylist;
     private JScrollPane sp;
     private JLabel jLabel = new JLabel();
     private CustomButton create = new CustomButton("Create",orange_color,40,40);
-    private JPanel pagePL1 = new JPanel();
-    private JPanel pagePL2 = new JPanel();
+    private CustomButton clear = new CustomButton("Clear",orange_color,40,40);
     //----------------
     //---Bio Content---
     private String wikiURL;
@@ -241,7 +237,7 @@ public class MusicPlayerFrame extends JFrame {
     private void initOpeningContent() {
         //---Opening Label---
         openingLabel.setBounds((int)(openingContent.getWidth() * 0.02),
-                (int)(openingContent.getHeight() * 0.05),(int)(openingContent.getWidth() * 0.96),50);
+                (int)(openingContent.getHeight() * 0.02),(int)(openingContent.getWidth() * 0.96),50);
         openingLabel.setFont(myFont);
         openingLabel.setForeground(blue_dark_color);
     }
@@ -252,25 +248,11 @@ public class MusicPlayerFrame extends JFrame {
         mainPlaylist.setRecordBackgroundColor(new Color(0xF08041),getCurSongNum());
         mainPlaylist.repaint();
 
-        mainPlaylistSP = new JScrollPane(mainPlaylist);
-        mainPlaylistSP.setBounds((int)(musicContent.getWidth() * 0.5) - 250,
-                (int)(musicContent.getHeight() * 0.01),
-                500,300);
-        mainPlaylistSP.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        mainPlaylistSP.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        // Remove the border for a seamless look
-        mainPlaylistSP.setBorder(BorderFactory.createEmptyBorder());
-
-        // Make the scrollbars less obtrusive
-        mainPlaylistSP.getHorizontalScrollBar().setUI(new CustomScrollBarUI(
-                orange_color,musicContent.getBackground()));
-        mainPlaylistSP.getVerticalScrollBar().setUI(new CustomScrollBarUI(
-                orange_color,musicContent.getBackground()));
-
-        // Ensure the scroll pane is transparent to match rounded corners
-        mainPlaylistSP.setOpaque(false);
-        mainPlaylistSP.getViewport().setOpaque(false);
+        mainPlaylistSP = createScrollPane(mainPlaylist,new Rectangle((int)(musicContent.getWidth() * 0.5) - 250,
+                (int)(musicContent.getHeight() * 0.01),500,300),orange_color,musicContent.getBackground());
         allPlaylists.add(mainPlaylistSP);
+
+        curPlaylist = mainPlaylist;
 
         //---Play/Pause Button---
         playPauseButton.setBounds(
@@ -287,7 +269,7 @@ public class MusicPlayerFrame extends JFrame {
                 (int)(0.55 * musicContent.getHeight()), 500,50);
         songNameLabel.setFont(songNameFont);
 
-        //---Next containers.Song Button---
+        //---Next Song Button---
         nextButton.setBounds(
                 (int)(musicContent.getWidth() * 0.75) - 30,
                 (int)(0.85 * musicContent.getHeight()), 60,60);
@@ -297,7 +279,7 @@ public class MusicPlayerFrame extends JFrame {
         nextButton.setFont(myFont);
         nextButton.addActionListener(e -> nextMusic());
 
-        //---Previous containers.Song Button---
+        //---Previous Song Button---
         previousButton.setBounds(
                 (int)(musicContent.getWidth() * 0.25) - 30,
                 (int)(0.85 * musicContent.getHeight()), 60,60);
@@ -338,12 +320,13 @@ public class MusicPlayerFrame extends JFrame {
                     allPlaylists.get(i).setVisible(true);
                     setCurrentPlaylist(pl.getSongNames());
                     setCurSong(0);
+                    setPlaylist(pl);
                 }
             }
         });
         playlistSelector.addItem(mainPlaylist.getTitle());
 
-        //---containers.Song Bar Slider---
+        //---Song Bar Slider---
         /*songSlider.setBounds((int)(musicContent.getWidth() * 0.02),
                 (int)(musicContent.getHeight() * 0.97),
                 (int)(musicContent.getWidth() * 0.96), 20);
@@ -354,98 +337,72 @@ public class MusicPlayerFrame extends JFrame {
     }
 
     private void initCreatePLContent() {
-        Color color = createPLContent.getBackground();
-        //---First Page---
-        pagePL1.setBounds(0,0,createPLContent.getWidth(),createPLContent.getHeight());
-        pagePL1.setBackground(color);
-        pagePL1.setLayout(null);
-
-        //---Second Page---
-        pagePL2.setBounds(0,0,createPLContent.getWidth(),createPLContent.getHeight());
-        pagePL2.setBackground(color);
-        pagePL2.setLayout(null);
-        pagePL2.setVisible(false);
-
         //---Label---
         playlistNameLabel.setBounds((int)(0.02 * createPLContent.getWidth()),
-                (int)(0.1 * createPLContent.getHeight()), 100, 50);
+                (int)(0.02 * createPLContent.getHeight()), 150, 50);
+        playlistNameLabel.setFont(myFont);
+        playlistNameLabel.setForeground(blue_dark_color);
         //---TextField---
-        playlistNameText.setBounds((int)(0.02 * createPLContent.getWidth()) + 100,
-                (int)(0.1 * createPLContent.getHeight()), 200, 50);
-
-        next.setFocusable(false);
-        next.setBounds((int)(0.8 * createPLContent.getWidth()),
-                createPLContent.getHeight() - 100, 80, 50);
-        next.addActionListener(e -> {
-            if (playlistNameText.getText().equals("")) {
-                playlistNameLabel.setForeground(red_light_color);
-            } else {
-                playlistNameLabel.setForeground(DEFAULT_TEXT_COLOR);
-                playlistName = playlistNameText.getText();
-                jLabel.setText(
-                        "Select which songs do you want into the " + playlistName + " playlist");
-                pagePL1.setVisible(false);
-                pagePL2.setVisible(true);
-            }
-        });
-
-        back.setFocusable(false);
-        back.setBounds(0, createPLContent.getHeight() - 100, 80, 50);
-        back.addActionListener(e -> {
-            pagePL1.setVisible(true);
-            pagePL2.setVisible(false);
-        });
+        playlistNameText.setBounds((int)(0.5 * createPLContent.getWidth()) - 245,
+                (int)(0.02 * createPLContent.getHeight()), 490, 50);
+        playlistNameText.setFont(myFont);
 
         jLabel.setBounds((int)(0.02 * createPLContent.getWidth()),
                 (int)(0.1 * createPLContent.getHeight()),
                 (int)(0.96 * createPLContent.getWidth()), 50);
 
+        //---Song Selector for Playlist---
         songSelectorForPlaylist = new SongSelector(orange_color,20,allSongsNames);
 
-        sp = new JScrollPane(songSelectorForPlaylist);
-        sp.setBounds((int)(0.02 * createPLContent.getWidth()),
-                (int)(0.2 * createPLContent.getHeight()),
-                (int)(0.93 * createPLContent.getWidth()), 200);
-        sp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        sp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        sp.setBorder(BorderFactory.createEmptyBorder());
-        sp.getHorizontalScrollBar().setUI(new CustomScrollBarUI(
-                orange_color,createPLContent.getBackground()));
-        sp.getVerticalScrollBar().setUI(new CustomScrollBarUI(
-                orange_color,createPLContent.getBackground()));
+        sp = createScrollPane(songSelectorForPlaylist,new Rectangle((int)(0.02 * createPLContent.getWidth()),
+                        70,(int)(0.93 * createPLContent.getWidth()),(int)(0.76 * createPLContent.getHeight())),
+                orange_color,createPLContent.getBackground());
 
-        sp.setOpaque(false);
-        sp.getViewport().setOpaque(false);
-
-        create.setBounds((int)(0.8 * createPLContent.getWidth()),
-                createPLContent.getHeight() - 100, 80, 50);
+        //---Create Button---
+        create.setBounds((int)(0.98 * createPLContent.getWidth() - 120),
+                (int)(0.98 * createPLContent.getHeight() - 50), 120, 50);
+        create.setFont(myFont);
         create.addActionListener(e -> {
-            Playlist playlist = new Playlist(playlistNameText.getText(),orange_color,20,
-                    songSelectorForPlaylist.getSelectedSongs(),this);
-            playlist.setRecordBackgroundColor(new Color(0xF08041),getCurSongNum());
-            playlist.repaint();
+            if (!playlistNameText.getText().equals("")) {
+                if (!songSelectorForPlaylist.getSelectedSongs().isEmpty()) {
+                    Playlist playlist = new Playlist(playlistNameText.getText(),orange_color,20,
+                            songSelectorForPlaylist.getSelectedSongs(),this);
+                    playlist.setRecordBackgroundColor(new Color(0xF08041),getCurSongNum());
+                    playlist.repaint();
 
-            JScrollPane jScrollPane = new JScrollPane(playlist);
-            jScrollPane.setBounds((int)(musicContent.getWidth() * 0.5) - 250,
-                    (int)(musicContent.getHeight() * 0.01),
-                    500,300);
-            jScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-            jScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            jScrollPane.setBorder(BorderFactory.createEmptyBorder());
-            jScrollPane.getHorizontalScrollBar().setUI(new CustomScrollBarUI(
-                    orange_color,musicContent.getBackground()));
-            jScrollPane.getVerticalScrollBar().setUI(new CustomScrollBarUI(
-                    orange_color,musicContent.getBackground()));
+                    JScrollPane jScrollPane = createScrollPane(playlist,new Rectangle(
+                            (int)(musicContent.getWidth() * 0.5) - 250,(int)(musicContent.getHeight() * 0.01),
+                            500,300),orange_color,musicContent.getBackground());
+                    jScrollPane.setVisible(false);
 
-            // Ensure the scroll pane is transparent to match rounded corners
-            jScrollPane.setOpaque(false);
-            jScrollPane.getViewport().setOpaque(false);
-            jScrollPane.setVisible(false);
-            musicContent.add(jScrollPane);
-            allPlaylists.add(jScrollPane);
-            playlistSelector.addItem(playlist.getTitle());
+                    musicContent.add(jScrollPane);
+                    allPlaylists.add(jScrollPane);
+                    playlistSelector.addItem(playlist.getTitle());
+
+                    playlistNameText.setText("");
+                    songSelectorForPlaylist.clearSelectedSongs();
+                    JOptionPane.showMessageDialog(this,
+                            "New playlist " + playlistNameText.getText() + " was created!",
+                            "Playlist created", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Please choose at least one song!",
+                            "No song chosen", JOptionPane.WARNING_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Please enter a playlist name!",
+                        "No playlist name Entered", JOptionPane.WARNING_MESSAGE);
+            }
         });
         create.setFocusable(false);
+
+        //---Clear Button---
+        clear.setBounds((int)(0.02 * createPLContent.getWidth()),
+                (int)(0.98 * createPLContent.getHeight() - 50), 120, 50);
+        clear.setFont(myFont);
+        clear.setFocusable(false);
+        clear.addActionListener(e -> songSelectorForPlaylist.clearSelectedSongs());
     }
 
     private void initBioContent() {
@@ -912,8 +869,8 @@ public class MusicPlayerFrame extends JFrame {
         int selectedSongNum = getSongNameNum(song);
         if (selectedSongNum != -1) {
             setCurSong(selectedSongNum);
-            mainPlaylist.setRecordBackgroundColor(new Color(0xF08041),getCurSongNum());
-            mainPlaylist.repaint();
+            curPlaylist.setRecordBackgroundColor(new Color(0xF08041),getCurSongNum());
+            curPlaylist.repaint();
             loadAudio();
             playPauseMusic();
         }
@@ -1000,8 +957,8 @@ public class MusicPlayerFrame extends JFrame {
             setCurSong(0);
             System.out.println("Loop :");
         }
-        mainPlaylist.setRecordBackgroundColor(new Color(0xF08041),getCurSongNum());
-        mainPlaylist.repaint();
+        curPlaylist.setRecordBackgroundColor(new Color(0xF08041),getCurSongNum());
+        curPlaylist.repaint();
         loadAudio();
         playPauseMusic();
     }
@@ -1018,13 +975,11 @@ public class MusicPlayerFrame extends JFrame {
             setCurSong(currentPLSongs.size() - 1);
             System.out.println("Loop :");
         }
-        mainPlaylist.setRecordBackgroundColor(new Color(0xF08041),getCurSongNum());
-        mainPlaylist.repaint();
+        curPlaylist.setRecordBackgroundColor(new Color(0xF08041),getCurSongNum());
+        curPlaylist.repaint();
         loadAudio();
         playPauseMusic();
     }
-
-
 
     public void searchArtistBio() {
         ArtistBioSearcher abs;
@@ -1146,6 +1101,8 @@ public class MusicPlayerFrame extends JFrame {
         }
     }
 
+    public void setPlaylist(Playlist pl) { curPlaylist = pl; }
+
     public int getSongNameNum(String songName) {
         for (int i = 0; i < currentPlaylist.size(); i++) {
             if (currentPlaylist.get(i).contains(songName)) {
@@ -1153,6 +1110,19 @@ public class MusicPlayerFrame extends JFrame {
             }
         }
         return -1;
+    }
+
+    public JScrollPane createScrollPane(JPanel panel, Rectangle rectangle, Color thColor, Color trColor) {
+        JScrollPane sp = new JScrollPane(panel);
+        sp.setBounds(rectangle);
+        sp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        sp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        sp.setBorder(BorderFactory.createEmptyBorder());
+        sp.getHorizontalScrollBar().setUI(new CustomScrollBarUI(thColor,trColor));
+        sp.getVerticalScrollBar().setUI(new CustomScrollBarUI(thColor,trColor));
+        sp.setOpaque(false);
+        sp.getViewport().setOpaque(false);
+        return sp;
     }
 
     private void createMenuOption(JButton button, int content) {
@@ -1241,15 +1211,12 @@ public class MusicPlayerFrame extends JFrame {
         musicContent.add(mainPlaylistSP);
         musicContent.add(playlistSelector);
 
-        pagePL1.add(playlistNameLabel);
-        pagePL1.add(playlistNameText);
-        pagePL1.add(next);
-        pagePL2.add(back);
-        pagePL2.add(jLabel);
-        pagePL2.add(create);
-        pagePL2.add(sp);
-        createPLContent.add(pagePL1);
-        createPLContent.add(pagePL2);
+        createPLContent.add(playlistNameLabel);
+        createPLContent.add(playlistNameText);
+        createPLContent.add(jLabel);
+        createPLContent.add(create);
+        createPLContent.add(clear);
+        createPLContent.add(sp);
 
         bioContent.add(artistLabel);
         bioContent.add(artistInput);

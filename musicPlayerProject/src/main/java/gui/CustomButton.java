@@ -47,11 +47,13 @@ public class CustomButton extends JButton {
             @Override
             public void mouseEntered(MouseEvent e) {
                 setForeground(getColor()); // Change color when hovered
+                setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
                 setForeground(getColor().darker()); // Reset color when not hovered
+                setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             }
         });
     }
