@@ -3,11 +3,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class SongSelector extends JPanel{
     private List<JPanel> songs = new ArrayList<>();
-    private List<Boolean> isSeleced = new ArrayList<>();
+    private List<Boolean> isSelected = new ArrayList<>();
     private List<String> selectedSongs = new ArrayList<>();
     private int cornerRadius;
     private Color panelColor;
@@ -31,17 +32,18 @@ public class SongSelector extends JPanel{
             song.setFocusable(false);
             song.addActionListener(e -> {
                 CustomButton songNameButton = (CustomButton)(songs.get(finalI).getComponent(0));
-                if (isSeleced.get(finalI)) {
+                if (isSelected.get(finalI)) {
                     removeSongFromName(songNameButton.getText());
                     songNameButton.setColor(panelColor);
+                    songNameButton.setForeground(panelColor.darker());
                 } else {
                     selectedSongs.add(songNameButton.getText());
                     songNameButton.setColor(new Color(0xF08041));
                 }
-                isSeleced.set(finalI,!isSeleced.get(finalI));
+                isSelected.set(finalI,!isSelected.get(finalI));
                 System.out.println(selectedSongs);
             });
-            isSeleced.add(false);
+            isSelected.add(false);
             songPanel.add(song, BorderLayout.CENTER);
 
             songs.add(songPanel);
@@ -56,6 +58,18 @@ public class SongSelector extends JPanel{
                 return;
             }
         }
+    }
+
+    public void clearSelectedSongs() {
+        for (JPanel songPanel : songs) {
+            CustomButton songNameButton = (CustomButton)(songPanel.getComponent(0));
+            removeSongFromName(songNameButton.getText());
+            songNameButton.setColor(panelColor);
+            songNameButton.setForeground(panelColor.darker());
+        }
+        Collections.fill(isSelected, false);
+        System.out.println(selectedSongs);
+        repaint();
     }
 
     public List<String> getSelectedSongs() {
