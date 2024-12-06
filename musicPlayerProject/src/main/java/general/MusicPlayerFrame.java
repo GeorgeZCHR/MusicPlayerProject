@@ -5,9 +5,6 @@ import contents.*;
 import gui.*;
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -120,14 +117,7 @@ public class MusicPlayerFrame extends JFrame {
 
         // Create a timer that updates every 1000 milliseconds (1 second)
         timer = new Timer(1000, e -> {
-
             musicContent.getSongNameLabel().setText(currentSong.getName());
-            /*if (currentSong.isHearted()) {
-                heartButton.setIcon(heartRedIcon);
-
-            } else {
-                heartButton.setIcon(heartWhiteIcon);
-            }*/
             //songSlider.setMaximum(songSliderLength);
             //System.out.println(e.getWhen());
             /*System.out.println("Seconds : " + totalSeconds);
@@ -147,7 +137,6 @@ public class MusicPlayerFrame extends JFrame {
 
         //---Add Components---
         addComponents();
-        //this.add(heartButton);
 
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -160,9 +149,12 @@ public class MusicPlayerFrame extends JFrame {
                 (int)(topAlbumsContent.getWidth() * 0.2), 50);
         getTopAlbums.setFocusable(false);
         getTopAlbums.addActionListener(e -> {
-            GetTopAlbums albums = new GetTopAlbums();
+            /*GetTopAlbums albums = new GetTopAlbums();
             //JsonObject jsonObject = albums.getTopAlbums();
-            //System.out.println(jsonObject);
+            //System.out.println(jsonObject);*/
+            /*for (int i = 0; i < allSongs.size(); i++) {
+                System.out.println(allSongs.get(i).getName()+" : "+allSongs.get(i).isHearted());
+            }*/
         });
     }
 
@@ -384,6 +376,7 @@ public class MusicPlayerFrame extends JFrame {
     public List<String> getAllSongNames() {
         return allSongsNames;
     }
+    public List<Song> getAllSongs() { return allSongs; }
     public List<JScrollPane> getAllPlaylists() {
         return allPlaylists;
     }
