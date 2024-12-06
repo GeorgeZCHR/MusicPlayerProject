@@ -3,16 +3,11 @@ import components.*;
 import containers.*;
 import contents.*;
 import gui.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -58,23 +53,10 @@ public class MusicPlayerFrame extends JFrame {
     private OpeningContent openingContent = new OpeningContent(null);
     private MusicContent musicContent = new MusicContent(null,this);
     private CreatePlaylistContent createPLContent = new CreatePlaylistContent(null,this);
-    private JPanel bioContent = new JPanel(null);
+    private BioContent bioContent = new BioContent(null);
     private TopArtistsContent topArtistsContent = new TopArtistsContent(null);
     private TopTracksContent topTracksContent = new TopTracksContent(null);
     private JPanel topAlbumsContent = new JPanel(null);
-    //----------------
-    //---Bio Content---
-    private String wikiURL;
-    private JTextArea bioTextArea = new JTextArea();
-    private JScrollPane bioTextAreaSP;
-    private CustomButton viewMoreButton = new CustomButton(
-            "View More Bio",Util.orange_color,40,40);
-    private JLabel artistLabel = new JLabel("Enter the artist's name:");
-    private JTextField artistInput = new JTextField();
-    private CustomButton searchBio = new CustomButton(
-            "Search",Util.orange_color,40,40);
-    private boolean isArtistBioEmpty = true;
-    private boolean isArtistBioValid = false;
     //----------------
     //---Discover Top Albums Content---
     private CustomButton getTopAlbums = new CustomButton(
@@ -171,47 +153,6 @@ public class MusicPlayerFrame extends JFrame {
         this.setVisible(true);
     }
 
-    private void initBioContent() {
-        //---containers.Artist Label---
-        artistLabel.setBounds((int)(0.02 * bioContent.getWidth()),
-                (int)(0.1 * bioContent.getHeight()), 200, 50);
-
-        //---containers.Artist Input Text Field---
-        artistInput.setBounds((int)(0.02 * bioContent.getWidth()) + 150,
-                (int)(0.1 * bioContent.getHeight()), 200, 50);
-
-        //---Search Bio Button---
-        searchBio.setFocusable(false);
-        searchBio.setBounds((int)(0.02 * bioContent.getWidth()) + 400,
-                (int)(0.1 * bioContent.getHeight()), 100, 50);
-        searchBio.addActionListener(e -> searchArtistBio());
-
-        //---Bio Text Area---
-        bioTextArea.setEnabled(false);
-        bioTextArea.setDisabledTextColor(Util.DEFAULT_TEXT_COLOR);
-        // Ενεργοποίηση αναδίπλωσης γραμμής
-        bioTextArea.setLineWrap(true);
-        // Αναδίπλωση ανά λέξη για καλύτερη εμφάνιση
-        bioTextArea.setWrapStyleWord(true);
-        // Ρυθμιση της γραμματοσειράς για να είναι αναγνώσιμη
-        bioTextArea.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        bioTextAreaSP = new JScrollPane(bioTextArea);
-        bioTextAreaSP.setVisible(false);
-        bioTextAreaSP.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        bioTextAreaSP.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        bioTextAreaSP.setBounds((int)(0.02 * bioContent.getWidth()),
-                (int)(0.2 * bioContent.getHeight()), (int)(0.96 * bioContent.getWidth()),
-                (int)(0.8 * bioContent.getHeight()));
-
-        //---View More Button---
-        viewMoreButton.setVisible(false);
-        viewMoreButton.setFocusable(false);
-        viewMoreButton.setBounds((int)(0.7 * bioContent.getWidth()),
-                (int)(0.1 * bioContent.getHeight()),
-                (int)(0.2 * bioContent.getWidth()), 50);
-        viewMoreButton.addActionListener(e -> openWikiPage());
-    }
-
     private void initTopAlbumsContent() {
         //--- show JSon Object to console with the button getTopAlbums ---
         getTopAlbums.setBounds((int)(topAlbumsContent.getWidth() * 0.1),
@@ -233,64 +174,6 @@ public class MusicPlayerFrame extends JFrame {
         }
         //System.out.println("SongSlider Value : " + songSlider.getValue());
     }*/
-
-    public void searchArtistBio() {
-        ArtistBioSearcher abs;
-        /*String artistName = JOptionPane.showInputDialog(this,
-                "Enter the artist's name:",
-                "containers.Artist Bio Search", JOptionPane.QUESTION_MESSAGE);*/
-        String artistName = artistInput.getText();
-        if (!artistName.trim().isEmpty()) {
-            isArtistBioEmpty = false;
-            wikiURL = "https://en.wikipedia.org/wiki/" + artistName.replace(" ", "_");
-            abs = new ArtistBioSearcher(artistName);
-            String bio = abs.produceBio();
-            if (bio != null) {
-                isArtistBioValid = true;
-                bioTextArea.setText(bio);
-                bioTextAreaSP.setVisible(true);
-                viewMoreButton.setVisible(true);
-            } else {
-                isArtistBioValid = false;
-                JOptionPane.showMessageDialog(this,
-                        "Please enter a valid artist's name.",
-                        "Not Valid containers.Artist Entered", JOptionPane.WARNING_MESSAGE);
-            }
-        } else {
-            isArtistBioEmpty = true;
-            JOptionPane.showMessageDialog(this,
-                    "Please enter an artist's name.",
-                    "No containers.Artist Entered", JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    public void openWikiPage() {
-        searchArtistBio();
-        //String artist = artistInput.getText();
-        /*wikiURL = "https://en.wikipedia.org/wiki/" + artist.replace(" ", "_");*/
-        if (isArtistBioEmpty) {
-            /*JOptionPane.showMessageDialog(this,
-                    "Please enter an artist's name.",
-                    "No containers.Artist Entered", JOptionPane.WARNING_MESSAGE);*/
-            return;
-        }
-        if (Desktop.isDesktopSupported()) {
-            try {
-                if (isArtistBioValid) {
-                    Desktop.getDesktop().browse(new URI(wikiURL));
-                }
-            } catch (IOException | URISyntaxException e) {
-                JOptionPane.showMessageDialog(this,
-                        "Please enter a valid artist's name.",
-                        "Not Valid containers.Artist Entered", JOptionPane.WARNING_MESSAGE);
-                /*JOptionPane.showMessageDialog(this,
-                        "Error opening browser: " + e.getMessage(),
-                        "Browser Error", JOptionPane.ERROR_MESSAGE);*/
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "Desktop is not supported on this system.", "Unsupported Operation", JOptionPane.ERROR_MESSAGE);
-        }
-    }
 
     public void goTo(String song) {
         musicContent.goTo(song);
@@ -445,7 +328,7 @@ public class MusicPlayerFrame extends JFrame {
         openingContent.init();
         musicContent.init();
         createPLContent.init();
-        initBioContent();
+        bioContent.init();
         topArtistsContent.init();
         topTracksContent.init();
         initTopAlbumsContent();
@@ -460,12 +343,6 @@ public class MusicPlayerFrame extends JFrame {
         menu.add(discoverTopArtists);
         menu.add(discoverTopTracks);
         menu.add(discoverTopAlbums);
-
-        bioContent.add(artistLabel);
-        bioContent.add(artistInput);
-        bioContent.add(searchBio);
-        bioContent.add(bioTextAreaSP);
-        bioContent.add(viewMoreButton);
 
         topAlbumsContent.add(getTopAlbums);
 
