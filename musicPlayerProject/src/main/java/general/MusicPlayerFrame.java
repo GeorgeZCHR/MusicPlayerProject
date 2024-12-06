@@ -1,15 +1,14 @@
 package general;
 import components.*;
 import containers.*;
+import contents.*;
 import gui.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.sound.sampled.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -18,20 +17,13 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class MusicPlayerFrame extends JFrame {
-    private final Color blue_dark_color = new Color(0x264653);
-    private final Color blue_color = new Color(0x2a9d8f);
-    private final Color orange_light_color = new Color(0xe9c46a);
-    private final Color orange_dark_color = new Color(0xF08041);
-    private final Color orange_color = new Color(0xf4a261);
-    private final Color red_light_color = new Color(0xe76f51);
-    private final Color DEFAULT_TEXT_COLOR = (new JLabel()).getForeground();
-    private final int OPENING_CONTENT = -1;
-    private final int MUSIC_CONTENT = 0;
-    private final int CREATE_PLAYLIST_CONTENT = 1;
-    private final int BIO_CONTENT = 2;
-    private final int TOP_ARTISTS_CONTENT = 3;
-    private final int TOP_TRACKS_CONTENT = 4;
-    private final int TOP_ALBUMS_CONTENT = 5;
+    public final int OPENING_CONTENT = -1;
+    public final int MUSIC_CONTENT = 0;
+    public final int CREATE_PLAYLIST_CONTENT = 1;
+    public final int BIO_CONTENT = 2;
+    public final int TOP_ARTISTS_CONTENT = 3;
+    public final int TOP_TRACKS_CONTENT = 4;
+    public final int TOP_ALBUMS_CONTENT = 5;
     private int currentContent = OPENING_CONTENT;
     private int width, realW, height, realH;
     private JPanel header = new JPanel(null), menu = new JPanel(null);
@@ -39,98 +31,57 @@ public class MusicPlayerFrame extends JFrame {
     private List<Song> allSongs = new ArrayList<>();
     private List<String> allSongsNames = new ArrayList<>();
     private Timer timer, sliderUpdateTimer;
-    private Clip clip;
     private Image image = (new ImageIcon("img/GIAM_Icon_AcademyOfMusic_RGB.png")).getImage();
     private int menuOptionCounter = 0;
     private int totalSeconds = 0;
-    private boolean isSongStarted = false;
     private int songSliderLength = 10000000;
     private List<JScrollPane> allPlaylists = new ArrayList<>();
-    private List<String> currentPlaylist = new ArrayList<>();
+    private List<String> currentPlaylistNames = new ArrayList<>();
     private List<Song> currentPLSongs = new ArrayList<>();
     private Playlist curPlaylist;
+    private Song currentSong;
+    private int currentSongNum = 0;
     //private SongPlayer songPlayer;
     //---Header---
-    private CustomButton menuShower = new CustomButton("≡",orange_color,20,20);
+    private CustomButton menuShower = new CustomButton("≡",Util.orange_color,20,20);
     private boolean showing = true;
     //----------------
     //---Menu---
-    private CustomButton createPlaylist = new CustomButton("Create Playlist",orange_color,0);
-    private CustomButton musicContentButton = new CustomButton("Music",orange_color,0);
-    private CustomButton searchArtistBio = new CustomButton("Search Artist Bio",orange_color,0);
-    private CustomButton discoverTopArtists = new CustomButton("Discover Top Artists",orange_color,0);
-    private CustomButton discoverTopTracks = new CustomButton("Discover Top Tracks",orange_color,0);
-    private CustomButton discoverTopAlbums = new CustomButton("Discover Top Albums",orange_color,0);
+    private CustomButton createPlaylist = new CustomButton("Create Playlist",Util.orange_color,0);
+    private CustomButton musicContentButton = new CustomButton("Music",Util.orange_color,0);
+    private CustomButton searchArtistBio = new CustomButton("Search Artist Bio",Util.orange_color,0);
+    private CustomButton discoverTopArtists = new CustomButton("Discover Top Artists",Util.orange_color,0);
+    private CustomButton discoverTopTracks = new CustomButton("Discover Top Tracks",Util.orange_color,0);
+    private CustomButton discoverTopAlbums = new CustomButton("Discover Top Albums",Util.orange_color,0);
     //----------------
     //---Content---
-    private JPanel openingContent = new JPanel(null);
-    private JPanel musicContent = new JPanel(null), createPLContent = new JPanel(null);
-    private JPanel bioContent = new JPanel(null), topArtistsContent = new JPanel(null);
+    private OpeningContent openingContent = new OpeningContent(null);
+    private MusicContent musicContent = new MusicContent(null,this);
+    private CreatePlaylistContent createPLContent = new CreatePlaylistContent(null,this);
+    private JPanel bioContent = new JPanel(null);
+    private TopArtistsContent topArtistsContent = new TopArtistsContent(null);
     private JPanel topTracksContent = new JPanel(null), topAlbumsContent = new JPanel(null);
-    //----------------
-    //---Opening Content---
-    private JLabel openingLabel = new JLabel("Welcome to the Music Player Project!");
-    //----------------
-    //---Music Content---
-    private boolean played = false;
-    private boolean started = false;
-    private int framePosition = 0;
-    private Song currentSong;
-    private int currentSongNum = 0;
-    private JButton heartButton = new JButton("\uFE0F");
-    private boolean isHearted = false;
-    private boolean songFinished = false;
-    private JLabel songNameLabel = new JLabel();
-    private CustomButton playPauseButton = new CustomButton("",orange_color,1);
-    private CustomButton nextButton = new CustomButton("",orange_color,1);
-    private CustomButton previousButton = new CustomButton("",orange_color,1);
-    //private JSlider songSlider = new JSlider();
-    private Playlist mainPlaylist;
-    private JScrollPane mainPlaylistSP;
-    private JComboBox playlistSelector;
-    //----------------
-    //---Create Playlist Content---
-    private JLabel playlistNameLabel = new JLabel("Playlist Name : ");
-    private CustomTextField playlistNameText = new CustomTextField(orange_color,20,20);
-    private SongSelector songSelectorForPlaylist;
-    private JScrollPane sp;
-    private JLabel jLabel = new JLabel();
-    private CustomButton create = new CustomButton("Create",orange_color,40,40);
-    private CustomButton clear = new CustomButton("Clear",orange_color,40,40);
     //----------------
     //---Bio Content---
     private String wikiURL;
     private JTextArea bioTextArea = new JTextArea();
     private JScrollPane bioTextAreaSP;
     private CustomButton viewMoreButton = new CustomButton(
-            "View More Bio",orange_color,40,40);
+            "View More Bio",Util.orange_color,40,40);
     private JLabel artistLabel = new JLabel("Enter the artist's name:");
     private JTextField artistInput = new JTextField();
     private CustomButton searchBio = new CustomButton(
-            "Search",orange_color,40,40);
+            "Search",Util.orange_color,40,40);
     private boolean isArtistBioEmpty = true;
     private boolean isArtistBioValid = false;
-    //----------------
-    //---Discover Top Artists Content---
-    private List<Artist> artistList;
-    private int topArtistNum = 0;
-    private CustomButton topArtistsNext = new CustomButton(
-            "Next",orange_color, 20,20);
-    private CustomButton topArtistsBack = new CustomButton(
-            "Back",orange_color, 20,20);
-    private JLabel topArtistImage, topArtistNumLabel;
-    private JLabel topArtistName, topArtistNameLabel;
-    private JLabel topArtistPlayCount, topArtistPlayCountLabel;
-    private JLabel topArtistListeners, topArtistListenersLabel;
-    private JLabel topArtistURL, topArtistURLLabel;
     //----------------
     //---Discover Top Tracks Content---
     private List<Track> trackList;
     private int topTrackNum = 0;
     private CustomButton topTracksNext = new CustomButton(
-            "Next",orange_color, 20,20);
+            "Next",Util.orange_color, 20,20);
     private CustomButton topTracksBack = new CustomButton(
-            "Back",orange_color, 20,20);
+            "Back",Util.orange_color, 20,20);
     private JLabel topTrackImage, topTrackNumLabel;
     private JLabel topTrackName, topTrackNameLabel;
     private JLabel topTrackPlayCount, topTrackPlayCountLabel;
@@ -139,11 +90,8 @@ public class MusicPlayerFrame extends JFrame {
     //----------------
     //---Discover Top Albums Content---
     private CustomButton getTopAlbums = new CustomButton(
-            "Get Top Albums",orange_color, 20,20);
+            "Get Top Albums",Util.orange_color, 20,20);
     //----------------
-    private final Font songNameFont = new Font(Font.SANS_SERIF, Font.BOLD,30);
-    private final Font myFont = new Font(Font.SANS_SERIF, Font.BOLD,20);
-    private final Font headerFont = new Font(Font.SANS_SERIF, Font.BOLD,40);
     public MusicPlayerFrame(int width, int height) {
         this.width = width;
         this.height = height;
@@ -158,32 +106,32 @@ public class MusicPlayerFrame extends JFrame {
 
         //---Header, Footer, Menu, Contents---
         header.setBounds(0,0,realW,50);
-        header.setBackground(blue_dark_color);
+        header.setBackground(Util.blue_dark_color);
 
         footer.setBounds(0,realH - header.getHeight(),realW,50);
-        footer.setBackground(blue_dark_color);
+        footer.setBackground(Util.blue_dark_color);
 
         menu.setBounds(0,header.getHeight(),250,footer.getY());
-        menu.setBackground(blue_color);
+        menu.setBackground(Util.blue_color);
 
-        createContent(openingContent,blue_color.brighter(),true);
-        createContent(musicContent,blue_color.brighter(),false);
-        createContent(bioContent,blue_color.brighter(),false);
-        createContent(createPLContent,blue_color.brighter(),false);
-        createContent(topArtistsContent,blue_color.brighter(),false);
-        createContent(topTracksContent,blue_color.brighter(),false);
-        createContent(topAlbumsContent,blue_color.brighter(),false);
+        createContent(openingContent,Util.blue_color.brighter(),true);
+        createContent(musicContent,Util.blue_color.brighter(),false);
+        createContent(bioContent,Util.blue_color.brighter(),false);
+        createContent(createPLContent,Util.blue_color.brighter(),false);
+        createContent(topArtistsContent,Util.blue_color.brighter(),false);
+        createContent(topTracksContent,Util.blue_color.brighter(),false);
+        createContent(topAlbumsContent,Util.blue_color.brighter(),false);
 
         loadSongs("music/");
         fillAllSongsNames();
-        setCurrentPlaylist(allSongsNames);
+        setCurrentPlaylistNames(allSongsNames);
         currentSong = currentPLSongs.get(currentSongNum);
 
         //---Header Options---
         menuShower.setBounds((int)(header.getWidth() * 0.02),(int)(header.getHeight() * 0.1),
                 (int)(header.getWidth() * 0.06),(int)(header.getHeight() * 0.8));
         menuShower.setFocusable(false);
-        menuShower.setFont(headerFont);
+        menuShower.setFont(Util.headerFont);
         menuShower.addActionListener(e -> changeMenu());
 
         //---Menu Options---
@@ -203,7 +151,7 @@ public class MusicPlayerFrame extends JFrame {
         // Create a timer that updates every 1000 milliseconds (1 second)
         timer = new Timer(1000, e -> {
 
-            songNameLabel.setText(currentSong.getName());
+            musicContent.getSongNameLabel().setText(currentSong.getName());
             /*if (currentSong.isHearted()) {
                 heartButton.setIcon(heartRedIcon);
 
@@ -235,180 +183,6 @@ public class MusicPlayerFrame extends JFrame {
         this.setVisible(true);
     }
 
-    private void initOpeningContent() {
-        //---Opening Label---
-        openingLabel.setBounds((int)(openingContent.getWidth() * 0.02),
-                (int)(openingContent.getHeight() * 0.02),(int)(openingContent.getWidth() * 0.96),50);
-        openingLabel.setFont(myFont);
-        openingLabel.setForeground(blue_dark_color);
-    }
-
-    private void initMusicContent() {
-        //---Playlist---
-        mainPlaylist = new Playlist("Main",orange_color,20,allSongsNames,this);
-        mainPlaylist.setRecordBackgroundColor(orange_dark_color,getCurSongNum());
-        mainPlaylist.repaint();
-
-        mainPlaylistSP = createScrollPane(mainPlaylist,new Rectangle((int)(musicContent.getWidth() * 0.5) - 250,
-                (int)(musicContent.getHeight() * 0.01),500,300),orange_color,musicContent.getBackground());
-        allPlaylists.add(mainPlaylistSP);
-
-        curPlaylist = mainPlaylist;
-
-        //---Play/Pause Button---
-        playPauseButton.setBounds(
-                (musicContent.getWidth()/2) - 30,
-                (int)(0.85 * musicContent.getHeight()), 60,60);
-        playPauseButton.setFocusable(false);
-        playPauseButton.setText("▶");
-        playPauseButton.setFont(myFont);
-        playPauseButton.addActionListener(e -> playPauseMusic());
-
-        //---Title Label---
-        songNameLabel.setBounds(
-                (musicContent.getWidth()/2) - 250,
-                (int)(0.55 * musicContent.getHeight()), 500,50);
-        songNameLabel.setFont(songNameFont);
-
-        //---Next Song Button---
-        nextButton.setBounds(
-                (int)(musicContent.getWidth() * 0.75) - 30,
-                (int)(0.85 * musicContent.getHeight()), 60,60);
-        nextButton.setVisible(false);
-        nextButton.setFocusable(false);
-        nextButton.setText("⏩");
-        nextButton.setFont(myFont);
-        nextButton.addActionListener(e -> nextMusic());
-
-        //---Previous Song Button---
-        previousButton.setBounds(
-                (int)(musicContent.getWidth() * 0.25) - 30,
-                (int)(0.85 * musicContent.getHeight()), 60,60);
-        previousButton.setVisible(false);
-        previousButton.setFocusable(false);
-        previousButton.setText("⏪");
-        previousButton.setFont(myFont);
-        previousButton.addActionListener(e -> previousMusic());
-
-        heartButton.setBounds(
-                (int)(musicContent.getWidth() * 0.85),
-                (int)(musicContent.getHeight() * 0.45), 60,60);
-
-        previousButton.setVisible(false);
-        previousButton.setFocusable(false);
-        previousButton.setText("⏪");
-        heartButton.setFont(myFont);
-
-        heartButton.addActionListener(e -> toggleHeart());
-
-        //---Playlist Selector ComboBox---
-        playlistSelector = new JComboBox();
-        playlistSelector.setBounds((int)(musicContent.getWidth() * 0.7),
-                (int)(musicContent.getHeight() * 0.65),200,50);
-        playlistSelector.addActionListener(e -> {
-            for (int i = 0; i < allPlaylists.size(); i++) {
-                allPlaylists.get(i).setVisible(false);
-            }
-            if (clip != null) {
-                clip.close();
-                played = false;
-                playPauseButton.setText("▶");
-                previousButton.setVisible(false);
-                nextButton.setVisible(false);
-            }
-            for (int i = 0; i < allPlaylists.size(); i++) {
-                Playlist pl = (Playlist)(allPlaylists.get(i).getViewport().getView());
-                if (pl.getTitle().equals(playlistSelector.getSelectedItem())) {
-                    allPlaylists.get(i).setVisible(true);
-                    setCurrentPlaylist(pl.getSongNames());
-                    setCurSong(0);
-                    setPlaylist(pl);
-                    curPlaylist.setRecordBackgroundColor(orange_dark_color,getCurSongNum());
-                    curPlaylist.repaint();
-                }
-            }
-        });
-        playlistSelector.addItem(mainPlaylist.getTitle());
-
-        //---Song Bar Slider---
-        /*songSlider.setBounds((int)(musicContent.getWidth() * 0.02),
-                (int)(musicContent.getHeight() * 0.97),
-                (int)(musicContent.getWidth() * 0.96), 20);
-        songSlider.setVisible(false);
-        songSlider.setMinimum(0);
-        songSlider.setValue(0);
-        songSlider.addChangeListener(e -> changeFramesOfSong());*/
-    }
-
-    private void initCreatePLContent() {
-        //---Label---
-        playlistNameLabel.setBounds((int)(0.02 * createPLContent.getWidth()),
-                (int)(0.02 * createPLContent.getHeight()), 150, 50);
-        playlistNameLabel.setFont(myFont);
-        playlistNameLabel.setForeground(blue_dark_color);
-        //---TextField---
-        playlistNameText.setBounds((int)(0.5 * createPLContent.getWidth()) - 245,
-                (int)(0.02 * createPLContent.getHeight()), 490, 50);
-        playlistNameText.setFont(myFont);
-
-        jLabel.setBounds((int)(0.02 * createPLContent.getWidth()),
-                (int)(0.1 * createPLContent.getHeight()),
-                (int)(0.96 * createPLContent.getWidth()), 50);
-
-        //---Song Selector for Playlist---
-        songSelectorForPlaylist = new SongSelector(orange_color,orange_dark_color,20,allSongsNames);
-
-        sp = createScrollPane(songSelectorForPlaylist,new Rectangle((int)(0.02 * createPLContent.getWidth()),
-                        70,(int)(0.93 * createPLContent.getWidth()),(int)(0.76 * createPLContent.getHeight())),
-                orange_color,createPLContent.getBackground());
-
-        //---Create Button---
-        create.setBounds((int)(0.98 * createPLContent.getWidth() - 120),
-                (int)(0.98 * createPLContent.getHeight() - 50), 120, 50);
-        create.setFont(myFont);
-        create.addActionListener(e -> {
-            if (!playlistNameText.getText().equals("")) {
-                if (!songSelectorForPlaylist.getSelectedSongs().isEmpty()) {
-                    Playlist playlist = new Playlist(playlistNameText.getText(),orange_color,20,
-                            songSelectorForPlaylist.getSelectedSongs(),this);
-                    playlist.setRecordBackgroundColor(orange_dark_color,getCurSongNum());
-                    playlist.repaint();
-
-                    JScrollPane jScrollPane = createScrollPane(playlist,new Rectangle(
-                            (int)(musicContent.getWidth() * 0.5) - 250,(int)(musicContent.getHeight() * 0.01),
-                            500,300),orange_color,musicContent.getBackground());
-                    jScrollPane.setVisible(false);
-
-                    musicContent.add(jScrollPane);
-                    allPlaylists.add(jScrollPane);
-                    playlistSelector.addItem(playlist.getTitle());
-
-                    playlistNameText.setText("");
-                    songSelectorForPlaylist.clearSelectedSongs();
-                    JOptionPane.showMessageDialog(this,
-                            "New playlist " + playlistNameText.getText() + " was created!",
-                            "Playlist created", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(this,
-                            "Please choose at least one song!",
-                            "No song chosen", JOptionPane.WARNING_MESSAGE);
-                }
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Please enter a playlist name!",
-                        "No playlist name Entered", JOptionPane.WARNING_MESSAGE);
-            }
-        });
-        create.setFocusable(false);
-
-        //---Clear Button---
-        clear.setBounds((int)(0.02 * createPLContent.getWidth()),
-                (int)(0.98 * createPLContent.getHeight() - 50), 120, 50);
-        clear.setFont(myFont);
-        clear.setFocusable(false);
-        clear.addActionListener(e -> songSelectorForPlaylist.clearSelectedSongs());
-    }
-
     private void initBioContent() {
         //---containers.Artist Label---
         artistLabel.setBounds((int)(0.02 * bioContent.getWidth()),
@@ -426,7 +200,7 @@ public class MusicPlayerFrame extends JFrame {
 
         //---Bio Text Area---
         bioTextArea.setEnabled(false);
-        bioTextArea.setDisabledTextColor(DEFAULT_TEXT_COLOR);
+        bioTextArea.setDisabledTextColor(Util.DEFAULT_TEXT_COLOR);
         // Ενεργοποίηση αναδίπλωσης γραμμής
         bioTextArea.setLineWrap(true);
         // Αναδίπλωση ανά λέξη για καλύτερη εμφάνιση
@@ -448,182 +222,6 @@ public class MusicPlayerFrame extends JFrame {
                 (int)(0.1 * bioContent.getHeight()),
                 (int)(0.2 * bioContent.getWidth()), 50);
         viewMoreButton.addActionListener(e -> openWikiPage());
-    }
-
-    private void initTopArtistsContent() {
-        //---Show JSon Object to console with the button getTopArtists---
-        artistList = new ArrayList<>();
-        GetTopArtists topArtists = new GetTopArtists();
-        JSONObject jsonObject = topArtists.getTopArtists();
-
-        JSONObject artists = jsonObject.getJSONObject("artists");
-
-        //JSONObject attr = artists.getJSONObject("@attr");
-
-        JSONArray artistArray = artists.getJSONArray("artist");
-        for (int i = 0; i < artistArray.length(); i++) {
-            JSONObject artist = artistArray.getJSONObject(i);
-
-            JSONArray images = artist.getJSONArray("image");
-            ImageHolder imageHolder = new ImageHolder();
-            for (int j = 0; j < images.length(); j++) {
-                if (images.getJSONObject(j).getString("size").equals("small")) {
-                    imageHolder.setSmallImage(images.getJSONObject(j).getString("#text"));
-                } else if (images.getJSONObject(j).getString("size").equals("medium")) {
-                    imageHolder.setMediumImage(images.getJSONObject(j).getString("#text"));
-                } else if (images.getJSONObject(j).getString("size").equals("large")) {
-                    imageHolder.setLargeImage(images.getJSONObject(j).getString("#text"));
-                } else if (images.getJSONObject(j).getString("size").equals("extralarge")) {
-                    imageHolder.setExtraLargeImage(images.getJSONObject(j).getString("#text"));
-                } else if (images.getJSONObject(j).getString("size").equals("mega")) {
-                    imageHolder.setMegaImage(images.getJSONObject(j).getString("#text"));
-                }
-            }
-
-            artistList.add(new Artist(
-                    artist.getString("name"),
-                    Long.parseLong(artist.getString("playcount")),
-                    Long.parseLong(artist.getString("listeners")),
-                    artist.getString("mbid"),
-                    artist.getString("url"),
-                    Long.parseLong(artist.getString("streamable")),
-                    imageHolder
-            ));
-            //artistList.get(i).print();
-        }
-
-        //---Top Artist Image---
-        URL url;
-        BufferedImage image;
-        try {
-            url = new URL(artistList.get(topArtistNum).getImageHolder().getMegaImage());
-            image = ImageIO.read(url);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        ImageIcon icon = new ImageIcon(image);
-        topArtistImage = new JLabel(icon);
-        // Optional: Center align the image in the JLabel
-        topArtistImage.setHorizontalAlignment(JLabel.CENTER);
-        topArtistImage.setVerticalAlignment(JLabel.CENTER);
-        topArtistImage.setBounds((int)(0.02 * topArtistsContent.getWidth()),
-                (int)(0.05 * topArtistsContent.getHeight()),icon.getIconWidth(),
-                icon.getIconHeight());
-
-        //---Top Artist Number---
-        topArtistNumLabel = new JLabel(String.valueOf(topArtistNum + 1));
-        topArtistNumLabel.setFont(headerFont);
-        topArtistNumLabel.setBounds((int)(0.5 * topArtistsContent.getWidth()) - 25,
-                (int)(0.9 * topArtistsContent.getHeight()),50,50);
-
-        //---Next Button---
-        topArtistsNext.setFocusable(false);
-        topArtistsNext.setBounds(
-                (int)(0.98 * topArtistsContent.getWidth()) - 100,
-                (int)(0.9 * topArtistsContent.getHeight()),100,50);
-        topArtistsNext.addActionListener(e -> {
-            if (!(topArtistNum + 1 < artistList.size())) {
-                topArtistNum = 0;
-            } else {
-                topArtistNum++;
-            }
-            setArtist();
-        });
-
-        //---Back Button---
-        topArtistsBack.setFocusable(false);
-        topArtistsBack.setBounds((int)(0.02 * topArtistsContent.getWidth()),
-                (int)(0.9 * topArtistsContent.getHeight()),100,50);
-        topArtistsBack.addActionListener(e -> {
-            if (!(topArtistNum - 1 > -1)) {
-                topArtistNum = artistList.size() - 1;
-            } else {
-                topArtistNum--;
-            }
-            setArtist();
-        });
-
-        //---Top Artist Name---
-        topArtistNameLabel = new JLabel("Name          :");
-        topArtistNameLabel.setBounds(icon.getIconWidth() + 40,
-                (int)(0.05 * topArtistsContent.getHeight()),150,50);
-        topArtistNameLabel.setFont(myFont);
-        topArtistNameLabel.setForeground(blue_dark_color);
-        topArtistName = new JLabel(artistList.get(topArtistNum).getName());
-        topArtistName.setBounds(icon.getIconWidth() + 190,
-                (int)(0.05 * topArtistsContent.getHeight()),400,50);
-        topArtistName.setFont(myFont);
-        topArtistName.setForeground(blue_dark_color);
-
-        //---Top Artist Play Count---
-        topArtistPlayCountLabel = new JLabel("Play Count :");
-        topArtistPlayCountLabel.setBounds(icon.getIconWidth() + 40,
-                (int)(0.05 * topArtistsContent.getHeight())+50,150,50);
-        topArtistPlayCountLabel.setFont(myFont);
-        topArtistPlayCountLabel.setForeground(blue_dark_color);
-        topArtistPlayCount = new JLabel(String.valueOf(artistList.get(topArtistNum).getPlayCount()));
-        topArtistPlayCount.setBounds(icon.getIconWidth() + 190,
-                (int)(0.05 * topArtistsContent.getHeight())+50,400,50);
-        topArtistPlayCount.setFont(myFont);
-        topArtistPlayCount.setForeground(blue_dark_color);
-
-        //---Top Artist Listeners---
-        topArtistListenersLabel = new JLabel("Listeners   :");
-        topArtistListenersLabel.setBounds(icon.getIconWidth() + 40,
-                (int)(0.05 * topArtistsContent.getHeight())+100,150,50);
-        topArtistListenersLabel.setFont(myFont);
-        topArtistListenersLabel.setForeground(blue_dark_color);
-        topArtistListeners = new JLabel(String.valueOf(artistList.get(topArtistNum).getListeners()));
-        topArtistListeners.setBounds(icon.getIconWidth() + 190,
-                (int)(0.05 * topArtistsContent.getHeight())+100,400,50);
-        topArtistListeners.setFont(myFont);
-        topArtistListeners.setForeground(blue_dark_color);
-
-        //---Top Artist URL---
-        topArtistURLLabel = new JLabel("URL :");
-        topArtistURLLabel.setBounds((int)(0.02 * topArtistsContent.getWidth()),
-                icon.getIconHeight()+50,100,50);
-        topArtistURLLabel.setFont(myFont);
-        topArtistURLLabel.setForeground(blue_dark_color);
-        topArtistURL = new JLabel(artistList.get(topArtistNum).getUrl());
-        topArtistURL.setBounds((int)(0.02 * topArtistsContent.getWidth()) + 100,
-                icon.getIconHeight()+50,1200,50);
-        topArtistURL.setFont(myFont);
-        topArtistURL.setForeground(blue_dark_color);
-    }
-
-    private void setArtist() {
-        //---Top Artist Image---
-        URL url;
-        BufferedImage image;
-        try {
-            url = new URL(artistList.get(topArtistNum).getImageHolder().getMegaImage());
-            image = ImageIO.read(url);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        ImageIcon icon = new ImageIcon(image);
-        topArtistImage = new JLabel(icon);
-        topArtistImage.setHorizontalAlignment(JLabel.CENTER);
-        topArtistImage.setVerticalAlignment(JLabel.CENTER);
-        topArtistImage.setBounds((int)(0.02 * topArtistsContent.getWidth()),
-                (int)(0.05 * topArtistsContent.getHeight()),icon.getIconWidth(),
-                icon.getIconHeight());
-
-        //---Top Artist Number---
-        topArtistNumLabel.setText(String.valueOf(topArtistNum + 1));
-
-        //---Top Artist Name---
-        topArtistName.setText(artistList.get(topArtistNum).getName());
-
-        //---Top Artist Play Count---
-        topArtistPlayCount.setText(String.valueOf(artistList.get(topArtistNum).getPlayCount()));
-
-        //---Top Artist Listeners---
-        topArtistListeners.setText(String.valueOf(artistList.get(topArtistNum).getListeners()));
-
-        //---Top Artist URL---
-        topArtistURL.setText(artistList.get(topArtistNum).getUrl());
     }
 
     private void initTopTracksContent() {
@@ -700,7 +298,7 @@ public class MusicPlayerFrame extends JFrame {
 
         //---Top Track Number---
         topTrackNumLabel = new JLabel(String.valueOf(topTrackNum + 1));
-        topTrackNumLabel.setFont(headerFont);
+        topTrackNumLabel.setFont(Util.headerFont);
         topTrackNumLabel.setBounds((int)(0.5 * topTracksContent.getWidth()) - 25,
                 (int)(0.9 * topTracksContent.getHeight()),50,50);
 
@@ -735,49 +333,49 @@ public class MusicPlayerFrame extends JFrame {
         topTrackNameLabel = new JLabel("Name          :");
         topTrackNameLabel.setBounds(icon.getIconWidth() + 40,
                 (int)(0.05 * topTracksContent.getHeight()),150,50);
-        topTrackNameLabel.setFont(myFont);
-        topTrackNameLabel.setForeground(blue_dark_color);
+        topTrackNameLabel.setFont(Util.myFont);
+        topTrackNameLabel.setForeground(Util.blue_dark_color);
         topTrackName = new JLabel(trackList.get(topTrackNum).getName());
         topTrackName.setBounds(icon.getIconWidth() + 190,
                 (int)(0.05 * topTracksContent.getHeight()),400,50);
-        topTrackName.setFont(myFont);
-        topTrackName.setForeground(blue_dark_color);
+        topTrackName.setFont(Util.myFont);
+        topTrackName.setForeground(Util.blue_dark_color);
 
         //---Top Track Play Count---
         topTrackPlayCountLabel = new JLabel("Play Count :");
         topTrackPlayCountLabel.setBounds(icon.getIconWidth() + 40,
                 (int)(0.05 * topTracksContent.getHeight())+50,150,50);
-        topTrackPlayCountLabel.setFont(myFont);
-        topTrackPlayCountLabel.setForeground(blue_dark_color);
+        topTrackPlayCountLabel.setFont(Util.myFont);
+        topTrackPlayCountLabel.setForeground(Util.blue_dark_color);
         topTrackPlayCount = new JLabel(String.valueOf(trackList.get(topTrackNum).getPlayCount()));
         topTrackPlayCount.setBounds(icon.getIconWidth() + 190,
                 (int)(0.05 * topTracksContent.getHeight())+50,400,50);
-        topTrackPlayCount.setFont(myFont);
-        topTrackPlayCount.setForeground(blue_dark_color);
+        topTrackPlayCount.setFont(Util.myFont);
+        topTrackPlayCount.setForeground(Util.blue_dark_color);
 
         //---Top Track Listeners---
         topTrackListenersLabel = new JLabel("Listeners   :");
         topTrackListenersLabel.setBounds(icon.getIconWidth() + 40,
                 (int)(0.05 * topTracksContent.getHeight())+100,150,50);
-        topTrackListenersLabel.setFont(myFont);
-        topTrackListenersLabel.setForeground(blue_dark_color);
+        topTrackListenersLabel.setFont(Util.myFont);
+        topTrackListenersLabel.setForeground(Util.blue_dark_color);
         topTrackListeners = new JLabel(String.valueOf(trackList.get(topTrackNum).getListeners()));
         topTrackListeners.setBounds(icon.getIconWidth() + 190,
                 (int)(0.05 * topTracksContent.getHeight())+100,400,50);
-        topTrackListeners.setFont(myFont);
-        topTrackListeners.setForeground(blue_dark_color);
+        topTrackListeners.setFont(Util.myFont);
+        topTrackListeners.setForeground(Util.blue_dark_color);
 
         //---Top Track URL---
         topTrackURLLabel = new JLabel("URL :");
         topTrackURLLabel.setBounds((int)(0.02 * topTracksContent.getWidth()),
                 icon.getIconHeight()+50,100,50);
-        topTrackURLLabel.setFont(myFont);
-        topTrackURLLabel.setForeground(blue_dark_color);
+        topTrackURLLabel.setFont(Util.myFont);
+        topTrackURLLabel.setForeground(Util.blue_dark_color);
         topTrackURL = new JLabel(trackList.get(topTrackNum).getUrl());
         topTrackURL.setBounds((int)(0.02 * topArtistsContent.getWidth()) + 100,
                 icon.getIconHeight()+50,1200,50);
-        topTrackURL.setFont(myFont);
-        topTrackURL.setForeground(blue_dark_color);
+        topTrackURL.setFont(Util.myFont);
+        topTrackURL.setForeground(Util.blue_dark_color);
     }
 
     private void setTrack() {
@@ -827,72 +425,6 @@ public class MusicPlayerFrame extends JFrame {
         });
     }
 
-    public void playPauseMusic() {
-        nextButton.setVisible(true);
-        previousButton.setVisible(true);
-        //songSlider.setVisible(true);
-        if (played) {
-            playPauseButton.setText("▶");
-            //framePosition = clip.getFramePosition();
-            /*long songLengthMin = (clip.getMicrosecondLength()/60000000);
-            long songLengthSec = (clip.getMicrosecondLength()%60000000)/1000000;
-            System.out.println("containers.Song length : " + songLengthMin + ":" + songLengthSec);*/
-            clip.stop();
-        } else {
-            playPauseButton.setText("⏸");
-            if (!started) {
-                System.out.println("Song : " + currentSong.getName());
-                started = true;
-            }
-            playAudio();
-            if (songFinished) {
-                songFinished = false;
-                nextSong();
-            }
-        }
-        played = !played;
-    }
-
-    public void nextMusic() {
-        clip.close();
-        nextSong();
-    }
-
-    public void previousMusic() {
-        clip.close();
-        previousSong();
-    }
-
-    public void goTo(String song) {
-        if (clip != null) {
-            clip.close();
-        }
-        framePosition = 0;
-        played = false;
-        started = false;
-        int selectedSongNum = getSongNameNum(song);
-        if (selectedSongNum != -1) {
-            setCurSong(selectedSongNum);
-            curPlaylist.setRecordBackgroundColor(orange_dark_color,getCurSongNum());
-            curPlaylist.repaint();
-            loadAudio();
-            playPauseMusic();
-        }
-    }
-
-
-
-    private void toggleHeart() {
-        if (currentSong.isHearted()) {
-            heartButton.setText("\u2661");
-            currentSong.setHearted(false);
-        } else {
-            heartButton.setText("\uFE0F");
-            currentSong.setHearted(true);
-        }
-        currentSong.addRemoveHeartFromName();
-    }
-
     /*public void changeFramesOfSong() {
         if (clip != null) {
             int newPosition = songSlider.getValue();
@@ -901,86 +433,6 @@ public class MusicPlayerFrame extends JFrame {
         }
         //System.out.println("SongSlider Value : " + songSlider.getValue());
     }*/
-
-    public void loadAudio() {
-        if (currentSong.getExcention().equals(".wav") || currentSong.getExcention().equals(".au")) {
-            File file = new File(currentSong.getPath());
-            try {
-                AudioInputStream ais = AudioSystem.getAudioInputStream(file);
-                clip = AudioSystem.getClip();
-                clip.open(ais);
-            } catch (UnsupportedAudioFileException | LineUnavailableException | IOException e) {
-                e.printStackTrace();
-            }
-            //songSliderLength = clip.getFrameLength();
-        }
-        if (currentSong.getExcention().equals(".mp3")) {}
-    }
-
-    public void playAudio() {
-        loadAudio();
-        clip.addLineListener(e -> {
-            if (e.getType() == LineEvent.Type.START) {
-                playPauseButton.setText("⏸");
-                System.out.println("Song : Start");
-            } else if (e.getType() == LineEvent.Type.STOP) {
-                playPauseButton.setText("▶");
-                framePosition = clip.getFramePosition();
-                if (clip.getFramePosition() < clip.getFrameLength()) {
-                    System.out.println("Song : Stop");
-                } else {
-                    played = false;
-                    songFinished = true;
-                    clip.close();
-                }
-            } else if (e.getType() == LineEvent.Type.CLOSE) {
-                System.out.println("Song : Close");
-                framePosition = 0;
-                started = false;
-                isSongStarted = false;
-                if (songFinished) {
-                    songFinished = false;
-                    nextSong();
-                }
-            }
-        });
-        clip.setFramePosition(framePosition);
-        clip.start();
-    }
-
-    public void nextSong() {
-        framePosition = 0;
-        played = false;
-        started = false;
-        if (getCurSongNum() + 1 < currentPLSongs.size()) {
-            System.out.println("Next Song");
-            setCurSong(getCurSongNum() + 1);
-        } else {
-            System.out.println("Loop");
-            setCurSong(0);
-        }
-        curPlaylist.setRecordBackgroundColor(orange_dark_color,getCurSongNum());
-        curPlaylist.repaint();
-        loadAudio();
-        playPauseMusic();
-    }
-
-    public void previousSong() {
-        framePosition = 0;
-        played = false;
-        started = false;
-        if (getCurSongNum() - 1 > -1) {
-            System.out.println("Previous Song");
-            setCurSong(getCurSongNum() - 1);
-        } else {
-            System.out.println("Loop");
-            setCurSong(currentPLSongs.size() - 1);
-        }
-        curPlaylist.setRecordBackgroundColor(orange_dark_color,getCurSongNum());
-        curPlaylist.repaint();
-        loadAudio();
-        playPauseMusic();
-    }
 
     public void searchArtistBio() {
         ArtistBioSearcher abs;
@@ -1040,8 +492,12 @@ public class MusicPlayerFrame extends JFrame {
         }
     }
 
+    public void goTo(String song) {
+        musicContent.goTo(song);
+    }
+
     private void changeMenu() {
-        JPanel content = getContent();
+        JPanel content = getCurrentContent();
         if (content == null) {
             return;
         }
@@ -1062,8 +518,28 @@ public class MusicPlayerFrame extends JFrame {
         showing = !showing;
     }
 
-    private JPanel getContent() {
+    private JPanel getCurrentContent() {
         switch (currentContent) {
+            case OPENING_CONTENT:
+                return openingContent;
+            case MUSIC_CONTENT:
+                return musicContent;
+            case CREATE_PLAYLIST_CONTENT:
+                return createPLContent;
+            case BIO_CONTENT:
+                return bioContent;
+            case TOP_ARTISTS_CONTENT:
+                return topArtistsContent;
+            case TOP_TRACKS_CONTENT:
+                return topTracksContent;
+            case TOP_ALBUMS_CONTENT:
+                return topAlbumsContent;
+        }
+        return null;
+    }
+
+    public JPanel getContent(int contentNum) {
+        switch (contentNum) {
             case OPENING_CONTENT:
                 return openingContent;
             case MUSIC_CONTENT:
@@ -1088,13 +564,13 @@ public class MusicPlayerFrame extends JFrame {
         }
     }
 
-    public void setCurrentPlaylist(List<String> songNames) {
-        currentPlaylist = new ArrayList<>(songNames);
+    public void setCurrentPlaylistNames(List<String> songNames) {
+        currentPlaylistNames = new ArrayList<>(songNames);
         currentPLSongs.clear();
-        for (int i = 0; i < currentPlaylist.size(); i++) {
+        for (int i = 0; i < currentPlaylistNames.size(); i++) {
             boolean found = false;
             for (int j = 0; j < allSongs.size() && !found; j++) {
-                if (currentPlaylist.get(i).equals(allSongs.get(j).getName())) {
+                if (currentPlaylistNames.get(i).equals(allSongs.get(j).getName())) {
                     currentPLSongs.add(allSongs.get(j));
                     found = true;
                 }
@@ -1102,34 +578,19 @@ public class MusicPlayerFrame extends JFrame {
         }
     }
 
-    public void setPlaylist(Playlist pl) { curPlaylist = pl; }
-
     public int getSongNameNum(String songName) {
-        for (int i = 0; i < currentPlaylist.size(); i++) {
-            if (currentPlaylist.get(i).contains(songName)) {
+        for (int i = 0; i < currentPlaylistNames.size(); i++) {
+            if (currentPlaylistNames.get(i).contains(songName)) {
                 return i;
             }
         }
         return -1;
     }
 
-    public JScrollPane createScrollPane(JPanel panel, Rectangle rectangle, Color thColor, Color trColor) {
-        JScrollPane sp = new JScrollPane(panel);
-        sp.setBounds(rectangle);
-        sp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        sp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        sp.setBorder(BorderFactory.createEmptyBorder());
-        sp.getHorizontalScrollBar().setUI(new CustomScrollBarUI(thColor,trColor));
-        sp.getVerticalScrollBar().setUI(new CustomScrollBarUI(thColor,trColor));
-        sp.setOpaque(false);
-        sp.getViewport().setOpaque(false);
-        return sp;
-    }
-
     private void createMenuOption(JButton button, int content) {
         button.setBounds(0,menuOptionCounter * 50,250,50);
         button.setFocusable(false);
-        button.setFont(myFont);
+        button.setFont(Util.myFont);
         button.addActionListener(e -> showContent(content));
         menuOptionCounter++;
     }
@@ -1151,9 +612,7 @@ public class MusicPlayerFrame extends JFrame {
         topArtistsContent.setVisible(false);
         topTracksContent.setVisible(false);
         topAlbumsContent.setVisible(false);
-        if (clip != null) {
-            clip.close();
-        }
+        musicContent.clearMusicContent();
         switch (content) {
             case MUSIC_CONTENT:
                 musicContent.setVisible(true);
@@ -1183,11 +642,11 @@ public class MusicPlayerFrame extends JFrame {
     }
 
     public void initContents() {
-        initOpeningContent();
-        initMusicContent();
-        initCreatePLContent();
+        openingContent.init();
+        musicContent.init();
+        createPLContent.init();
         initBioContent();
-        initTopArtistsContent();
+        topArtistsContent.init();
         initTopTracksContent();
         initTopAlbumsContent();
     }
@@ -1202,41 +661,11 @@ public class MusicPlayerFrame extends JFrame {
         menu.add(discoverTopTracks);
         menu.add(discoverTopAlbums);
 
-        openingContent.add(openingLabel);
-
-        //musicContent.add(songSlider);
-        musicContent.add(playPauseButton);
-        musicContent.add(nextButton);
-        musicContent.add(previousButton);
-        musicContent.add(songNameLabel);
-        musicContent.add(mainPlaylistSP);
-        musicContent.add(playlistSelector);
-
-        createPLContent.add(playlistNameLabel);
-        createPLContent.add(playlistNameText);
-        createPLContent.add(jLabel);
-        createPLContent.add(create);
-        createPLContent.add(clear);
-        createPLContent.add(sp);
-
         bioContent.add(artistLabel);
         bioContent.add(artistInput);
         bioContent.add(searchBio);
         bioContent.add(bioTextAreaSP);
         bioContent.add(viewMoreButton);
-
-        topArtistsContent.add(topArtistImage);
-        topArtistsContent.add(topArtistNumLabel);
-        topArtistsContent.add(topArtistNameLabel);
-        topArtistsContent.add(topArtistName);
-        topArtistsContent.add(topArtistPlayCountLabel);
-        topArtistsContent.add(topArtistPlayCount);
-        topArtistsContent.add(topArtistListenersLabel);
-        topArtistsContent.add(topArtistListeners);
-        topArtistsContent.add(topArtistURLLabel);
-        topArtistsContent.add(topArtistURL);
-        topArtistsContent.add(topArtistsNext);
-        topArtistsContent.add(topArtistsBack);
 
         topTracksContent.add(topTrackImage);
         topTracksContent.add(topTrackNumLabel);
@@ -1278,13 +707,35 @@ public class MusicPlayerFrame extends JFrame {
         }
     }
 
-    private int getCurSongNum() {
+    public int getCurSongNum() {
         return currentSongNum;
     }
-    private void setCurSong(int num) {
+    public void setCurSong(int num) {
         System.out.println("Num : " + num);
         currentSongNum = num;
         currentSong = currentPLSongs.get(num);
         //songPlayer.changeSong(currentSong);
+    }
+
+    public List<String> getAllSongNames() {
+        return allSongsNames;
+    }
+    public List<JScrollPane> getAllPlaylists() {
+        return allPlaylists;
+    }
+    public JComboBox getPlaylistSelector() {
+        return musicContent.getPlaylistSelector();
+    }
+    public Playlist getCurPlaylist() {
+        return curPlaylist;
+    }
+    public void setCurPlaylist(Playlist pl) {
+        curPlaylist = pl;
+    }
+    public Song getCurrentSong() {
+        return currentSong;
+    }
+    public List<Song> getCurrentPLSongs() {
+        return currentPLSongs;
     }
 }
