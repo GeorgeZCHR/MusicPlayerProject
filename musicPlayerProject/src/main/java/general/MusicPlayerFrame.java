@@ -60,7 +60,8 @@ public class MusicPlayerFrame extends JFrame {
     private CreatePlaylistContent createPLContent = new CreatePlaylistContent(null,this);
     private JPanel bioContent = new JPanel(null);
     private TopArtistsContent topArtistsContent = new TopArtistsContent(null);
-    private JPanel topTracksContent = new JPanel(null), topAlbumsContent = new JPanel(null);
+    private TopTracksContent topTracksContent = new TopTracksContent(null);
+    private JPanel topAlbumsContent = new JPanel(null);
     //----------------
     //---Bio Content---
     private String wikiURL;
@@ -74,19 +75,6 @@ public class MusicPlayerFrame extends JFrame {
             "Search",Util.orange_color,40,40);
     private boolean isArtistBioEmpty = true;
     private boolean isArtistBioValid = false;
-    //----------------
-    //---Discover Top Tracks Content---
-    private List<Track> trackList;
-    private int topTrackNum = 0;
-    private CustomButton topTracksNext = new CustomButton(
-            "Next",Util.orange_color, 20,20);
-    private CustomButton topTracksBack = new CustomButton(
-            "Back",Util.orange_color, 20,20);
-    private JLabel topTrackImage, topTrackNumLabel;
-    private JLabel topTrackName, topTrackNameLabel;
-    private JLabel topTrackPlayCount, topTrackPlayCountLabel;
-    private JLabel topTrackListeners, topTrackListenersLabel;
-    private JLabel topTrackURL, topTrackURLLabel;
     //----------------
     //---Discover Top Albums Content---
     private CustomButton getTopAlbums = new CustomButton(
@@ -222,194 +210,6 @@ public class MusicPlayerFrame extends JFrame {
                 (int)(0.1 * bioContent.getHeight()),
                 (int)(0.2 * bioContent.getWidth()), 50);
         viewMoreButton.addActionListener(e -> openWikiPage());
-    }
-
-    private void initTopTracksContent() {
-        //---show JSon Object to console with the button getTopTracks ---
-        trackList = new ArrayList<>();
-        GetTopTracks topTracks = new GetTopTracks();
-        JSONObject jsonObject = topTracks.getTopTracks();
-
-        JSONObject tracks = jsonObject.getJSONObject("tracks");
-
-        //JSONObject attr = tracks.getJSONObject("@attr");
-
-        JSONArray tracksArray = tracks.getJSONArray("track");
-        for (int i = 0; i < tracksArray.length(); i++) {
-            JSONObject track = tracksArray.getJSONObject(i);
-
-            JSONArray images = track.getJSONArray("image");
-            ImageHolder imageHolder = new ImageHolder();
-            for (int j = 0; j < images.length(); j++) {
-                if (images.getJSONObject(j).getString("size").equals("small")) {
-                    imageHolder.setSmallImage(images.getJSONObject(j).getString("#text"));
-                } else if (images.getJSONObject(j).getString("size").equals("medium")) {
-                    imageHolder.setMediumImage(images.getJSONObject(j).getString("#text"));
-                } else if (images.getJSONObject(j).getString("size").equals("large")) {
-                    imageHolder.setLargeImage(images.getJSONObject(j).getString("#text"));
-                } else if (images.getJSONObject(j).getString("size").equals("extralarge")) {
-                    imageHolder.setExtraLargeImage(images.getJSONObject(j).getString("#text"));
-                } else if (images.getJSONObject(j).getString("size").equals("mega")) {
-                    imageHolder.setMegaImage(images.getJSONObject(j).getString("#text"));
-                }
-            }
-
-            String streamableText = track.getJSONObject("streamable").getString("#text");
-            String streamableFulltrack = track.getJSONObject("streamable").getString("fulltrack");
-            String artistMBID = track.getJSONObject("artist").getString("mbid");
-            String artistName = track.getJSONObject("artist").getString("name");
-            String artistURL = track.getJSONObject("artist").getString("url");
-
-            trackList.add(new Track(
-                    track.getString("name"),
-                    Long.parseLong(track.getString("playcount")),
-                    Long.parseLong(track.getString("listeners")),
-                    track.getString("mbid"),
-                    track.getString("url"),
-                    imageHolder,
-                    Long.parseLong(track.getString("duration")),
-                    Long.parseLong(streamableText),
-                    Long.parseLong(streamableFulltrack),
-                    artistMBID,
-                    artistName,
-                    artistURL
-            ));
-            //trackList.get(i).print();
-        }
-
-        //---Top Track Image---
-        URL url;
-        BufferedImage image;
-        try {
-            //System.out.println(trackList.get(topTrackNum).getImageHolder().getMegaImage());
-            url = new URL(trackList.get(topTrackNum).getImageHolder().getExtraLargeImage());
-            image = ImageIO.read(url);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        ImageIcon icon = new ImageIcon(image);
-        topTrackImage = new JLabel(icon);
-        // Optional: Center align the image in the JLabel
-        topTrackImage.setHorizontalAlignment(JLabel.CENTER);
-        topTrackImage.setVerticalAlignment(JLabel.CENTER);
-        topTrackImage.setBounds((int)(0.02 * topTracksContent.getWidth()),
-                (int)(0.05 * topTracksContent.getHeight()),icon.getIconWidth(),
-                icon.getIconHeight());
-
-        //---Top Track Number---
-        topTrackNumLabel = new JLabel(String.valueOf(topTrackNum + 1));
-        topTrackNumLabel.setFont(Util.headerFont);
-        topTrackNumLabel.setBounds((int)(0.5 * topTracksContent.getWidth()) - 25,
-                (int)(0.9 * topTracksContent.getHeight()),50,50);
-
-        //---Next Button---
-        topTracksNext.setFocusable(false);
-        topTracksNext.setBounds(
-                (int)(0.98 * topTracksContent.getWidth()) - 100,
-                (int)(0.9 * topTracksContent.getHeight()),100,50);
-        topTracksNext.addActionListener(e -> {
-            if (!(topTrackNum + 1 < trackList.size())) {
-                topTrackNum = 0;
-            } else {
-                topTrackNum++;
-            }
-            setTrack();
-        });
-
-        //---Back Button---
-        topTracksBack.setFocusable(false);
-        topTracksBack.setBounds((int)(0.02 * topTracksContent.getWidth()),
-                (int)(0.9 * topTracksContent.getHeight()),100,50);
-        topTracksBack.addActionListener(e -> {
-            if (!(topTrackNum - 1 > -1)) {
-                topTrackNum = trackList.size() - 1;
-            } else {
-                topTrackNum--;
-            }
-            setTrack();
-        });
-
-        //---Top Track Name---
-        topTrackNameLabel = new JLabel("Name          :");
-        topTrackNameLabel.setBounds(icon.getIconWidth() + 40,
-                (int)(0.05 * topTracksContent.getHeight()),150,50);
-        topTrackNameLabel.setFont(Util.myFont);
-        topTrackNameLabel.setForeground(Util.blue_dark_color);
-        topTrackName = new JLabel(trackList.get(topTrackNum).getName());
-        topTrackName.setBounds(icon.getIconWidth() + 190,
-                (int)(0.05 * topTracksContent.getHeight()),400,50);
-        topTrackName.setFont(Util.myFont);
-        topTrackName.setForeground(Util.blue_dark_color);
-
-        //---Top Track Play Count---
-        topTrackPlayCountLabel = new JLabel("Play Count :");
-        topTrackPlayCountLabel.setBounds(icon.getIconWidth() + 40,
-                (int)(0.05 * topTracksContent.getHeight())+50,150,50);
-        topTrackPlayCountLabel.setFont(Util.myFont);
-        topTrackPlayCountLabel.setForeground(Util.blue_dark_color);
-        topTrackPlayCount = new JLabel(String.valueOf(trackList.get(topTrackNum).getPlayCount()));
-        topTrackPlayCount.setBounds(icon.getIconWidth() + 190,
-                (int)(0.05 * topTracksContent.getHeight())+50,400,50);
-        topTrackPlayCount.setFont(Util.myFont);
-        topTrackPlayCount.setForeground(Util.blue_dark_color);
-
-        //---Top Track Listeners---
-        topTrackListenersLabel = new JLabel("Listeners   :");
-        topTrackListenersLabel.setBounds(icon.getIconWidth() + 40,
-                (int)(0.05 * topTracksContent.getHeight())+100,150,50);
-        topTrackListenersLabel.setFont(Util.myFont);
-        topTrackListenersLabel.setForeground(Util.blue_dark_color);
-        topTrackListeners = new JLabel(String.valueOf(trackList.get(topTrackNum).getListeners()));
-        topTrackListeners.setBounds(icon.getIconWidth() + 190,
-                (int)(0.05 * topTracksContent.getHeight())+100,400,50);
-        topTrackListeners.setFont(Util.myFont);
-        topTrackListeners.setForeground(Util.blue_dark_color);
-
-        //---Top Track URL---
-        topTrackURLLabel = new JLabel("URL :");
-        topTrackURLLabel.setBounds((int)(0.02 * topTracksContent.getWidth()),
-                icon.getIconHeight()+50,100,50);
-        topTrackURLLabel.setFont(Util.myFont);
-        topTrackURLLabel.setForeground(Util.blue_dark_color);
-        topTrackURL = new JLabel(trackList.get(topTrackNum).getUrl());
-        topTrackURL.setBounds((int)(0.02 * topArtistsContent.getWidth()) + 100,
-                icon.getIconHeight()+50,1200,50);
-        topTrackURL.setFont(Util.myFont);
-        topTrackURL.setForeground(Util.blue_dark_color);
-    }
-
-    private void setTrack() {
-        //---Top Track Image---
-        URL url;
-        BufferedImage image;
-        try {
-            url = new URL(trackList.get(topTrackNum).getImageHolder().getExtraLargeImage());
-            image = ImageIO.read(url);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        ImageIcon icon = new ImageIcon(image);
-        topTrackImage = new JLabel(icon);
-        topTrackImage.setHorizontalAlignment(JLabel.CENTER);
-        topTrackImage.setVerticalAlignment(JLabel.CENTER);
-        topTrackImage.setBounds((int)(0.02 * topTracksContent.getWidth()),
-                (int)(0.05 * topTracksContent.getHeight()),icon.getIconWidth(),
-                icon.getIconHeight());
-
-        //---Top Track Number---
-        topTrackNumLabel.setText(String.valueOf(topTrackNum + 1));
-
-        //---Top Track Name---
-        topTrackName.setText(trackList.get(topTrackNum).getName());
-
-        //---Top Track Play Count---
-        topTrackPlayCount.setText(String.valueOf(trackList.get(topTrackNum).getPlayCount()));
-
-        //---Top Track Listeners---
-        topTrackListeners.setText(String.valueOf(trackList.get(topTrackNum).getListeners()));
-
-        //---Top Track URL---
-        topTrackURL.setText(trackList.get(topTrackNum).getUrl());
     }
 
     private void initTopAlbumsContent() {
@@ -647,7 +447,7 @@ public class MusicPlayerFrame extends JFrame {
         createPLContent.init();
         initBioContent();
         topArtistsContent.init();
-        initTopTracksContent();
+        topTracksContent.init();
         initTopAlbumsContent();
     }
 
@@ -666,19 +466,6 @@ public class MusicPlayerFrame extends JFrame {
         bioContent.add(searchBio);
         bioContent.add(bioTextAreaSP);
         bioContent.add(viewMoreButton);
-
-        topTracksContent.add(topTrackImage);
-        topTracksContent.add(topTrackNumLabel);
-        topTracksContent.add(topTrackNameLabel);
-        topTracksContent.add(topTrackName);
-        topTracksContent.add(topTrackPlayCountLabel);
-        topTracksContent.add(topTrackPlayCount);
-        topTracksContent.add(topTrackListenersLabel);
-        topTracksContent.add(topTrackListeners);
-        topTracksContent.add(topTrackURLLabel);
-        topTracksContent.add(topTrackURL);
-        topTracksContent.add(topTracksNext);
-        topTracksContent.add(topTracksBack);
 
         topAlbumsContent.add(getTopAlbums);
 
