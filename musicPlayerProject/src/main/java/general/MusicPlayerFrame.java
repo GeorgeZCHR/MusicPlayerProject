@@ -21,6 +21,7 @@ public class MusicPlayerFrame extends JFrame {
     private final Color blue_dark_color = new Color(0x264653);
     private final Color blue_color = new Color(0x2a9d8f);
     private final Color orange_light_color = new Color(0xe9c46a);
+    private final Color orange_dark_color = new Color(0xF08041);
     private final Color orange_color = new Color(0xf4a261);
     private final Color red_light_color = new Color(0xe76f51);
     private final Color DEFAULT_TEXT_COLOR = (new JLabel()).getForeground();
@@ -245,7 +246,7 @@ public class MusicPlayerFrame extends JFrame {
     private void initMusicContent() {
         //---Playlist---
         mainPlaylist = new Playlist("Main",orange_color,20,allSongsNames,this);
-        mainPlaylist.setRecordBackgroundColor(new Color(0xF08041),getCurSongNum());
+        mainPlaylist.setRecordBackgroundColor(orange_dark_color,getCurSongNum());
         mainPlaylist.repaint();
 
         mainPlaylistSP = createScrollPane(mainPlaylist,new Rectangle((int)(musicContent.getWidth() * 0.5) - 250,
@@ -308,8 +309,9 @@ public class MusicPlayerFrame extends JFrame {
             for (int i = 0; i < allPlaylists.size(); i++) {
                 allPlaylists.get(i).setVisible(false);
             }
-            if (clip != null && clip.isRunning()) {
+            if (clip != null) {
                 clip.close();
+                played = false;
                 playPauseButton.setText("▶");
                 previousButton.setVisible(false);
                 nextButton.setVisible(false);
@@ -321,6 +323,8 @@ public class MusicPlayerFrame extends JFrame {
                     setCurrentPlaylist(pl.getSongNames());
                     setCurSong(0);
                     setPlaylist(pl);
+                    curPlaylist.setRecordBackgroundColor(orange_dark_color,getCurSongNum());
+                    curPlaylist.repaint();
                 }
             }
         });
@@ -352,7 +356,7 @@ public class MusicPlayerFrame extends JFrame {
                 (int)(0.96 * createPLContent.getWidth()), 50);
 
         //---Song Selector for Playlist---
-        songSelectorForPlaylist = new SongSelector(orange_color,20,allSongsNames);
+        songSelectorForPlaylist = new SongSelector(orange_color,orange_dark_color,20,allSongsNames);
 
         sp = createScrollPane(songSelectorForPlaylist,new Rectangle((int)(0.02 * createPLContent.getWidth()),
                         70,(int)(0.93 * createPLContent.getWidth()),(int)(0.76 * createPLContent.getHeight())),
@@ -367,7 +371,7 @@ public class MusicPlayerFrame extends JFrame {
                 if (!songSelectorForPlaylist.getSelectedSongs().isEmpty()) {
                     Playlist playlist = new Playlist(playlistNameText.getText(),orange_color,20,
                             songSelectorForPlaylist.getSelectedSongs(),this);
-                    playlist.setRecordBackgroundColor(new Color(0xF08041),getCurSongNum());
+                    playlist.setRecordBackgroundColor(orange_dark_color,getCurSongNum());
                     playlist.repaint();
 
                     JScrollPane jScrollPane = createScrollPane(playlist,new Rectangle(
@@ -869,7 +873,7 @@ public class MusicPlayerFrame extends JFrame {
         int selectedSongNum = getSongNameNum(song);
         if (selectedSongNum != -1) {
             setCurSong(selectedSongNum);
-            curPlaylist.setRecordBackgroundColor(new Color(0xF08041),getCurSongNum());
+            curPlaylist.setRecordBackgroundColor(orange_dark_color,getCurSongNum());
             curPlaylist.repaint();
             loadAudio();
             playPauseMusic();
@@ -948,16 +952,14 @@ public class MusicPlayerFrame extends JFrame {
         framePosition = 0;
         played = false;
         started = false;
-        System.out.println(getCurSongNum()+1 + " < " + currentPLSongs.size());
         if (getCurSongNum() + 1 < currentPLSongs.size()) {
-            System.out.println("nextMusic true");
+            System.out.println("Next Song");
             setCurSong(getCurSongNum() + 1);
         } else {
-            System.out.println("nextMusic false");
+            System.out.println("Loop");
             setCurSong(0);
-            System.out.println("Loop :");
         }
-        curPlaylist.setRecordBackgroundColor(new Color(0xF08041),getCurSongNum());
+        curPlaylist.setRecordBackgroundColor(orange_dark_color,getCurSongNum());
         curPlaylist.repaint();
         loadAudio();
         playPauseMusic();
@@ -968,14 +970,13 @@ public class MusicPlayerFrame extends JFrame {
         played = false;
         started = false;
         if (getCurSongNum() - 1 > -1) {
-            System.out.println("previousMusic true");
+            System.out.println("Previous Song");
             setCurSong(getCurSongNum() - 1);
         } else {
-            System.out.println("previousMusic false");
+            System.out.println("Loop");
             setCurSong(currentPLSongs.size() - 1);
-            System.out.println("Loop :");
         }
-        curPlaylist.setRecordBackgroundColor(new Color(0xF08041),getCurSongNum());
+        curPlaylist.setRecordBackgroundColor(orange_dark_color,getCurSongNum());
         curPlaylist.repaint();
         loadAudio();
         playPauseMusic();
@@ -1090,11 +1091,11 @@ public class MusicPlayerFrame extends JFrame {
     public void setCurrentPlaylist(List<String> songNames) {
         currentPlaylist = new ArrayList<>(songNames);
         currentPLSongs.clear();
-        for (int i = 0; i < allSongs.size(); i++) {
+        for (int i = 0; i < currentPlaylist.size(); i++) {
             boolean found = false;
-            for (int j = 0; j < currentPlaylist.size() && !found; j++) {
-                if (allSongs.get(i).getName().equals(currentPlaylist.get(j))) {
-                    currentPLSongs.add(allSongs.get(i));
+            for (int j = 0; j < allSongs.size() && !found; j++) {
+                if (currentPlaylist.get(i).equals(allSongs.get(j).getName())) {
+                    currentPLSongs.add(allSongs.get(j));
                     found = true;
                 }
             }

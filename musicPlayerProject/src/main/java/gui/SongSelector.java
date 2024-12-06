@@ -11,11 +11,13 @@ public class SongSelector extends JPanel{
     private List<Boolean> isSelected = new ArrayList<>();
     private List<String> selectedSongs = new ArrayList<>();
     private int cornerRadius;
-    private Color panelColor;
+    private final Color panelColor;
+    private final Color selectionColor;
 
-    public SongSelector(Color panelColor, int cornerRadius,
+    public SongSelector(Color panelColor, Color selectionColor, int cornerRadius,
                         List<String> names) {
         this.panelColor = panelColor;
+        this.selectionColor = selectionColor;
         this.cornerRadius = cornerRadius;
         setOpaque(false);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -38,7 +40,7 @@ public class SongSelector extends JPanel{
                     songNameButton.setForeground(panelColor.darker());
                 } else {
                     selectedSongs.add(songNameButton.getText());
-                    songNameButton.setColor(new Color(0xF08041));
+                    songNameButton.setColor(selectionColor);
                 }
                 isSelected.set(finalI,!isSelected.get(finalI));
                 System.out.println(selectedSongs);
