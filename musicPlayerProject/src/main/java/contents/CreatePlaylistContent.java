@@ -56,6 +56,7 @@ public class CreatePlaylistContent extends JPanel implements Content {
                             songSelectorForPlaylist.getSelectedSongs(),mpf);
                     playlist.setRecordBackgroundColor(Util.orange_dark_color,
                             mpf.getCurSongNum());
+                    playlist.checkHearts();
                     playlist.repaint();
 
 

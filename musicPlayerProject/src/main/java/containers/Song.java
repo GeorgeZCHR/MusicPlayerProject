@@ -19,7 +19,6 @@ public class Song {
         this.album = "Unknown";
         this.path = path;
         this.excention = path.substring(path.lastIndexOf("."));
-
         this.isHearted = false;
     }
 

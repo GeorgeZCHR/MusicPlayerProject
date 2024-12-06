@@ -1,11 +1,8 @@
 package contents;
-
-import containers.Song;
 import general.MusicPlayerFrame;
 import general.Util;
 import gui.CustomButton;
 import gui.Playlist;
-
 import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
@@ -111,9 +108,10 @@ public class MusicContent extends JPanel implements Content {
                 Playlist pl = (Playlist)(mpf.getAllPlaylists().get(i).getViewport().getView());
                 if (pl.getTitle().equals(playlistSelector.getSelectedItem())) {
                     mpf.getAllPlaylists().get(i).setVisible(true);
-                    mpf.setCurrentPlaylistNames(pl.getSongNames());
+                    mpf.setCurrentPlaylistNames(pl.getAllSongNames());
                     mpf.setCurSong(0);
                     mpf.setCurPlaylist(pl);
+                    mpf.getCurPlaylist().checkHearts();
                     mpf.getCurPlaylist().setRecordBackgroundColor(Util.orange_dark_color,mpf.getCurSongNum());
                     mpf.getCurPlaylist().repaint();
                 }

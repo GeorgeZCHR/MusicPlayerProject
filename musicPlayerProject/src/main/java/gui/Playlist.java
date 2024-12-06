@@ -1,4 +1,5 @@
 package gui;
+import containers.Song;
 import general.MusicPlayerFrame;
 import javax.swing.*;
 import java.awt.*;
@@ -13,27 +14,31 @@ public class Playlist extends JPanel {
     private List<JPanel> records = new ArrayList<>();
     private int cornerRadius;
     private Color panelColor;
-    private List<String> songNames;
+    private List<String> allSongNames = new ArrayList<>();
     private MusicPlayerFrame frame;
+    private List<String> currentNames = new ArrayList<>();
 
     public Playlist(String title, Color panelColor, int cornerRadius,
-                    List<String> names, MusicPlayerFrame frame) {
+                    List<String> currentNames, MusicPlayerFrame frame) {
         this.title = title;
         this.frame = frame;
         this.panelColor = panelColor;
         this.cornerRadius = cornerRadius;
-        this.songNames = new ArrayList<>(names);
+        this.currentNames.addAll(currentNames);
+        for (int i = 0; i < frame.getAllSongs().size(); i++) {
+            allSongNames.add(frame.getAllSongs().get(i).getName());
+        }
         setOpaque(false);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        for (int i = 0; i < songNames.size(); i++) {
+        for (int i = 0; i < this.currentNames.size(); i++) {
             int finalI = i;
             JPanel record = new JPanel();
             record.setLayout(new BorderLayout());
             record.setOpaque(false);
 
             CustomButton name = new CustomButton(
-                    names.get(i),panelColor,20,20);
+                    currentNames.get(i),panelColor,20,20);
             name.setFont(new Font(Font.SANS_SERIF,Font.BOLD,20));
             name.setFocusable(false);
             name.addActionListener(e -> {
@@ -61,8 +66,18 @@ public class Playlist extends JPanel {
                 CustomButton nameButton = (CustomButton)(records.get(finalI).getComponent(0));
                 CustomButton likeButton = (CustomButton)
                         (((JPanel)(records.get(finalI).getComponent(1))).getComponent(0));
-                System.out.println("Like for: " + nameButton.getText());
-                likeButton.setText("♥");
+                for (int j = 0; j < frame.getAllSongs().size(); j++) {
+                    //System.out.println(likeButton.getText()+" = "+frame.getAllSongs().get(j).getName());
+                    if (nameButton.getText().equals(frame.getAllSongs().get(j).getName())) {
+                        if (!frame.getAllSongs().get(j).isHearted()) {
+                            likeButton.setText("♥");
+                            frame.getAllSongs().get(j).setHearted(true);
+                        } else {
+                            likeButton.setText("♡");
+                            frame.getAllSongs().get(j).setHearted(false);
+                        }
+                    }
+                }
             });
             buttonPanel.add(like, BorderLayout.WEST);
 
@@ -104,7 +119,23 @@ public class Playlist extends JPanel {
         nameButton.setColor(color);
     }
 
+    public void checkHearts() {
+        for (int i = 0; i < currentNames.size(); i++) {
+            CustomButton nameButton = (CustomButton)(records.get(i).getComponent(0));
+            CustomButton likeButton = (CustomButton)(((JPanel)(records.get(i).getComponent(1))).getComponent(0));
+            for (int j = 0; j < allSongNames.size(); j++) {
+                if (nameButton.getText().equals(frame.getAllSongs().get(j).getName())) {
+                    if (!frame.getAllSongs().get(j).isHearted()) {
+                        likeButton.setText("♡");
+                    } else {
+                        likeButton.setText("♥");
+                    }
+                }
+            }
+        }
+    }
+
     public String getTitle() { return title; }
 
-    public List<String> getSongNames() { return songNames; }
+    public List<String> getAllSongNames() { return allSongNames; }
 }
