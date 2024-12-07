@@ -28,4 +28,24 @@ public class Util {
         sp.getViewport().setOpaque(false);
         return sp;
     }
+
+    public static JScrollPane createScrollPane(JTextArea jTextArea, Rectangle rectangle, Color thColor, Color trColor) {
+        jTextArea.setForeground(blue_dark_color);
+        jTextArea.setDisabledTextColor(blue_dark_color);
+        jTextArea.setOpaque(false);
+        jTextArea.setDisabledTextColor(Util.DEFAULT_TEXT_COLOR);
+        jTextArea.setLineWrap(true);
+        jTextArea.setWrapStyleWord(true);
+        jTextArea.setFont(Util.myFont);
+        JScrollPane sp = new JScrollPane(jTextArea);
+        sp.setBounds(rectangle);
+        sp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        sp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        sp.setBorder(BorderFactory.createEmptyBorder());
+        sp.getHorizontalScrollBar().setUI(new CustomScrollBarUI(thColor,trColor));
+        sp.getVerticalScrollBar().setUI(new CustomScrollBarUI(thColor,trColor));
+        sp.setOpaque(false);
+        sp.getViewport().setOpaque(false);
+        return sp;
+    }
 }

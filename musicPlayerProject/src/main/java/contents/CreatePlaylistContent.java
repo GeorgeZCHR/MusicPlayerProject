@@ -1,10 +1,7 @@
 package contents;
 import general.MusicPlayerFrame;
 import general.Util;
-import gui.CustomButton;
-import gui.CustomTextField;
-import gui.Playlist;
-import gui.SongSelector;
+import gui.*;
 import javax.swing.*;
 import java.awt.*;
 
@@ -41,10 +38,11 @@ public class CreatePlaylistContent extends JPanel implements Content {
 
         JScrollPane sp = Util.createScrollPane(songSelectorForPlaylist,new Rectangle((int)(0.02 * getWidth()),
                         70,(int)(0.93 * getWidth()),(int)(0.76 * getHeight())),
-                Util.orange_color,getBackground());
+                Util.blue_color,getBackground());
 
         //---Create Button---
-        CustomButton create = new CustomButton("Create",Util.orange_color,40,40);
+        RoundButton create = new RoundButton("Create",Util.orange_color,
+                40,40);
         create.setBounds((int)(0.98 * getWidth() - 120),
                 (int)(0.98 * getHeight() - 50), 120, 50);
         create.setFont(Util.myFont);
@@ -61,10 +59,10 @@ public class CreatePlaylistContent extends JPanel implements Content {
 
 
                     JScrollPane jScrollPane = Util.createScrollPane(playlist,new Rectangle(
-                            (int)(mpf.getContent(mpf.MUSIC_CONTENT).getWidth() * 0.5) - 250,
-                            (int)(mpf.getContent(mpf.MUSIC_CONTENT).getHeight() * 0.01),
-                            500,300),
-                            Util.orange_color,mpf.getContent(mpf.MUSIC_CONTENT).getBackground());
+                                    (int)(mpf.getContent(mpf.MUSIC_CONTENT).getWidth() * 0.5) - 250,
+                                    (int)(mpf.getContent(mpf.MUSIC_CONTENT).getHeight() * 0.01),
+                                    500,300),
+                            Util.blue_color,mpf.getContent(mpf.MUSIC_CONTENT).getBackground());
                     jScrollPane.setVisible(false);
 
                     mpf.getContent(mpf.MUSIC_CONTENT).add(jScrollPane);
@@ -73,24 +71,22 @@ public class CreatePlaylistContent extends JPanel implements Content {
 
                     playlistNameText.setText("");
                     songSelectorForPlaylist.clearSelectedSongs();
-                    JOptionPane.showMessageDialog(this,
-                            "New playlist " + playlistNameText.getText() + " was created!",
-                            "Playlist created", JOptionPane.INFORMATION_MESSAGE);
+                    WarningFrame wf = new WarningFrame("Playlist created",
+                            "New playlist " + playlistNameText.getText() + " was created!");
                 } else {
-                    JOptionPane.showMessageDialog(this,
-                            "Please choose at least one song!",
-                            "No song chosen", JOptionPane.WARNING_MESSAGE);
+                    WarningFrame wf = new WarningFrame("No song chosen",
+                            "Please choose at least one song!");
                 }
             } else {
-                JOptionPane.showMessageDialog(this,
-                        "Please enter a playlist name!",
-                        "No playlist name Entered", JOptionPane.WARNING_MESSAGE);
+                WarningFrame wf = new WarningFrame("No playlist name Entered",
+                        "Please enter a playlist name!");
             }
         });
         create.setFocusable(false);
 
         //---Clear Button---
-        CustomButton clear = new CustomButton("Clear",Util.orange_color,40,40);
+        RoundButton clear = new RoundButton("Clear",Util.orange_color,
+                40,40);
         clear.setBounds((int)(0.02 * getWidth()),
                 (int)(0.98 * getHeight() - 50), 120, 50);
         clear.setFont(Util.myFont);
