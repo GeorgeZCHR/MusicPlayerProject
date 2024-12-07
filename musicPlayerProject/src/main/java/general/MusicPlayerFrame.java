@@ -1,5 +1,4 @@
 package general;
-import components.*;
 import containers.*;
 import contents.*;
 import gui.*;
@@ -35,16 +34,17 @@ public class MusicPlayerFrame extends JFrame {
     private int currentSongNum = 0;
     //private SongPlayer songPlayer;
     //---Header---
-    private CustomButton menuShower = new CustomButton("≡",Util.orange_color,20,20);
+    private RoundButton menuShower = new RoundButton("≡",Util.orange_color,20,20);
     private boolean showing = true;
+    private JComboBox playlistSelector;
     //----------------
     //---Menu---
-    private CustomButton createPlaylist = new CustomButton("Create Playlist",Util.orange_color,0);
-    private CustomButton musicContentButton = new CustomButton("Music",Util.orange_color,0);
-    private CustomButton searchArtistBio = new CustomButton("Search Artist Bio",Util.orange_color,0);
-    private CustomButton discoverTopArtists = new CustomButton("Discover Top Artists",Util.orange_color,0);
-    private CustomButton discoverTopTracks = new CustomButton("Discover Top Tracks",Util.orange_color,0);
-    private CustomButton discoverTopAlbums = new CustomButton("Discover Top Albums",Util.orange_color,0);
+    private RectButton createPlaylist = new RectButton("Create Playlist",Util.orange_color);
+    private RectButton musicContentButton = new RectButton("Music",Util.orange_color);
+    private RectButton searchArtistBio = new RectButton("Search Artist Bio",Util.orange_color);
+    private RectButton discoverTopArtists = new RectButton("Discover Top Artists",Util.orange_color);
+    private RectButton discoverTopTracks = new RectButton("Discover Top Tracks",Util.orange_color);
+    private RectButton discoverTopAlbums = new RectButton("Discover Top Albums",Util.orange_color);
     //----------------
     //---Content---
     private OpeningContent openingContent = new OpeningContent(null);
@@ -56,7 +56,7 @@ public class MusicPlayerFrame extends JFrame {
     private JPanel topAlbumsContent = new JPanel(null);
     //----------------
     //---Discover Top Albums Content---
-    private CustomButton getTopAlbums = new CustomButton(
+    private RoundButton getTopAlbums = new RoundButton(
             "Get Top Albums",Util.orange_color, 20,20);
     //----------------
     public MusicPlayerFrame(int width, int height) {
@@ -94,13 +94,6 @@ public class MusicPlayerFrame extends JFrame {
         setCurrentPlaylistNames(allSongsNames);
         currentSong = currentPLSongs.get(currentSongNum);
 
-        //---Header Options---
-        menuShower.setBounds((int)(header.getWidth() * 0.02),(int)(header.getHeight() * 0.1),
-                (int)(header.getWidth() * 0.06),(int)(header.getHeight() * 0.8));
-        menuShower.setFocusable(false);
-        menuShower.setFont(Util.headerFont);
-        menuShower.addActionListener(e -> changeMenu());
-
         //---Menu Options---
         createMenuOption(musicContentButton,MUSIC_CONTENT);
         createMenuOption(createPlaylist,CREATE_PLAYLIST_CONTENT);
@@ -111,6 +104,43 @@ public class MusicPlayerFrame extends JFrame {
 
         //---Contents---
         initContents();
+
+        //---Header Options---
+        menuShower.setBounds((int)(header.getWidth() * 0.02),(int)(header.getHeight() * 0.1),
+                (int)(header.getWidth() * 0.06),(int)(header.getHeight() * 0.8));
+        menuShower.setFocusable(false);
+        menuShower.setFont(Util.headerFont);
+        menuShower.addActionListener(e -> changeMenu());
+
+        //---Playlist Selector ComboBox---
+        playlistSelector = new JComboBox();
+        playlistSelector.setBounds((int)(header.getWidth() * 0.74),(int)(header.getHeight() * 0.1),
+                (int)(header.getWidth() * 0.24),(int)(header.getHeight() * 0.8));
+        playlistSelector.addActionListener(e -> {
+            for (int i = 0; i < allPlaylists.size(); i++) {
+                allPlaylists.get(i).setVisible(false);
+            }
+            if (musicContent.getClip() != null) {
+                musicContent.getClip().close();
+                musicContent.played = false;
+                musicContent.playPauseButton.setText("▶");
+                musicContent.previousButton.setVisible(false);
+                musicContent.nextButton.setVisible(false);
+            }
+            for (int i = 0; i < allPlaylists.size(); i++) {
+                Playlist pl = (Playlist)(allPlaylists.get(i).getViewport().getView());
+                if (pl.getTitle().equals(playlistSelector.getSelectedItem())) {
+                    allPlaylists.get(i).setVisible(true);
+                    setCurrentPlaylistNames(pl.getAllSongNames());
+                    setCurSong(0);
+                    setCurPlaylist(pl);
+                    getCurPlaylist().checkHearts();
+                    getCurPlaylist().setRecordBackgroundColor(Util.orange_dark_color,getCurSongNum());
+                    getCurPlaylist().repaint();
+                }
+            }
+        });
+        playlistSelector.addItem(musicContent.mainPlaylist.getTitle());
 
         //---Footer---
         // todo
@@ -328,6 +358,7 @@ public class MusicPlayerFrame extends JFrame {
 
     public void addComponents() {
         header.add(menuShower);
+        header.add(playlistSelector);
 
         menu.add(musicContentButton);
         menu.add(createPlaylist);
@@ -380,9 +411,7 @@ public class MusicPlayerFrame extends JFrame {
     public List<JScrollPane> getAllPlaylists() {
         return allPlaylists;
     }
-    public JComboBox getPlaylistSelector() {
-        return musicContent.getPlaylistSelector();
-    }
+    public JComboBox getPlaylistSelector() { return playlistSelector; }
     public Playlist getCurPlaylist() {
         return curPlaylist;
     }

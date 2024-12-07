@@ -1,8 +1,9 @@
 package contents;
 import components.ArtistBioSearcher;
 import general.Util;
-import gui.CustomButton;
 import gui.CustomTextField;
+import gui.RoundButton;
+import gui.WarningFrame;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
@@ -11,7 +12,7 @@ import java.net.URISyntaxException;
 
 public class BioContent extends JPanel implements Content {
     CustomTextField artistInput = new CustomTextField(Util.orange_color,20,20);
-    private CustomButton viewMoreButton = new CustomButton(
+    private RoundButton viewMoreButton = new RoundButton(
             "View More Bio", Util.orange_color,20,20);
     private JScrollPane bioTextAreaSP;
     private JTextArea bioTextArea = new JTextArea();
@@ -36,7 +37,7 @@ public class BioContent extends JPanel implements Content {
         artistInput.setFont(Util.myFont);
 
         //---Search Bio Button---
-        CustomButton searchBio = new CustomButton(
+        RoundButton searchBio = new RoundButton(
                 "Search",Util.orange_color,20,20);
         searchBio.setFocusable(false);
         searchBio.setFont(Util.myFont);
@@ -46,20 +47,12 @@ public class BioContent extends JPanel implements Content {
 
         //---Bio Text Area---
         bioTextArea.setEnabled(false);
-        bioTextArea.setDisabledTextColor(Util.DEFAULT_TEXT_COLOR);
-        // Ενεργοποίηση αναδίπλωσης γραμμής
-        bioTextArea.setLineWrap(true);
-        // Αναδίπλωση ανά λέξη για καλύτερη εμφάνιση
-        bioTextArea.setWrapStyleWord(true);
-        // Ρυθμιση της γραμματοσειράς για να είναι αναγνώσιμη
+        bioTextArea.setOpaque(false);
         bioTextArea.setFont(Util.myFont);
-        bioTextAreaSP = new JScrollPane(bioTextArea);
-        bioTextAreaSP.setVisible(false);
-        bioTextAreaSP.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        bioTextAreaSP.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        bioTextAreaSP.setBounds((int)(0.02 * getWidth()),
-                (int)(0.2 * getHeight()), (int)(0.96 * getWidth()),
-                (int)(0.8 * getHeight()));
+        bioTextAreaSP = Util.createScrollPane(bioTextArea,
+                new Rectangle((int)(0.02 * getWidth()),(int)(0.2 * getHeight()),
+                        (int)(0.96 * getWidth()),(int)(0.8 * getHeight())),
+                Util.blue_color,Util.blue_color.brighter());
 
         //---View More Button---
         viewMoreButton.setVisible(false);
@@ -94,15 +87,13 @@ public class BioContent extends JPanel implements Content {
                 viewMoreButton.setVisible(true);
             } else {
                 isArtistBioValid = false;
-                JOptionPane.showMessageDialog(this,
-                        "Please enter a valid artist's name.",
-                        "Not Valid containers.Artist Entered", JOptionPane.WARNING_MESSAGE);
+                WarningFrame wf = new WarningFrame("Not Valid Artist Entered",
+                        "Please enter a valid artist's name.");
             }
         } else {
             isArtistBioEmpty = true;
-            JOptionPane.showMessageDialog(this,
-                    "Please enter an artist's name.",
-                    "No containers.Artist Entered", JOptionPane.WARNING_MESSAGE);
+            WarningFrame wf = new WarningFrame("No Artist Entered",
+                    "Please enter an artist's name.");
         }
     }
 
@@ -111,9 +102,6 @@ public class BioContent extends JPanel implements Content {
         //String artist = artistInput.getText();
         /*wikiURL = "https://en.wikipedia.org/wiki/" + artist.replace(" ", "_");*/
         if (isArtistBioEmpty) {
-            /*JOptionPane.showMessageDialog(this,
-                    "Please enter an artist's name.",
-                    "No containers.Artist Entered", JOptionPane.WARNING_MESSAGE);*/
             return;
         }
         if (Desktop.isDesktopSupported()) {
@@ -122,15 +110,12 @@ public class BioContent extends JPanel implements Content {
                     Desktop.getDesktop().browse(new URI(wikiURL));
                 }
             } catch (IOException | URISyntaxException e) {
-                JOptionPane.showMessageDialog(this,
-                        "Please enter a valid artist's name.",
-                        "Not Valid containers.Artist Entered", JOptionPane.WARNING_MESSAGE);
-                /*JOptionPane.showMessageDialog(this,
-                        "Error opening browser: " + e.getMessage(),
-                        "Browser Error", JOptionPane.ERROR_MESSAGE);*/
+                WarningFrame wf = new WarningFrame("Not Valid containers.Artist Entered",
+                        "Please enter a valid artist's name.");
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Desktop is not supported on this system.", "Unsupported Operation", JOptionPane.ERROR_MESSAGE);
+            WarningFrame wf = new WarningFrame("Unsupported Operation",
+                    "Desktop is not supported on this system.");
         }
     }
 }

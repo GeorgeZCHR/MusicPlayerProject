@@ -3,7 +3,7 @@ import components.GetTopTracks;
 import containers.ImageHolder;
 import containers.Track;
 import general.Util;
-import gui.CustomButton;
+import gui.RoundButton;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import javax.imageio.ImageIO;
@@ -107,7 +107,7 @@ public class TopTracksContent extends JPanel implements Content{
                 (int)(0.9 * getHeight()),50,50);
 
         //---Next Button---
-        CustomButton topTracksNext = new CustomButton(
+        RoundButton topTracksNext = new RoundButton(
                 "Next", Util.orange_color, 20,20);
         topTracksNext.setFocusable(false);
         topTracksNext.setFont(Util.myFont);
@@ -124,7 +124,7 @@ public class TopTracksContent extends JPanel implements Content{
         });
 
         //---Back Button---
-        CustomButton topTracksBack = new CustomButton(
+        RoundButton topTracksBack = new RoundButton(
                 "Back",Util.orange_color, 20,20);
         topTracksBack.setFocusable(false);
         topTracksBack.setFont(Util.myFont);

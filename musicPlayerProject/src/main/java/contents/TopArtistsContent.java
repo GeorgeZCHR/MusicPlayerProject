@@ -3,7 +3,7 @@ import components.GetTopArtists;
 import containers.Artist;
 import containers.ImageHolder;
 import general.Util;
-import gui.CustomButton;
+import gui.RoundButton;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import javax.imageio.ImageIO;
@@ -94,7 +94,7 @@ public class TopArtistsContent extends JPanel implements Content {
                 (int)(0.9 * getHeight()),50,50);
 
         //---Next Button---
-        CustomButton topArtistsNext = new CustomButton(
+        RoundButton topArtistsNext = new RoundButton(
                 "Next", Util.orange_color, 20,20);
         topArtistsNext.setFocusable(false);
         topArtistsNext.setFont(Util.myFont);
@@ -111,7 +111,7 @@ public class TopArtistsContent extends JPanel implements Content {
         });
 
         //---Back Button---
-        CustomButton topArtistsBack = new CustomButton(
+        RoundButton topArtistsBack = new RoundButton(
                 "Back",Util.orange_color, 20,20);
         topArtistsBack.setFocusable(false);
         topArtistsBack.setFont(Util.myFont);

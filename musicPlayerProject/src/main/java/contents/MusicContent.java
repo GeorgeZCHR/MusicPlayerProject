@@ -2,6 +2,7 @@ package contents;
 import general.MusicPlayerFrame;
 import general.Util;
 import gui.CustomButton;
+import gui.OvalButton;
 import gui.Playlist;
 import javax.sound.sampled.*;
 import javax.swing.*;
@@ -12,19 +13,19 @@ import java.io.IOException;
 public class MusicContent extends JPanel implements Content {
     private MusicPlayerFrame mpf;
     private Clip clip;
-    private boolean played = false;
+    public boolean played = false;
     private boolean started = false;
     private boolean isSongStarted = false;
     private int framePosition = 0;
-    private JButton heartButton = new JButton("\uFE0F");
+    //private JButton heartButton = new JButton("\uFE0F");
     private boolean isHearted = false;
     private boolean songFinished = false;
     private JLabel songNameLabel = new JLabel();
-    private CustomButton playPauseButton = new CustomButton("", Util.orange_color,1);
-    private CustomButton nextButton = new CustomButton("",Util.orange_color,1);
-    private CustomButton previousButton = new CustomButton("",Util.orange_color,1);
+    public OvalButton playPauseButton = new OvalButton("", Util.orange_color);
+    public OvalButton nextButton = new OvalButton("",Util.orange_color);
+    public OvalButton previousButton = new OvalButton("",Util.orange_color);
     //private JSlider songSlider = new JSlider();
-    private Playlist mainPlaylist;
+    public Playlist mainPlaylist;
     private JScrollPane mainPlaylistSP;
     private JComboBox playlistSelector;
     public MusicContent(LayoutManager layout, MusicPlayerFrame mpf) {
@@ -43,7 +44,7 @@ public class MusicContent extends JPanel implements Content {
         mainPlaylistSP = Util.createScrollPane(mainPlaylist,new Rectangle(
                         (int)(getWidth() * 0.5) - 250,
                         (int)(getHeight() * 0.01),500,300),
-                Util.orange_color,getBackground());
+                Util.blue_color,getBackground());
         mpf.getAllPlaylists().add(mainPlaylistSP);
 
         mpf.setCurPlaylist(mainPlaylist);
@@ -79,45 +80,15 @@ public class MusicContent extends JPanel implements Content {
         previousButton.setFont(Util.myFont);
         previousButton.addActionListener(e -> previousSong());
 
-        heartButton.setBounds((int)(getWidth() * 0.85),
-                (int)(getHeight() * 0.45), 60,60);
+        //heartButton.setBounds((int)(getWidth() * 0.85),
+          //      (int)(getHeight() * 0.45), 60,60);
 
         previousButton.setVisible(false);
         previousButton.setFocusable(false);
         previousButton.setText("⏪");
-        heartButton.setFont(Util.myFont);
+        //heartButton.setFont(Util.myFont);
 
-        heartButton.addActionListener(e -> toggleHeart());
-
-        //---Playlist Selector ComboBox---
-        playlistSelector = new JComboBox();
-        playlistSelector.setBounds((int)(getWidth() * 0.7),
-                (int)(getHeight() * 0.65),200,50);
-        playlistSelector.addActionListener(e -> {
-            for (int i = 0; i < mpf.getAllPlaylists().size(); i++) {
-                mpf.getAllPlaylists().get(i).setVisible(false);
-            }
-            if (clip != null) {
-                clip.close();
-                played = false;
-                playPauseButton.setText("▶");
-                previousButton.setVisible(false);
-                nextButton.setVisible(false);
-            }
-            for (int i = 0; i < mpf.getAllPlaylists().size(); i++) {
-                Playlist pl = (Playlist)(mpf.getAllPlaylists().get(i).getViewport().getView());
-                if (pl.getTitle().equals(playlistSelector.getSelectedItem())) {
-                    mpf.getAllPlaylists().get(i).setVisible(true);
-                    mpf.setCurrentPlaylistNames(pl.getAllSongNames());
-                    mpf.setCurSong(0);
-                    mpf.setCurPlaylist(pl);
-                    mpf.getCurPlaylist().checkHearts();
-                    mpf.getCurPlaylist().setRecordBackgroundColor(Util.orange_dark_color,mpf.getCurSongNum());
-                    mpf.getCurPlaylist().repaint();
-                }
-            }
-        });
-        playlistSelector.addItem(mainPlaylist.getTitle());
+        //heartButton.addActionListener(e -> toggleHeart());
 
         //---Song Bar Slider---
         /*songSlider.setBounds((int)(musicContent.getWidth() * 0.02),
@@ -134,7 +105,6 @@ public class MusicContent extends JPanel implements Content {
         add(previousButton);
         add(songNameLabel);
         add(mainPlaylistSP);
-        add(playlistSelector);
     }
 
     public void clearMusicContent() {
@@ -209,7 +179,7 @@ public class MusicContent extends JPanel implements Content {
         if (mpf.getCurrentSong().getExcention().equals(".mp3")) {}
     }
 
-    public void toggleHeart() {
+    /*public void toggleHeart() {
         if (mpf.getCurrentSong().isHearted()) {
             heartButton.setText("\u2661");
             mpf.getCurrentSong().setHearted(false);
@@ -218,7 +188,7 @@ public class MusicContent extends JPanel implements Content {
             mpf.getCurrentSong().setHearted(true);
         }
         mpf.getCurrentSong().addRemoveHeartFromName();
-    }
+    }*/
 
     public void nextSong() {
         if (clip != null) {
