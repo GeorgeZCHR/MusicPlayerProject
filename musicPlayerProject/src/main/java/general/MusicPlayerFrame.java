@@ -53,13 +53,9 @@ public class MusicPlayerFrame extends JFrame {
     private BioContent bioContent = new BioContent(null);
     private TopArtistsContent topArtistsContent = new TopArtistsContent(null);
     private TopTracksContent topTracksContent = new TopTracksContent(null);
-    private JPanel topAlbumsContent = new JPanel(null);
+    private TopAlbumsContent topAlbumsContent = new TopAlbumsContent(null);
     //----------------
-    //---Discover Top Albums Content---
-    private RoundButton getTopAlbums = new RoundButton(
-            "Get Top Albums",Util.orange_color, 20,20);
-    //----------------
-    public MusicPlayerFrame(int width, int height) {
+        public MusicPlayerFrame(int width, int height) {
         this.width = width;
         this.height = height;
         realW = width - 16;  // For Windows 10
@@ -170,22 +166,6 @@ public class MusicPlayerFrame extends JFrame {
 
         this.setLocationRelativeTo(null);
         this.setVisible(true);
-    }
-
-    private void initTopAlbumsContent() {
-        //--- show JSon Object to console with the button getTopAlbums ---
-        getTopAlbums.setBounds((int)(topAlbumsContent.getWidth() * 0.1),
-                (int)(topAlbumsContent.getHeight() * 0.1),
-                (int)(topAlbumsContent.getWidth() * 0.2), 50);
-        getTopAlbums.setFocusable(false);
-        getTopAlbums.addActionListener(e -> {
-            /*GetTopAlbums albums = new GetTopAlbums();
-            //JsonObject jsonObject = albums.getTopAlbums();
-            //System.out.println(jsonObject);*/
-            /*for (int i = 0; i < allSongs.size(); i++) {
-                System.out.println(allSongs.get(i).getName()+" : "+allSongs.get(i).isHearted());
-            }*/
-        });
     }
 
     /*public void changeFramesOfSong() {
@@ -353,7 +333,7 @@ public class MusicPlayerFrame extends JFrame {
         bioContent.init();
         topArtistsContent.init();
         topTracksContent.init();
-        initTopAlbumsContent();
+        topAlbumsContent.init();
     }
 
     public void addComponents() {
@@ -366,8 +346,6 @@ public class MusicPlayerFrame extends JFrame {
         menu.add(discoverTopArtists);
         menu.add(discoverTopTracks);
         menu.add(discoverTopAlbums);
-
-        topAlbumsContent.add(getTopAlbums);
 
         this.add(header);
         this.add(footer);
