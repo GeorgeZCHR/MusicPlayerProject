@@ -37,12 +37,12 @@ public class Playlist extends JPanel {
             record.setLayout(new BorderLayout());
             record.setOpaque(false);
 
-            CustomButton name = new CustomButton(
+            RoundButton name = new RoundButton(
                     currentNames.get(i),panelColor,20,20);
             name.setFont(new Font(Font.SANS_SERIF,Font.BOLD,20));
             name.setFocusable(false);
             name.addActionListener(e -> {
-                CustomButton nameButton = (CustomButton)(records.get(finalI).getComponent(0));
+                RoundButton nameButton = (RoundButton)(records.get(finalI).getComponent(0));
                 frame.goTo(nameButton.getText());
             });
             name.addMouseListener(new MouseAdapter() {
@@ -58,13 +58,13 @@ public class Playlist extends JPanel {
             buttonPanel.setLayout(new BorderLayout());
             buttonPanel.setOpaque(false);
 
-            CustomButton like = new CustomButton(
+            RoundButton like = new RoundButton(
                     "♡",panelColor,20,20);
             like.setFont(new Font(Font.SANS_SERIF,Font.BOLD,40));
             like.setFocusable(false);
             like.addActionListener(e -> {
-                CustomButton nameButton = (CustomButton)(records.get(finalI).getComponent(0));
-                CustomButton likeButton = (CustomButton)
+                RoundButton nameButton = (RoundButton)(records.get(finalI).getComponent(0));
+                RoundButton likeButton = (RoundButton)
                         (((JPanel)(records.get(finalI).getComponent(1))).getComponent(0));
                 for (int j = 0; j < frame.getAllSongs().size(); j++) {
                     //System.out.println(likeButton.getText()+" = "+frame.getAllSongs().get(j).getName());
@@ -81,12 +81,12 @@ public class Playlist extends JPanel {
             });
             buttonPanel.add(like, BorderLayout.WEST);
 
-            CustomButton settingsButton = new CustomButton(
+            RoundButton settingsButton = new RoundButton(
                     "⋮",panelColor,20,20);
             settingsButton.setFont(new Font(Font.SANS_SERIF,Font.BOLD,30));
             settingsButton.setFocusable(false);
             settingsButton.addActionListener(e -> {
-                CustomButton nameButton = (CustomButton)(records.get(finalI).getComponent(0));
+                RoundButton nameButton = (RoundButton)(records.get(finalI).getComponent(0));
                 System.out.println("Settings for: " + nameButton.getText());
             });
             buttonPanel.add(settingsButton, BorderLayout.EAST);
@@ -112,17 +112,17 @@ public class Playlist extends JPanel {
 
     public void setRecordBackgroundColor(Color color, int num) {
         for (JPanel record : records) {
-            CustomButton button = (CustomButton)(record.getComponent(0));
+            RoundButton button = (RoundButton)(record.getComponent(0));
             button.setColor(panelColor);
         }
-        CustomButton nameButton = (CustomButton)(records.get(num).getComponent(0));
+        RoundButton nameButton = (RoundButton)(records.get(num).getComponent(0));
         nameButton.setColor(color);
     }
 
     public void checkHearts() {
         for (int i = 0; i < currentNames.size(); i++) {
-            CustomButton nameButton = (CustomButton)(records.get(i).getComponent(0));
-            CustomButton likeButton = (CustomButton)(((JPanel)(records.get(i).getComponent(1))).getComponent(0));
+            RoundButton nameButton = (RoundButton)(records.get(i).getComponent(0));
+            RoundButton likeButton = (RoundButton)(((JPanel)(records.get(i).getComponent(1))).getComponent(0));
             for (int j = 0; j < allSongNames.size(); j++) {
                 if (nameButton.getText().equals(frame.getAllSongs().get(j).getName())) {
                     if (!frame.getAllSongs().get(j).isHearted()) {
