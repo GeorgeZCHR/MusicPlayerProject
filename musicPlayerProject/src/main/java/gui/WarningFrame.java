@@ -29,7 +29,7 @@ public class WarningFrame extends JFrame {
         scrollPane.setBounds(10, 20, getWidth() - 20, 80);
         scrollPane.setBorder(null);
 
-        CustomButton button = new CustomButton("Ok", Util.orange_color, 20, 20);
+        RoundButton button = new RoundButton("Ok", Util.orange_color, 20, 20);
         button.setBounds((int) (0.5 * getWidth()) - 100, 100, 200, 50);
         button.addActionListener(e -> dispose());
 

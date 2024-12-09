@@ -28,12 +28,12 @@ public class SongSelector extends JPanel{
             songPanel.setLayout(new BorderLayout());
             songPanel.setOpaque(false);
 
-            CustomButton song = new CustomButton(
+            RoundButton song = new RoundButton(
                     names.get(i),panelColor,20,20);
             song.setFont(new Font(Font.SANS_SERIF,Font.BOLD,20));
             song.setFocusable(false);
             song.addActionListener(e -> {
-                CustomButton songNameButton = (CustomButton)(songs.get(finalI).getComponent(0));
+                RoundButton songNameButton = (RoundButton)(songs.get(finalI).getComponent(0));
                 if (isSelected.get(finalI)) {
                     removeSongFromName(songNameButton.getText());
                     songNameButton.setColor(panelColor);
@@ -64,7 +64,7 @@ public class SongSelector extends JPanel{
 
     public void clearSelectedSongs() {
         for (JPanel songPanel : songs) {
-            CustomButton songNameButton = (CustomButton)(songPanel.getComponent(0));
+            RoundButton songNameButton = (RoundButton)(songPanel.getComponent(0));
             removeSongFromName(songNameButton.getText());
             songNameButton.setColor(panelColor);
             songNameButton.setForeground(panelColor.darker());
