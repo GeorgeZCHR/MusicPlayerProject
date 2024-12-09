@@ -1,28 +1,40 @@
 package components;
-
+import general.MusicPlayerFrame;
+import general.Util;
+import gui.CustomPasswordField;
+import gui.CustomTextField;
+import gui.RoundButton;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.ContentType;
+import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 public class AuthManager extends JFrame {
-    private static final String FIREBASE_API_KEY = "APIKEY"; // Replace with your API key
+    private static final String FIREBASE_API_KEY = "AIzaSyBe0CSxR3GiTWsLdFEEnnSplGep9SMRho4"; // Replace with your API key
     private CardLayout cardLayout;
     private JPanel mainPanel;
-    private JTextField emailField, registerEmailField;
-    private JPasswordField passwordField, registerPasswordField;
+    private CustomTextField emailField, registerEmailField;
+    private CustomPasswordField passwordField, registerPasswordField;
+    private FirestoreManager fr;
+    public User user;
+    private boolean loginSaccessful = false;
 
-    public AuthManager() {
+    public AuthManager(FirestoreManager fr) {
+        this.fr = fr;
+
         setTitle("Firebase Authentication");
         setSize(400, 300);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
         cardLayout = new CardLayout();
@@ -39,16 +51,32 @@ public class AuthManager extends JFrame {
     private JPanel createLoginPanel() {
         JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.setBackground(Util.blue_color.brighter());
 
         JLabel emailLabel = new JLabel("Email:");
-        emailField = new JTextField();
-        JLabel passwordLabel = new JLabel("Password:");
-        passwordField = new JPasswordField();
+        emailLabel.setFont(Util.myFont);
+        emailLabel.setForeground(Util.blue_dark_color);
 
-        JButton loginButton = new JButton("Login");
+        emailField = new CustomTextField(Util.orange_color,20,20);
+        emailField.setFont(Util.myFont);
+        emailField.setForeground(Util.blue_dark_color);
+
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setFont(Util.myFont);
+        passwordLabel.setForeground(Util.blue_dark_color);
+
+        passwordField = new CustomPasswordField(Util.orange_color,20,20);
+        passwordField.setFont(Util.myFont);
+        passwordField.setForeground(Util.blue_dark_color);
+
+        RoundButton loginButton = new RoundButton("Login",Util.orange_color,
+                20,20);
+        loginButton.setFont(Util.myFont);
         loginButton.addActionListener(e -> loginUser());
 
-        JButton switchToRegisterButton = new JButton("Go to Register");
+        RoundButton switchToRegisterButton = new RoundButton("Go to Register",
+                Util.orange_color,20,20);
+        switchToRegisterButton.setFont(Util.myFont);
         switchToRegisterButton.addActionListener(e -> cardLayout.show(mainPanel, "register"));
 
         panel.add(emailLabel);
@@ -64,16 +92,32 @@ public class AuthManager extends JFrame {
     private JPanel createRegisterPanel() {
         JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.setBackground(Util.blue_color.brighter());
 
         JLabel emailLabel = new JLabel("Email:");
-        registerEmailField = new JTextField();
-        JLabel passwordLabel = new JLabel("Password:");
-        registerPasswordField = new JPasswordField();
+        emailLabel.setFont(Util.myFont);
+        emailLabel.setForeground(Util.blue_dark_color);
 
-        JButton registerButton = new JButton("Register");
+        registerEmailField = new CustomTextField(Util.orange_color,20,20);
+        registerEmailField.setFont(Util.myFont);
+        registerEmailField.setForeground(Util.blue_dark_color);
+
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setFont(Util.myFont);
+        passwordLabel.setForeground(Util.blue_dark_color);
+
+        registerPasswordField = new CustomPasswordField(Util.orange_color,20,20);
+        registerPasswordField.setFont(Util.myFont);
+        registerPasswordField.setForeground(Util.blue_dark_color);
+
+        RoundButton registerButton = new RoundButton("Register",Util.orange_color,
+                20,20);
+        registerButton.setFont(Util.myFont);
         registerButton.addActionListener(e -> registerUser());
 
-        JButton switchToLoginButton = new JButton("Go to Login");
+        RoundButton switchToLoginButton = new RoundButton("Go to Login",
+                Util.orange_color,20,20);
+        switchToLoginButton.setFont(Util.myFont);
         switchToLoginButton.addActionListener(e -> cardLayout.show(mainPanel, "login"));
 
         panel.add(emailLabel);
@@ -106,6 +150,10 @@ public class AuthManager extends JFrame {
 
                 if (statusCode == 200) {
                     JOptionPane.showMessageDialog(this, "Login successful ");
+                    saveCredentialsLocally(email, password);
+                    user = fr.getUser(email);
+                    SwingUtilities.invokeLater(() -> new MusicPlayerFrame(user,fr,1080,720));
+                    dispose();
                 } else {
                     JOptionPane.showMessageDialog(this, "Login failed: " + responseBody, "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -136,6 +184,9 @@ public class AuthManager extends JFrame {
 
                 if (statusCode == 200) {
                     JOptionPane.showMessageDialog(this, "Registration successful");
+                    String username = email.substring(0,email.indexOf("@"));
+                    user = new User(username,password,email,false,new ArrayList<>());
+                    fr.setNewUser(user);
                     cardLayout.show(mainPanel, "login");
                 } else {
                     JOptionPane.showMessageDialog(this, "Registration failed: " + responseBody, "Error", JOptionPane.ERROR_MESSAGE);
@@ -147,7 +198,19 @@ public class AuthManager extends JFrame {
         }
     }
 
-    /*public static void main(String[] args) {
-        SwingUtilities.invokeLater(components.AuthManager::new);
-    }*/
+    private void saveCredentialsLocally(String email, String password) {
+        JSONObject userCredentials = new JSONObject();
+
+        userCredentials.put("email", email);
+        userCredentials.put("password", password);
+
+        String filePath = "userCredentials.json";
+
+        try (FileWriter fileWriter = new FileWriter(filePath)) {
+            fileWriter.write(userCredentials.toString(4));
+            System.out.println("JSON file created: " + filePath);
+        } catch (IOException e) {
+            System.err.println("Error writing JSON file: " + e.getMessage());
+        }
+    }
 }
