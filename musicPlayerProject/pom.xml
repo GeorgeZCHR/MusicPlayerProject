@@ -53,5 +53,24 @@
             <artifactId>httpclient5</artifactId>
             <version>5.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.0</version> <!-- Ensure this is the latest version -->
+        </dependency>
+
+        <!-- Logback (SLF4J binding) -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.4.6</version> <!-- Ensure this is the latest version -->
+        </dependency>
+
+        <!-- Logback Core -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.4.6</version> <!-- Ensure this is the latest version -->
+        </dependency>
     </dependencies>
 </project>

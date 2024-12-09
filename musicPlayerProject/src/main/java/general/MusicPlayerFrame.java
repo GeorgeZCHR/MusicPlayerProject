@@ -1,4 +1,6 @@
 package general;
+import components.FirestoreManager;
+import components.User;
 import containers.*;
 import contents.*;
 import gui.*;
@@ -17,6 +19,8 @@ public class MusicPlayerFrame extends JFrame {
     public final int TOP_ALBUMS_CONTENT = 5;
     private int currentContent = OPENING_CONTENT;
     private int width, realW, height, realH;
+    public User user;
+    public FirestoreManager fr;
     private JPanel header = new JPanel(null), menu = new JPanel(null);
     private JPanel footer = new JPanel(null);
     private List<Song> allSongs = new ArrayList<>();
@@ -47,7 +51,7 @@ public class MusicPlayerFrame extends JFrame {
     private RectButton discoverTopAlbums = new RectButton("Discover Top Albums",Util.orange_color);
     //----------------
     //---Content---
-    private OpeningContent openingContent = new OpeningContent(null);
+    private OpeningContent openingContent = new OpeningContent(null,this);
     private MusicContent musicContent = new MusicContent(null,this);
     private CreatePlaylistContent createPLContent = new CreatePlaylistContent(null,this);
     private BioContent bioContent = new BioContent(null);
@@ -55,7 +59,9 @@ public class MusicPlayerFrame extends JFrame {
     private TopTracksContent topTracksContent = new TopTracksContent(null);
     private TopAlbumsContent topAlbumsContent = new TopAlbumsContent(null);
     //----------------
-        public MusicPlayerFrame(int width, int height) {
+        public MusicPlayerFrame(User user, FirestoreManager fr, int width, int height) {
+            this.user = user;
+            this.fr = fr;
         this.width = width;
         this.height = height;
         realW = width - 16;  // For Windows 10
@@ -402,4 +408,5 @@ public class MusicPlayerFrame extends JFrame {
     public List<Song> getCurrentPLSongs() {
         return currentPLSongs;
     }
+    public User getUser() { return user; }
 }
