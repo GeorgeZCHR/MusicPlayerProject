@@ -3,7 +3,6 @@ import components.FirestoreManager;
 import components.User;
 import general.MusicPlayerFrame;
 import org.json.JSONObject;
-
 import javax.swing.SwingUtilities;
 import java.io.File;
 import java.io.FileWriter;
@@ -19,19 +18,8 @@ public class Main {
         );
         File file = new File("userCredentials.json");
         if (!file.exists()) {
-            JSONObject userCredentials = new JSONObject();
-
-            userCredentials.put("email", "blablabla");
-            userCredentials.put("password", "blablabla");
-
-            String filePath = "userCredentials.json";
-
-            try (FileWriter fileWriter = new FileWriter(filePath)) {
-                fileWriter.write(userCredentials.toString(4));
-                System.out.println("JSON file created: " + filePath);
-            } catch (IOException e) {
-                System.err.println("Error writing JSON file: " + e.getMessage());
-            }
+            writeExampleUserCredentials();
+            SwingUtilities.invokeLater(() -> new AuthManager(fr));
         } else {
             String email = "";
             String password = "";
@@ -45,15 +33,30 @@ public class Main {
 
             } catch (IOException e) {
                 System.err.println("Error reading the JSON file: " + e.getMessage());
+                SwingUtilities.invokeLater(() -> new AuthManager(fr));
             }
             User user = fr.getUser(email);
-            if (user != null) {
-                if (email.equals(user.getEmail()) && password.equals(user.getPassword())) {
-                    SwingUtilities.invokeLater(() -> new MusicPlayerFrame(user,fr,1080,720));
-                }
+            if (user != null && email.equals(user.getEmail()) && password.equals(user.getPassword())) {
+                SwingUtilities.invokeLater(() -> new MusicPlayerFrame(user,fr,1080,720));
             } else {
                 SwingUtilities.invokeLater(() -> new AuthManager(fr));
             }
+        }
+    }
+
+    public static void writeExampleUserCredentials() {
+        JSONObject userCredentials = new JSONObject();
+
+        userCredentials.put("email", "blablabla");
+        userCredentials.put("password", "blablabla");
+
+        String filePath = "userCredentials.json";
+
+        try (FileWriter fileWriter = new FileWriter(filePath)) {
+            fileWriter.write(userCredentials.toString(4));
+            System.out.println("JSON file created: " + filePath);
+        } catch (IOException e) {
+            System.err.println("Error writing JSON file: " + e.getMessage());
         }
     }
 }
