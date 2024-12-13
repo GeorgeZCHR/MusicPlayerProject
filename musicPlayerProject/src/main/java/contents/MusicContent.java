@@ -36,9 +36,8 @@ public class MusicContent extends JPanel implements Content {
     public void init() {
         //---Playlist---
         mainPlaylist = new Playlist("Main",Util.orange_color,20,
-                mpf.getAllSongNames(),mpf);
+                mpf.getAllSongNames(),mpf, true);
         mainPlaylist.setRecordBackgroundColor(Util.orange_dark_color,mpf.getCurSongNum());
-        mainPlaylist.repaint();
 
         mainPlaylistSP = Util.createScrollPane(mainPlaylist,new Rectangle(
                         (int)(getWidth() * 0.5) - 250,
@@ -115,7 +114,6 @@ public class MusicContent extends JPanel implements Content {
             nextButton.setVisible(false);
             mpf.setCurSong(0);
             mpf.getCurPlaylist().setRecordBackgroundColor(Util.orange_dark_color,mpf.getCurSongNum());
-            mpf.getCurPlaylist().repaint();
         }
     }
 
@@ -156,7 +154,6 @@ public class MusicContent extends JPanel implements Content {
         if (selectedSongNum != -1) {
             mpf.setCurSong(selectedSongNum);
             mpf.getCurPlaylist().setRecordBackgroundColor(Util.orange_dark_color,mpf.getCurSongNum());
-            mpf.getCurPlaylist().repaint();
             loadAudio();
             playPauseMusic();
         }
@@ -204,7 +201,6 @@ public class MusicContent extends JPanel implements Content {
             mpf.setCurSong(0);
         }
         mpf.getCurPlaylist().setRecordBackgroundColor(Util.orange_dark_color,mpf.getCurSongNum());
-        mpf.getCurPlaylist().repaint();
         loadAudio();
         playPauseMusic();
     }
@@ -224,7 +220,6 @@ public class MusicContent extends JPanel implements Content {
             mpf.setCurSong(mpf.getCurrentPLSongs().size() - 1);
         }
         mpf.getCurPlaylist().setRecordBackgroundColor(Util.orange_dark_color,mpf.getCurSongNum());
-        mpf.getCurPlaylist().repaint();
         loadAudio();
         playPauseMusic();
     }

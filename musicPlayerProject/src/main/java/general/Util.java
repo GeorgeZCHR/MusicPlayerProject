@@ -5,6 +5,13 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Util {
+    public static final int OPENING_CONTENT = -1;
+    public static final int MUSIC_CONTENT = 0;
+    public static final int CREATE_PLAYLIST_CONTENT = 1;
+    public static final int BIO_CONTENT = 2;
+    public static final int TOP_ARTISTS_CONTENT = 3;
+    public static final int TOP_TRACKS_CONTENT = 4;
+    public static final int TOP_ALBUMS_CONTENT = 5;
     public static final Color blue_dark_color = new Color(0x264653);
     public static final Color blue_color = new Color(0x2a9d8f);
     public static final Color orange_light_color = new Color(0xe9c46a);

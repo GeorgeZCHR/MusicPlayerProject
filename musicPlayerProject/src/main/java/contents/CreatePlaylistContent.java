@@ -51,21 +51,20 @@ public class CreatePlaylistContent extends JPanel implements Content {
                 if (!songSelectorForPlaylist.getSelectedSongs().isEmpty()) {
                     Playlist playlist = new Playlist(playlistNameText.getText(),
                             Util.orange_color,20,
-                            songSelectorForPlaylist.getSelectedSongs(),mpf);
+                            songSelectorForPlaylist.getSelectedSongs(),mpf, false);
                     playlist.setRecordBackgroundColor(Util.orange_dark_color,
                             mpf.getCurSongNum());
                     playlist.checkHearts();
-                    playlist.repaint();
 
 
                     JScrollPane jScrollPane = Util.createScrollPane(playlist,new Rectangle(
-                                    (int)(mpf.getContent(mpf.MUSIC_CONTENT).getWidth() * 0.5) - 250,
-                                    (int)(mpf.getContent(mpf.MUSIC_CONTENT).getHeight() * 0.01),
+                                    (int)(mpf.getContent(Util.MUSIC_CONTENT).getWidth() * 0.5) - 250,
+                                    (int)(mpf.getContent(Util.MUSIC_CONTENT).getHeight() * 0.01),
                                     500,300),
-                            Util.blue_color,mpf.getContent(mpf.MUSIC_CONTENT).getBackground());
+                            Util.blue_color,mpf.getContent(Util.MUSIC_CONTENT).getBackground());
                     jScrollPane.setVisible(false);
 
-                    mpf.getContent(mpf.MUSIC_CONTENT).add(jScrollPane);
+                    mpf.getContent(Util.MUSIC_CONTENT).add(jScrollPane);
                     mpf.getAllPlaylists().add(jScrollPane);
                     mpf.getPlaylistSelector().addItem(playlist.getTitle());
 

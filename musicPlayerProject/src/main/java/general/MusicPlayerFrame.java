@@ -10,14 +10,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class MusicPlayerFrame extends JFrame {
-    public final int OPENING_CONTENT = -1;
-    public final int MUSIC_CONTENT = 0;
-    public final int CREATE_PLAYLIST_CONTENT = 1;
-    public final int BIO_CONTENT = 2;
-    public final int TOP_ARTISTS_CONTENT = 3;
-    public final int TOP_TRACKS_CONTENT = 4;
-    public final int TOP_ALBUMS_CONTENT = 5;
-    private int currentContent = OPENING_CONTENT;
+    private int currentContent = Util.OPENING_CONTENT;
     private int width, realW, height, realH;
     public User user;
     public FirestoreManager fr;
@@ -97,12 +90,12 @@ public class MusicPlayerFrame extends JFrame {
         currentSong = currentPLSongs.get(currentSongNum);
 
         //---Menu Options---
-        createMenuOption(musicContentButton,MUSIC_CONTENT);
-        createMenuOption(createPlaylist,CREATE_PLAYLIST_CONTENT);
-        createMenuOption(searchArtistBio,BIO_CONTENT);
-        createMenuOption(discoverTopArtists,TOP_ARTISTS_CONTENT);
-        createMenuOption(discoverTopTracks,TOP_TRACKS_CONTENT);
-        createMenuOption(discoverTopAlbums,TOP_ALBUMS_CONTENT);
+        createMenuOption(musicContentButton,Util.MUSIC_CONTENT);
+        createMenuOption(createPlaylist,Util.CREATE_PLAYLIST_CONTENT);
+        createMenuOption(searchArtistBio,Util.BIO_CONTENT);
+        createMenuOption(discoverTopArtists,Util.TOP_ARTISTS_CONTENT);
+        createMenuOption(discoverTopTracks,Util.TOP_TRACKS_CONTENT);
+        createMenuOption(discoverTopAlbums,Util.TOP_ALBUMS_CONTENT);
 
         //---Contents---
         initContents();
@@ -211,19 +204,19 @@ public class MusicPlayerFrame extends JFrame {
 
     private JPanel getCurrentContent() {
         switch (currentContent) {
-            case OPENING_CONTENT:
+            case Util.OPENING_CONTENT:
                 return openingContent;
-            case MUSIC_CONTENT:
+            case Util.MUSIC_CONTENT:
                 return musicContent;
-            case CREATE_PLAYLIST_CONTENT:
+            case Util.CREATE_PLAYLIST_CONTENT:
                 return createPLContent;
-            case BIO_CONTENT:
+            case Util.BIO_CONTENT:
                 return bioContent;
-            case TOP_ARTISTS_CONTENT:
+            case Util.TOP_ARTISTS_CONTENT:
                 return topArtistsContent;
-            case TOP_TRACKS_CONTENT:
+            case Util.TOP_TRACKS_CONTENT:
                 return topTracksContent;
-            case TOP_ALBUMS_CONTENT:
+            case Util.TOP_ALBUMS_CONTENT:
                 return topAlbumsContent;
         }
         return null;
@@ -231,19 +224,19 @@ public class MusicPlayerFrame extends JFrame {
 
     public JPanel getContent(int contentNum) {
         switch (contentNum) {
-            case OPENING_CONTENT:
+            case Util.OPENING_CONTENT:
                 return openingContent;
-            case MUSIC_CONTENT:
+            case Util.MUSIC_CONTENT:
                 return musicContent;
-            case CREATE_PLAYLIST_CONTENT:
+            case Util.CREATE_PLAYLIST_CONTENT:
                 return createPLContent;
-            case BIO_CONTENT:
+            case Util.BIO_CONTENT:
                 return bioContent;
-            case TOP_ARTISTS_CONTENT:
+            case Util.TOP_ARTISTS_CONTENT:
                 return topArtistsContent;
-            case TOP_TRACKS_CONTENT:
+            case Util.TOP_TRACKS_CONTENT:
                 return topTracksContent;
-            case TOP_ALBUMS_CONTENT:
+            case Util.TOP_ALBUMS_CONTENT:
                 return topAlbumsContent;
         }
         return null;
@@ -305,29 +298,29 @@ public class MusicPlayerFrame extends JFrame {
         topAlbumsContent.setVisible(false);
         musicContent.clearMusicContent();
         switch (content) {
-            case MUSIC_CONTENT:
+            case Util.MUSIC_CONTENT:
                 musicContent.setVisible(true);
-                currentContent = MUSIC_CONTENT;
+                currentContent = Util.MUSIC_CONTENT;
                 break;
-            case CREATE_PLAYLIST_CONTENT:
+            case Util.CREATE_PLAYLIST_CONTENT:
                 createPLContent.setVisible(true);
-                currentContent = CREATE_PLAYLIST_CONTENT;
+                currentContent = Util.CREATE_PLAYLIST_CONTENT;
                 break;
-            case BIO_CONTENT:
+            case Util.BIO_CONTENT:
                 bioContent.setVisible(true);
-                currentContent = BIO_CONTENT;
+                currentContent = Util.BIO_CONTENT;
                 break;
-            case TOP_ARTISTS_CONTENT:
+            case Util.TOP_ARTISTS_CONTENT:
                 topArtistsContent.setVisible(true);
-                currentContent = TOP_ARTISTS_CONTENT;
+                currentContent = Util.TOP_ARTISTS_CONTENT;
                 break;
-            case TOP_TRACKS_CONTENT:
+            case Util.TOP_TRACKS_CONTENT:
                 topTracksContent.setVisible(true);
-                currentContent = TOP_TRACKS_CONTENT;
+                currentContent = Util.TOP_TRACKS_CONTENT;
                 break;
-            case TOP_ALBUMS_CONTENT:
+            case Util.TOP_ALBUMS_CONTENT:
                 topAlbumsContent.setVisible(true);
-                currentContent = TOP_ALBUMS_CONTENT;
+                currentContent = Util.TOP_ALBUMS_CONTENT;
                 break;
         }
     }
