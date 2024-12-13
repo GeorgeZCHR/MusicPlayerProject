@@ -1,6 +1,9 @@
 package gui;
 import containers.Song;
+import contents.MusicContent;
 import general.MusicPlayerFrame;
+import general.Util;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -17,9 +20,11 @@ public class Playlist extends JPanel {
     private List<String> allSongNames = new ArrayList<>();
     private MusicPlayerFrame frame;
     private List<String> currentNames = new ArrayList<>();
+    private boolean main;
 
     public Playlist(String title, Color panelColor, int cornerRadius,
-                    List<String> currentNames, MusicPlayerFrame frame) {
+                    List<String> currentNames, MusicPlayerFrame frame, boolean main) {
+        this.main = main;
         this.title = title;
         this.frame = frame;
         this.panelColor = panelColor;
@@ -39,10 +44,10 @@ public class Playlist extends JPanel {
 
             RoundButton name = new RoundButton(
                     currentNames.get(i),panelColor,20,20);
-            name.setFont(new Font(Font.SANS_SERIF,Font.BOLD,20));
+            name.setFont(Util.myFont);
             name.setFocusable(false);
             name.addActionListener(e -> {
-                RoundButton nameButton = (RoundButton)(records.get(finalI).getComponent(0));
+                RoundButton nameButton = (RoundButton)e.getSource();
                 frame.goTo(nameButton.getText());
             });
             name.addMouseListener(new MouseAdapter() {
@@ -60,12 +65,13 @@ public class Playlist extends JPanel {
 
             RoundButton like = new RoundButton(
                     "♡",panelColor,20,20);
-            like.setFont(new Font(Font.SANS_SERIF,Font.BOLD,40));
+            like.setFont(Util.myFont);
             like.setFocusable(false);
             like.addActionListener(e -> {
-                RoundButton nameButton = (RoundButton)(records.get(finalI).getComponent(0));
-                RoundButton likeButton = (RoundButton)
-                        (((JPanel)(records.get(finalI).getComponent(1))).getComponent(0));
+                RoundButton likeButton = (RoundButton)e.getSource();
+                JPanel bPanel = (JPanel)likeButton.getParent();
+                JPanel oldRecord = (JPanel)bPanel.getParent();
+                RoundButton nameButton = (RoundButton)oldRecord.getComponent(0);
                 for (int j = 0; j < frame.getAllSongs().size(); j++) {
                     //System.out.println(likeButton.getText()+" = "+frame.getAllSongs().get(j).getName());
                     if (nameButton.getText().equals(frame.getAllSongs().get(j).getName())) {
@@ -81,15 +87,48 @@ public class Playlist extends JPanel {
             });
             buttonPanel.add(like, BorderLayout.WEST);
 
-            RoundButton settingsButton = new RoundButton(
-                    "⋮",panelColor,20,20);
-            settingsButton.setFont(new Font(Font.SANS_SERIF,Font.BOLD,30));
-            settingsButton.setFocusable(false);
-            settingsButton.addActionListener(e -> {
-                RoundButton nameButton = (RoundButton)(records.get(finalI).getComponent(0));
-                System.out.println("Settings for: " + nameButton.getText());
-            });
-            buttonPanel.add(settingsButton, BorderLayout.EAST);
+            if (this.main) {
+                RoundButton settingsButton = new RoundButton(
+                        "⋮",panelColor,20,20);
+                settingsButton.setFont(Util.songNameFont);
+                settingsButton.setFocusable(false);
+                settingsButton.addActionListener(e -> {
+                    RoundButton sButton = (RoundButton)e.getSource();
+                    JPanel bPanel = (JPanel)sButton.getParent();
+                    JPanel oldRecord = (JPanel)bPanel.getParent();
+                    RoundButton nameButton = (RoundButton)oldRecord.getComponent(0);
+                    System.out.println("Settings for: " + nameButton.getText());
+                });
+                buttonPanel.add(settingsButton, BorderLayout.EAST);
+            } else {
+                RoundButton removeButton = new RoundButton(
+                        "-",panelColor,20,20);
+                removeButton.setFont(Util.songNameFont);
+                removeButton.setFocusable(false);
+                removeButton.addActionListener(e -> {
+                    if (this.currentNames.size() <= 1) {
+                        new WarningFrame("Song cannot be removed",
+                                "The playlist must have at least one song inside!");
+                    } else {
+                        RoundButton rButton = (RoundButton)e.getSource();
+                        JPanel bPanel = (JPanel)rButton.getParent();
+                        JPanel oldRecord = (JPanel)bPanel.getParent();
+                        RoundButton nameButton = (RoundButton)oldRecord.getComponent(0);
+                        System.out.println(nameButton.getText() + " was removed from " + getTitle());
+                        //todo a JPanel that will say are you sure?
+                        MusicContent mc = (MusicContent)frame.getContent(Util.MUSIC_CONTENT);
+                        if (mc.getClip() != null) {
+                            mc.getClip().close();
+                        }
+                        int pos = getPositionFromName(nameButton.getText());
+                        records.remove(pos);
+                        this.currentNames.remove(pos);
+                        remove(pos);
+                        update();
+                    }
+                });
+                buttonPanel.add(removeButton, BorderLayout.EAST);
+            }
 
             record.add(buttonPanel, BorderLayout.EAST);
             records.add(record);
@@ -117,6 +156,7 @@ public class Playlist extends JPanel {
         }
         RoundButton nameButton = (RoundButton)(records.get(num).getComponent(0));
         nameButton.setColor(color);
+        repaint();
     }
 
     public void checkHearts() {
@@ -133,6 +173,25 @@ public class Playlist extends JPanel {
                 }
             }
         }
+        repaint();
+    }
+
+    public void update() {
+        frame.setCurrentPlaylistNames(currentNames);
+        frame.setCurSong(0);
+        //frame.setCurPlaylist(pl);
+        frame.getCurPlaylist().checkHearts();
+        frame.getCurPlaylist().setRecordBackgroundColor(Util.orange_dark_color,frame.getCurSongNum());
+        repaint();
+    }
+
+    public int getPositionFromName(String name) {
+        for (int i = 0; i < currentNames.size(); i++) {
+            if (currentNames.get(i).equals(name)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public String getTitle() { return title; }
