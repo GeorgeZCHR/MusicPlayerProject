@@ -126,12 +126,11 @@ public class MusicPlayerFrame extends JFrame {
                 Playlist pl = (Playlist)(allPlaylists.get(i).getViewport().getView());
                 if (pl.getTitle().equals(playlistSelector.getSelectedItem())) {
                     allPlaylists.get(i).setVisible(true);
-                    setCurrentPlaylistNames(pl.getAllSongNames());
+                    setCurrentPlaylistNames(pl.getCurrentNames());
                     setCurSong(0);
                     setCurPlaylist(pl);
                     getCurPlaylist().checkHearts();
                     getCurPlaylist().setRecordBackgroundColor(Util.orange_dark_color,getCurSongNum());
-                    getCurPlaylist().repaint();
                 }
             }
         });

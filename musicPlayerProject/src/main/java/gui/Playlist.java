@@ -3,6 +3,7 @@ import containers.Song;
 import contents.MusicContent;
 import general.MusicPlayerFrame;
 import general.Util;
+import org.checkerframework.checker.units.qual.Current;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,6 +22,7 @@ public class Playlist extends JPanel {
     private MusicPlayerFrame frame;
     private List<String> currentNames = new ArrayList<>();
     private boolean main;
+    private List<Boolean> settingsOpened = new ArrayList<>();
 
     public Playlist(String title, Color panelColor, int cornerRadius,
                     List<String> currentNames, MusicPlayerFrame frame, boolean main) {
@@ -48,7 +50,7 @@ public class Playlist extends JPanel {
             name.setFocusable(false);
             name.addActionListener(e -> {
                 RoundButton nameButton = (RoundButton)e.getSource();
-                frame.goTo(nameButton.getText());
+                this.frame.goTo(nameButton.getText());
             });
             name.addMouseListener(new MouseAdapter() {
                 @Override
@@ -72,15 +74,15 @@ public class Playlist extends JPanel {
                 JPanel bPanel = (JPanel)likeButton.getParent();
                 JPanel oldRecord = (JPanel)bPanel.getParent();
                 RoundButton nameButton = (RoundButton)oldRecord.getComponent(0);
-                for (int j = 0; j < frame.getAllSongs().size(); j++) {
+                for (int j = 0; j < this.frame.getAllSongs().size(); j++) {
                     //System.out.println(likeButton.getText()+" = "+frame.getAllSongs().get(j).getName());
-                    if (nameButton.getText().equals(frame.getAllSongs().get(j).getName())) {
-                        if (!frame.getAllSongs().get(j).isHearted()) {
+                    if (nameButton.getText().equals(this.frame.getAllSongs().get(j).getName())) {
+                        if (!this.frame.getAllSongs().get(j).isHearted()) {
                             likeButton.setText("♥");
-                            frame.getAllSongs().get(j).setHearted(true);
+                            this.frame.getAllSongs().get(j).setHearted(true);
                         } else {
                             likeButton.setText("♡");
-                            frame.getAllSongs().get(j).setHearted(false);
+                            this.frame.getAllSongs().get(j).setHearted(false);
                         }
                     }
                 }
@@ -97,8 +99,38 @@ public class Playlist extends JPanel {
                     JPanel bPanel = (JPanel)sButton.getParent();
                     JPanel oldRecord = (JPanel)bPanel.getParent();
                     RoundButton nameButton = (RoundButton)oldRecord.getComponent(0);
-                    System.out.println("Settings for: " + nameButton.getText());
+                    boolean somethingIsOpen = false;
+                    for (int j = 0; j < settingsOpened.size(); j++) {
+                        if (settingsOpened.get(j)) {
+                            somethingIsOpen = true;
+                        }
+                    }
+                    int pos = getPositionFromName(nameButton.getText());
+                    SettingsDropDown settingsDropDown = new SettingsDropDown(
+                            Util.blue_color,this.cornerRadius,nameButton.getText());
+                    Rectangle rec = this.frame.getCurPlaylist().getBounds();
+                    settingsDropDown.setBounds(rec.width + 200,rec.y + 50,100,200);
+                    MusicContent mc = (MusicContent)this.frame.getContent(Util.MUSIC_CONTENT);
+                    if (!settingsOpened.get(pos)) {
+                        if (!somethingIsOpen) {
+                            mc.add(settingsDropDown);
+                            mc.repaint();
+                            settingsOpened.set(pos,!settingsOpened.get(pos));
+                        }
+                    } else {
+                        if (somethingIsOpen) {
+                            for (int k = 0; k < mc.getComponentCount(); k++) {
+                                if (mc.getComponent(k).toString().equals(settingsDropDown.toString())) {
+                                    mc.remove(k);
+                                    break;
+                                }
+                            }
+                            mc.repaint();
+                            settingsOpened.set(pos,!settingsOpened.get(pos));
+                        }
+                    }
                 });
+                settingsOpened.add(false);
                 buttonPanel.add(settingsButton, BorderLayout.EAST);
             } else {
                 RoundButton removeButton = new RoundButton(
@@ -116,7 +148,7 @@ public class Playlist extends JPanel {
                         RoundButton nameButton = (RoundButton)oldRecord.getComponent(0);
                         System.out.println(nameButton.getText() + " was removed from " + getTitle());
                         //todo a JPanel that will say are you sure?
-                        MusicContent mc = (MusicContent)frame.getContent(Util.MUSIC_CONTENT);
+                        MusicContent mc = (MusicContent)this.frame.getContent(Util.MUSIC_CONTENT);
                         if (mc.getClip() != null) {
                             mc.getClip().close();
                         }
@@ -196,5 +228,5 @@ public class Playlist extends JPanel {
 
     public String getTitle() { return title; }
 
-    public List<String> getAllSongNames() { return allSongNames; }
+    public List<String> getCurrentNames() { return currentNames; }
 }
