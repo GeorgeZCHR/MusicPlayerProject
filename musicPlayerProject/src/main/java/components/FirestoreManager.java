@@ -6,8 +6,9 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +26,7 @@ public class FirestoreManager {
     private Firestore init() {
         Firestore db = null;
         try {
-            FileInputStream serviceAccount =
-                    new FileInputStream(serviceAccountPath);
+            InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("serviceAccountKey.json");
 
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
@@ -139,25 +139,54 @@ public class FirestoreManager {
         }
     }
 
+    public void savePlaylist(String email, String playlistName, List<String> songs) {
+        DocumentReference docRef = db.collection("playlists").document(playlistName);
+
+        // Create or update the playlist with a list of songs
+        ApiFuture<WriteResult> future = docRef.set(new UserPlaylist(email, playlistName, songs, LocalDate.now().toString()));
+
+        try {
+            future.get();
+            System.out.println("Playlist saved successfully!");
+        } catch (Exception e) {
+            System.err.println("Error saving playlist: " + e.getMessage());
+        }
+    }
+
+    public UserPlaylist getPlaylist(String playlistName) {
+        DocumentReference docRef = db.collection("playlists").document(playlistName);
+
+        ApiFuture<DocumentSnapshot> future = docRef.get();
+        try {
+            DocumentSnapshot documentSnapshot = future.get();
+
+            if (documentSnapshot.exists()) {
+                Map<String, Object> data = documentSnapshot.getData();
+                String email = (String) data.get("email");
+                String name = (String) data.get("name");
+                List<String> songs = (List<String>) data.get("songs");
+
+                return new UserPlaylist(email, name, songs,LocalDate.now().toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public List<String> extractSongs(String input) {
-        // Find the indices of '[' and ']'
         int start = input.indexOf('[');
         int end = input.indexOf(']');
 
-        // Extract the substring containing the songs
         if (start != -1 && end != -1 && start < end) {
             String songsString = input.substring(start + 1, end);
-
-            // Split the string by commas and trim whitespace
             String[] songsArray = songsString.split(",");
             List<String> songsList = new ArrayList<>();
             for (String song : songsArray) {
                 songsList.add(song.trim());
             }
-
             return songsList;
         }
-        // Return an empty list if the format is incorrect
         return new ArrayList<>();
     }
 }
