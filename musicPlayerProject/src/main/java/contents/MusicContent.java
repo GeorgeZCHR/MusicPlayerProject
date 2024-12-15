@@ -23,7 +23,7 @@ public class MusicContent extends JPanel implements Content {
     public OvalButton playPauseButton = new OvalButton("", Util.orange_color);
     public OvalButton nextButton = new OvalButton("",Util.orange_color);
     public OvalButton previousButton = new OvalButton("",Util.orange_color);
-    //private JSlider songSlider = new JSlider();
+    private JProgressBar progressBar;
     public Playlist mainPlaylist;
     private JScrollPane mainPlaylistSP;
     private JComboBox playlistSelector;
@@ -89,20 +89,73 @@ public class MusicContent extends JPanel implements Content {
         //heartButton.addActionListener(e -> toggleHeart());
 
         //---Song Bar Slider---
-        /*songSlider.setBounds((int)(musicContent.getWidth() * 0.02),
-                (int)(musicContent.getHeight() * 0.97),
-                (int)(musicContent.getWidth() * 0.96), 20);
-        songSlider.setVisible(false);
-        songSlider.setMinimum(0);
-        songSlider.setValue(0);
-        songSlider.addChangeListener(e -> changeFramesOfSong());*/
+        progressBar = new JProgressBar(0, 100);
+        progressBar.setBounds((int)(getWidth() * 0.02),
+                (int)(getHeight() * 0.75),
+                (int)(getWidth() * 0.96), 16);
+        progressBar.setValue(0);
+        progressBar.setStringPainted(true);
 
-        //musicContent.add(songSlider);
+        progressBar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                if (clip != null) {
+                    // Calculate the clicked position as a percentage
+                    int mouseX = e.getX();
+                    int progressBarWidth = progressBar.getWidth();
+                    float clickPercent = (float) mouseX / progressBarWidth;
+
+                    // Set the audio clip's frame position based on the percentage
+                    int newFramePosition = (int) (clip.getFrameLength() * clickPercent);
+                    clip.setFramePosition(newFramePosition);
+
+                    // Update the progress bar value
+                    progressBar.setValue((int) (clickPercent * 100));
+                }
+            }
+        });
+
+        startProgressBarTimer();
+
+        add(progressBar);
         add(playPauseButton);
         add(nextButton);
         add(previousButton);
         add(songNameLabel);
         add(mainPlaylistSP);
+    }
+
+    private void updateProgressBar() {
+        if (clip != null) {
+            int currentFrame = clip.getFramePosition();
+            int totalFrames = clip.getFrameLength();
+            int progress = (int) ((double) currentFrame / totalFrames * 100);
+            progressBar.setValue(progress);
+
+            // Calculate current time and total time in seconds
+            int currentTimeInSeconds = (int) (currentFrame / clip.getFormat().getFrameRate());
+            int totalTimeInSeconds = (int) (totalFrames / clip.getFormat().getFrameRate());
+
+            // Format as MM:SS
+            String currentTime = formatTime(currentTimeInSeconds);
+            String totalTime = formatTime(totalTimeInSeconds);
+
+            // Update progress bar string
+            progressBar.setString(currentTime + " / " + totalTime);
+        } else {
+            progressBar.setString("0:00 / 0:00");
+        }
+    }
+
+    private String formatTime(int seconds) {
+        int minutes = seconds / 60;
+        int remainingSeconds = seconds % 60;
+        return String.format("%d:%02d", minutes, remainingSeconds);
+    }
+
+    private void startProgressBarTimer() {
+        Timer timer = new Timer(100, e -> updateProgressBar()); // Update every 100 ms
+        timer.start();
     }
 
     public void clearMusicContent() {
