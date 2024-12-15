@@ -115,13 +115,7 @@ public class MusicPlayerFrame extends JFrame {
             for (int i = 0; i < allPlaylists.size(); i++) {
                 allPlaylists.get(i).setVisible(false);
             }
-            if (musicContent.getClip() != null) {
-                musicContent.getClip().close();
-                musicContent.played = false;
-                musicContent.playPauseButton.setText("▶");
-                musicContent.previousButton.setVisible(false);
-                musicContent.nextButton.setVisible(false);
-            }
+           musicContent.clearMusicContent();
             for (int i = 0; i < allPlaylists.size(); i++) {
                 Playlist pl = (Playlist)(allPlaylists.get(i).getViewport().getView());
                 if (pl.getTitle().equals(playlistSelector.getSelectedItem())) {
