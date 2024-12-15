@@ -395,4 +395,13 @@ public class MusicPlayerFrame extends JFrame {
         return currentPLSongs;
     }
     public User getUser() { return user; }
+    public Playlist getPlaylistFromPlaylistTitle(String playlistName) {
+        for (int i = 0; i < allPlaylists.size(); i++) {
+            Playlist pl = (Playlist)(allPlaylists.get(i).getViewport().getView());
+            if (pl.getTitle().equals(playlistName)) {
+                return pl;
+            }
+        }
+        return null;
+    }
 }

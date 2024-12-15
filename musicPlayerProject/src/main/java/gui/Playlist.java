@@ -1,10 +1,7 @@
 package gui;
-import containers.Song;
 import contents.MusicContent;
 import general.MusicPlayerFrame;
 import general.Util;
-import org.checkerframework.checker.units.qual.Current;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -24,6 +21,7 @@ public class Playlist extends JPanel {
     private List<String> currentNames = new ArrayList<>();
     private boolean main;
     private List<Boolean> settingsOpened = new ArrayList<>();
+    public static int playlistCounter = 0;
 
     public Playlist(String title, Color panelColor, int cornerRadius,
                     List<String> currentNames, MusicPlayerFrame frame, boolean main) {
@@ -39,9 +37,134 @@ public class Playlist extends JPanel {
         setOpaque(false);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
+
+        if(!this.main) {
+            JPanel playlistUpperComponents = new JPanel();
+            playlistUpperComponents.setLayout(new BorderLayout());
+            playlistUpperComponents.setOpaque(false);
+
+            JLabel playlistNameLabel = new JLabel(this.title, JLabel.CENTER);
+            playlistNameLabel.setFont(Util.headerFont);
+            playlistNameLabel.setForeground(Util.orange_color.darker());
+            playlistUpperComponents.add(playlistNameLabel, BorderLayout.WEST);
+
+
+            RoundButton addButton = new RoundButton(
+                    "+",panelColor,20,20);
+            addButton.setFont(Util.headerFont);
+            addButton.setFocusable(false);
+            addButton.addActionListener(e -> addNewSongsIntoPlaylist());
+            playlistUpperComponents.add(addButton, BorderLayout.CENTER);
+
+            RoundButton deleteButton = new RoundButton(
+                    "❌",panelColor,20,20);
+            deleteButton.setFont(Util.myFont);
+            deleteButton.setFocusable(false);
+            deleteButton.addActionListener(e -> deletePlaylist());
+            playlistUpperComponents.add(deleteButton, BorderLayout.EAST);
+
+            add(playlistUpperComponents);
+        }
+
+
         addNewRecords(currentNames);
-        validate();
-        repaint();
+        playlistCounter++;
+    }
+
+
+    private void addNewSongsIntoPlaylist() {
+        if (getRemainingSongNames().size() == 0) {
+            new WarningFrame("Playlist Full","There aren't any songs to add!");
+        } else {
+            MusicContent mc = (MusicContent)this.frame.getContent(Util.MUSIC_CONTENT);
+            mc.clearMusicContent();
+
+            JDialog songSelectorFrame = new JDialog(
+                    this.frame,"Song Selector for " + this.title,true);
+            songSelectorFrame.setSize(426, 400);
+            songSelectorFrame.setLayout(null);
+            songSelectorFrame.setLocationRelativeTo(null);
+
+            JPanel songSelPanel = new JPanel();
+            songSelPanel.setBounds(0,0,songSelectorFrame.getWidth(),songSelectorFrame.getHeight());
+            songSelPanel.setLayout(null);
+            songSelPanel.setOpaque(true);
+            songSelPanel.setBackground(Util.blue_color.brighter());
+
+            SongSelector songSelector = new SongSelector(Util.orange_color,
+                    Util.orange_dark_color,20,getRemainingSongNames());
+            JScrollPane sp = Util.createScrollPane(
+                    songSelector,new Rectangle(5,5,400,300),
+                    Util.blue_color,getBackground());
+
+            RoundButton confirmButton = new RoundButton(
+                    "Confirm",panelColor,20,20);
+            confirmButton.setBounds(255,325,150,25);
+            confirmButton.setFont(Util.myFont);
+            confirmButton.setFocusable(false);
+            confirmButton.addActionListener(ev -> {
+                List<String> newSongNames = new ArrayList<>();
+                newSongNames.addAll(songSelector.getSelectedSongs());
+                if (!newSongNames.isEmpty()) {
+                    currentNames.addAll(newSongNames);
+                    addNewRecords(newSongNames);
+                    validate();
+                    repaint();
+                    songSelectorFrame.dispose();
+                } else {
+                    new WarningFrame("No song chosen",
+                            "Please choose at least one song!");
+                }
+            });
+
+            RoundButton cancelButton = new RoundButton(
+                    "Cancel",panelColor,20,20);
+            cancelButton.setBounds(5,325,150,25);
+            cancelButton.setFont(Util.myFont);
+            cancelButton.setFocusable(false);
+            cancelButton.addActionListener(ev -> songSelectorFrame.dispose());
+
+            songSelPanel.add(sp);
+            songSelPanel.add(confirmButton);
+            songSelPanel.add(cancelButton);
+            songSelectorFrame.add(songSelPanel);
+
+            songSelectorFrame.setVisible(true);
+        }
+    }
+
+    private void deletePlaylist() {
+        MusicContent mc = (MusicContent)frame.getContent(Util.MUSIC_CONTENT);
+        for (int i = 0; i < frame.getAllPlaylists().size(); i++) {
+            frame.getAllPlaylists().get(i).setVisible(false);
+        }
+        mc.clearMusicContent();
+        Playlist pl = frame.getPlaylistFromPlaylistTitle("Main");
+        pl.setVisible(true);
+        frame.setCurrentPlaylistNames(pl.getCurrentNames());
+        frame.setCurSong(0);
+        frame.setCurPlaylist(pl);
+        frame.getCurPlaylist().checkHearts();
+        frame.getCurPlaylist().setRecordBackgroundColor(Util.orange_dark_color,frame.getCurSongNum());
+
+        for (int i = 0; i < frame.getAllPlaylists().size(); i++) {
+            if (((Playlist)frame.getAllPlaylists().get(i).getViewport().getView())
+                    .getTitle().equals(title)) {
+                for (int j = 0; j < mc.getComponents().length; j++) {
+                    if (mc.getComponents()[j].getClass().getName().equals("JScrollPane")) {
+                        JScrollPane scrollPane = (JScrollPane)mc.getComponents()[j];
+                        Playlist playlist = (Playlist)scrollPane.getViewport().getView();
+                        if (playlist.getTitle().equals(title)) {
+                            mc.remove(j);
+                            break;
+                        }
+                    }
+                }
+                frame.getAllPlaylists().remove(i);
+                frame.getPlaylistSelector().removeItem(title);
+                break;
+            }
+        }
     }
 
     @Override
@@ -58,11 +181,11 @@ public class Playlist extends JPanel {
     }
 
     public void setRecordBackgroundColor(Color color, int num) {
-        for (int i = 0; i < getComponents().length; i++) {
+        for (int i = 1; i < getComponents().length; i++) {
             RoundButton button = (RoundButton)(((JPanel)getComponents()[i]).getComponent(0));
             button.setColor(panelColor);
         }
-        RoundButton nameButton = (RoundButton)(((JPanel)getComponents()[num]).getComponent(0));
+        RoundButton nameButton = (RoundButton)(((JPanel)getComponents()[num+1]).getComponent(0));
         nameButton.setColor(color);
         validate();
         repaint();
@@ -102,6 +225,16 @@ public class Playlist extends JPanel {
             }
         }
         return -1;
+    }
+
+    public List<String> getRemainingSongNames() {
+        List<String> remainingSongNames = new ArrayList<>();
+        for (int i = 0; i < allSongNames.size(); i++) {
+            if (!currentNames.contains(allSongNames.get(i))) {
+                remainingSongNames.add(allSongNames.get(i));
+            }
+        }
+        return remainingSongNames;
     }
 
     public void addNewRecords(List<String> newSongNames) {
@@ -233,7 +366,7 @@ public class Playlist extends JPanel {
             mc.clearMusicContent();
             int pos = getPositionFromName(nameButton.getText());
             this.currentNames.remove(pos);
-            remove(pos);
+            remove(pos+1);
             update();
         }
     }
