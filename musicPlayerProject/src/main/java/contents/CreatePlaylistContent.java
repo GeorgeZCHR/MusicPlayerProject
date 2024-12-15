@@ -90,7 +90,10 @@ public class CreatePlaylistContent extends JPanel implements Content {
                 (int)(0.98 * getHeight() - 50), 120, 50);
         clear.setFont(Util.myFont);
         clear.setFocusable(false);
-        clear.addActionListener(e -> songSelectorForPlaylist.clearSelectedSongs());
+        clear.addActionListener(e -> {
+            playlistNameText.setText("");
+            songSelectorForPlaylist.clearSelectedSongs();
+        });
 
         add(playlistNameLabel);
         add(playlistNameText);
