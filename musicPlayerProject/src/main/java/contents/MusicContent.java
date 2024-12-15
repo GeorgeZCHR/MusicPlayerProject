@@ -109,6 +109,7 @@ public class MusicContent extends JPanel implements Content {
         if (clip != null) {
             clip.close();
             played = false;
+            started = false;
             playPauseButton.setText("▶");
             previousButton.setVisible(false);
             nextButton.setVisible(false);
