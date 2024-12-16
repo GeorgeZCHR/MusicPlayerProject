@@ -1,5 +1,4 @@
 package contents;
-
 import java.awt.*;
 
 public interface Content {

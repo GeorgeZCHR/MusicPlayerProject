@@ -16,7 +16,6 @@ public class MusicContent extends JPanel implements Content {
     private boolean started = false;
     private boolean isSongStarted = false;
     private int framePosition = 0;
-    //private JButton heartButton = new JButton("\uFE0F");
     private boolean isHearted = false;
     private boolean songFinished = false;
     private JLabel songNameLabel = new JLabel();
@@ -78,15 +77,9 @@ public class MusicContent extends JPanel implements Content {
         previousButton.setFont(Util.myFont);
         previousButton.addActionListener(e -> previousSong());
 
-        //heartButton.setBounds((int)(getWidth() * 0.85),
-          //      (int)(getHeight() * 0.45), 60,60);
-
         previousButton.setVisible(false);
         previousButton.setFocusable(false);
         previousButton.setText("⏪");
-        //heartButton.setFont(Util.myFont);
-
-        //heartButton.addActionListener(e -> toggleHeart());
 
         //---Song Bar Slider---
         progressBar = new JProgressBar(0, 100);
@@ -95,6 +88,7 @@ public class MusicContent extends JPanel implements Content {
                 (int)(getWidth() * 0.96), 16);
         progressBar.setValue(0);
         progressBar.setStringPainted(true);
+        progressBar.setVisible(false);
 
         progressBar.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -174,13 +168,9 @@ public class MusicContent extends JPanel implements Content {
     public void playPauseMusic() {
         nextButton.setVisible(true);
         previousButton.setVisible(true);
-        //songSlider.setVisible(true);
+        progressBar.setVisible(true);
         if (played) {
             playPauseButton.setText("▶");
-            //framePosition = clip.getFramePosition();
-            /*long songLengthMin = (clip.getMicrosecondLength()/60000000);
-            long songLengthSec = (clip.getMicrosecondLength()%60000000)/1000000;
-            System.out.println("containers.Song length : " + songLengthMin + ":" + songLengthSec);*/
             clip.stop();
         } else {
             playPauseButton.setText("⏸");

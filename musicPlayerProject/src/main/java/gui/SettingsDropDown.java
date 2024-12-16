@@ -2,8 +2,6 @@ package gui;
 import general.Util;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 
 public class SettingsDropDown extends JPanel {

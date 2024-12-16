@@ -29,7 +29,6 @@ public class MusicPlayerFrame extends JFrame {
     private Playlist curPlaylist;
     private Song currentSong;
     private int currentSongNum = 0;
-    //private SongPlayer songPlayer;
     //---Header---
     private RoundButton menuShower = new RoundButton("≡",Util.orange_color,20,20);
     private boolean showing = true;
@@ -136,20 +135,6 @@ public class MusicPlayerFrame extends JFrame {
         // Create a timer that updates every 1000 milliseconds (1 second)
         timer = new Timer(1000, e -> {
             musicContent.getSongNameLabel().setText(currentSong.getName());
-            //songSlider.setMaximum(songSliderLength);
-            //System.out.println(e.getWhen());
-            /*System.out.println("Seconds : " + totalSeconds);
-            totalSeconds++;*/
-            /*if (clip != null) {
-                 if (!isSongStarted) {
-                     songSliderLength = clip.getFrameLength();
-                     isSongStarted = true;
-                 }
-                 int frames = clip.getFramePosition();
-                 songSliderLength = clip.getFrameLength();
-                 songSlider.setValue(frames);
-                 System.out.println("Frames of containers.Song : " + frames);
-            }*/
         });
         timer.start();
 
@@ -159,15 +144,6 @@ public class MusicPlayerFrame extends JFrame {
         this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
-
-    /*public void changeFramesOfSong() {
-        if (clip != null) {
-            int newPosition = songSlider.getValue();
-            clip.setFramePosition(newPosition); // Seek to new frame position
-            framePosition = newPosition; // Update framePosition to new slider position
-        }
-        //System.out.println("SongSlider Value : " + songSlider.getValue());
-    }*/
 
     public void goTo(String song) {
         musicContent.goTo(song);
@@ -371,7 +347,6 @@ public class MusicPlayerFrame extends JFrame {
         System.out.println("Num : " + num);
         currentSongNum = num;
         currentSong = currentPLSongs.get(num);
-        //songPlayer.changeSong(currentSong);
     }
 
     public List<String> getAllSongNames() {

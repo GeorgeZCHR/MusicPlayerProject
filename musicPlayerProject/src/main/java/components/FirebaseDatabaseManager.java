@@ -1,8 +1,6 @@
 package components;
-
 import com.google.api.core.ApiFuture;
 import com.google.firebase.database.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
