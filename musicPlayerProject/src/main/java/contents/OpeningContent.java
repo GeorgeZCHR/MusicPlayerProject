@@ -1,7 +1,6 @@
 package contents;
 import javax.swing.*;
 import java.awt.*;
-
 import general.MusicPlayerFrame;
 import general.Util;
 

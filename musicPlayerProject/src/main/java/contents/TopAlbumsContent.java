@@ -1,10 +1,8 @@
 package contents;
-
 import components.GetTopAlbums;
 import general.Util;
 import gui.RoundButton;
 import org.json.JSONObject;
-
 import javax.swing.*;
 import java.awt.*;
 

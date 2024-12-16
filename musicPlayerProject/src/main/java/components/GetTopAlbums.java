@@ -1,11 +1,9 @@
 package components;
-
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import org.json.JSONObject;
-import org.json.JSONArray;
 
 public class GetTopAlbums {
 

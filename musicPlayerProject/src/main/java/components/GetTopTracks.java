@@ -1,11 +1,9 @@
 package components;
-
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import org.json.JSONObject;
 
 public class GetTopTracks {

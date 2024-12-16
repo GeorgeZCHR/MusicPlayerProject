@@ -221,5 +221,4 @@ public class TopArtistsContent extends JPanel implements Content {
         //---Top Artist URL---
         topArtistURL.setText(artistList.get(topArtistNum).getUrl());
     }
-
 }

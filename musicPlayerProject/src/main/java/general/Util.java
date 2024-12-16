@@ -1,6 +1,5 @@
 package general;
 import gui.CustomScrollBarUI;
-
 import javax.swing.*;
 import java.awt.*;
 
