@@ -108,8 +108,7 @@ public class Playlist extends JPanel {
                 if (!newSongNames.isEmpty()) {
                     currentNames.addAll(newSongNames);
                     addNewRecords(newSongNames);
-                    validate();
-                    repaint();
+                    update();
                     songSelectorFrame.dispose();
                 } else {
                     new WarningFrame("No song chosen",
@@ -181,11 +180,18 @@ public class Playlist extends JPanel {
     }
 
     public void setRecordBackgroundColor(Color color, int num) {
-        for (int i = 1; i < getComponents().length; i++) {
+        RoundButton nameButton;
+        int begin = 0;
+        if (main) {
+            nameButton = (RoundButton)(((JPanel)getComponents()[num]).getComponent(0));
+        } else {
+            begin = 1;
+            nameButton = (RoundButton)(((JPanel)getComponents()[num+1]).getComponent(0));
+        }
+        for (int i = begin; i < getComponents().length; i++) {
             RoundButton button = (RoundButton)(((JPanel)getComponents()[i]).getComponent(0));
             button.setColor(panelColor);
         }
-        RoundButton nameButton = (RoundButton)(((JPanel)getComponents()[num+1]).getComponent(0));
         nameButton.setColor(color);
         validate();
         repaint();
