@@ -5,7 +5,7 @@ public class Song {
     private String artist;
     private String album;
     private String path;
-    private String excention;
+    private String extension;
     //private String lyrics; todo
     //private String ImgSongPath; todo
 
@@ -13,23 +13,22 @@ public class Song {
     private String heart = "❤\uFE0F";
 
     public Song(String path, String folderPath) {
-        String songName = path.substring(0,path.lastIndexOf(".") - 1);
+        String songName = path.substring(0,path.lastIndexOf("."));
         this.name = songName.replace(folderPath,"");
         this.artist = "Unknown";
         this.album = "Unknown";
         this.path = path;
-        this.excention = path.substring(path.lastIndexOf("."));
+        this.extension = path.substring(path.lastIndexOf("."));
         this.isHearted = false;
     }
 
     public void printData() {
-        System.out.println(getName());
-        System.out.println(getArtist());
-        System.out.println(getAlbum());
-        System.out.println(getExcention());
-        System.out.println(getPath());
-
-
+        System.out.println("Name       : " + getName());
+        System.out.println("Artist     : " + getArtist());
+        System.out.println("Album      : " + getAlbum());
+        System.out.println("Path       : " + getPath());
+        System.out.println("Εxtension  : " + getΕxtension());
+        System.out.println("Is Hearted : " + isHearted());
     }
 
     public void addRemoveHeartFromName() {
@@ -48,7 +47,7 @@ public class Song {
     public String getArtist() { return artist; }
     public String getAlbum() { return album; }
     public String getPath() { return path; }
-    public String getExcention() { return excention; }
+    public String getΕxtension() { return extension; }
 
     public boolean isHearted() { return isHearted; }
 
@@ -56,7 +55,7 @@ public class Song {
     public void setArtist(String artist) { this.artist = artist; }
     public void setAlbum(String album) { this.album = album; }
     public void setPath(String path) { this.path = path; }
-    public void setExcention(String excention) { this.excention = excention; }
+    public void setΕxtension(String extension) { this.extension = extension; }
 
     public void setHearted(boolean isHearted) { this.isHearted = isHearted; }
 }

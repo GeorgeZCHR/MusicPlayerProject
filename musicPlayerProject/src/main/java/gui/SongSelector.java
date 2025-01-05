@@ -10,9 +10,11 @@ public class SongSelector extends JPanel{
     private List<JPanel> songs = new ArrayList<>();
     private List<Boolean> isSelected = new ArrayList<>();
     private List<String> selectedSongs = new ArrayList<>();
+    private List<Integer> selectedIndexes = new ArrayList<>();
     private int cornerRadius;
     private final Color panelColor;
     private final Color selectionColor;
+    private int counter = 0;
 
     public SongSelector(Color panelColor, Color selectionColor, int cornerRadius,
                         List<String> names) {
@@ -21,8 +23,11 @@ public class SongSelector extends JPanel{
         this.cornerRadius = cornerRadius;
         setOpaque(false);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        addSongs(names);
+    }
 
-        for (int i = 0; i < names.size(); i++) {
+    public void addSongs(List<String> names) {
+        for (int i = counter; i < names.size(); i++) {
             int finalI = i;
             JPanel songPanel = new JPanel();
             songPanel.setLayout(new BorderLayout());
@@ -36,10 +41,12 @@ public class SongSelector extends JPanel{
                 RoundButton songNameButton = (RoundButton)(songs.get(finalI).getComponent(0));
                 if (isSelected.get(finalI)) {
                     removeSongFromName(songNameButton.getText());
+                    selectedIndexes.remove(finalI);
                     songNameButton.setColor(panelColor);
                     songNameButton.setForeground(panelColor.darker());
                 } else {
                     selectedSongs.add(songNameButton.getText());
+                    selectedIndexes.add(finalI);
                     songNameButton.setColor(selectionColor);
                 }
                 isSelected.set(finalI,!isSelected.get(finalI));
@@ -50,7 +57,18 @@ public class SongSelector extends JPanel{
 
             songs.add(songPanel);
             add(songs.get(finalI));
+            counter++;
         }
+        repaint();
+        revalidate();
+    }
+
+    public void clearAll() {
+        removeAll();
+        songs.clear();
+        selectedSongs.clear();
+        selectedIndexes.clear();
+        counter = 0;
     }
 
     public void removeSongFromName(String name) {
@@ -69,6 +87,7 @@ public class SongSelector extends JPanel{
             songNameButton.setColor(panelColor);
             songNameButton.setForeground(panelColor.darker());
         }
+        selectedIndexes.clear();
         Collections.fill(isSelected, false);
         System.out.println(selectedSongs);
         repaint();
@@ -77,6 +96,7 @@ public class SongSelector extends JPanel{
     public List<String> getSelectedSongs() {
         return selectedSongs;
     }
+    public List<Integer> getSelectedIndexes() { return selectedIndexes; }
 
     @Override
     protected void paintComponent(Graphics g) {
