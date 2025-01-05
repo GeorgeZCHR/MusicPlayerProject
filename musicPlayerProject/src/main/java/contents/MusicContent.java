@@ -195,6 +195,7 @@ public class MusicContent extends JPanel implements Content {
         played = false;
         started = false;
         int selectedSongNum = mpf.getSongNameNum(song);
+        System.out.println("selectedSongNum : "+selectedSongNum);
         if (selectedSongNum != -1) {
             mpf.setCurSong(selectedSongNum);
             mpf.getCurPlaylist().setRecordBackgroundColor(Util.orange_dark_color,mpf.getCurSongNum());
@@ -204,8 +205,8 @@ public class MusicContent extends JPanel implements Content {
     }
 
     public void loadAudio() {
-        if (mpf.getCurrentSong().getExcention().equals(".wav") ||
-                mpf.getCurrentSong().getExcention().equals(".au")) {
+        if (mpf.getCurrentSong().getΕxtension().equals(".wav") ||
+                mpf.getCurrentSong().getΕxtension().equals(".au")) {
             File file = new File(mpf.getCurrentSong().getPath());
             try {
                 AudioInputStream ais = AudioSystem.getAudioInputStream(file);
@@ -216,7 +217,6 @@ public class MusicContent extends JPanel implements Content {
             }
             //songSliderLength = clip.getFrameLength();
         }
-        if (mpf.getCurrentSong().getExcention().equals(".mp3")) {}
     }
 
     /*public void toggleHeart() {

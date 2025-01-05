@@ -1,12 +1,11 @@
 package contents;
 import components.GetTopAlbums;
-import components.GetTopAlbums;
 import containers.Album;
-import containers.Album;
-import containers.Artist;
 import containers.ImageHolder;
 import general.Util;
+import gui.CustomTextField;
 import gui.RoundButton;
+import gui.WarningFrame;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import javax.imageio.ImageIO;
@@ -22,65 +21,69 @@ import java.util.List;
 
 public class TopAlbumsContent extends JPanel implements Content {
 
-    private List<Album> albumsList;
+    private List<Album> albumsList = new ArrayList<>();
     private int topAlbumsNum = 0;
     private JLabel topAlbumsImage, topAlbumsNumLabel;
     private JLabel topAlbumsName, topAlbumsPlayCount;
-    private JLabel topAlbumsListeners, topAlbumsURL;
+    private JLabel topAlbumsArtistName, topAlbumsURL, topAlbumsArtistURL;
+    private RoundButton topAlbumsNext, topAlbumsBack;
+    private JLabel topAlbumsNameLabel, topAlbumsPlayCountLabel;
+    private JLabel topAlbumsArtistNameLabel, topAlbumsURLLabel;
+    private JLabel topAlbumsArtistURLLabel;
 
-    public TopAlbumsContent(LayoutManager layout) { super(layout); }
+    public TopAlbumsContent(LayoutManager layout) {
+        super(layout);
+    }
+
     @Override
     public void init() {
-        String artist="Skrillex";
+        CustomTextField content = new CustomTextField(Util.orange_color,20,20);
+        content.setBounds((int) (0.02 * getWidth()),
+                (int) (0.01 * getHeight()), 400,(int) (0.08 * getHeight()));
+        content.setFont(Util.myFont);
 
-        //---Show JSon Object to console with the button getTopArtists---
-        albumsList = new ArrayList<>();
-        GetTopAlbums topAlbums = new GetTopAlbums();
-        JSONObject jsonObject = topAlbums.getTopAlbumsByArtist(artist);//look into this
-
-        JSONObject albums = jsonObject.getJSONObject("albums");
-
-        //JSONObject attr = artists.getJSONObject("@attr");
-
-        JSONArray albumsArray = albums.getJSONArray("albums");
-        for (int i = 0; i < albumsArray.length(); i++) {
-            JSONObject album = albumsArray.getJSONObject(i);
-
-            JSONArray images = album.getJSONArray("image");
-            ImageHolder imageHolder = new ImageHolder();
-            for (int j = 0; j < images.length(); j++) {
-                if (images.getJSONObject(j).getString("size").equals("small")) {
-                    imageHolder.setSmallImage(images.getJSONObject(j).getString("#text"));
-                } else if (images.getJSONObject(j).getString("size").equals("medium")) {
-                    imageHolder.setMediumImage(images.getJSONObject(j).getString("#text"));
-                } else if (images.getJSONObject(j).getString("size").equals("large")) {
-                    imageHolder.setLargeImage(images.getJSONObject(j).getString("#text"));
-                } else if (images.getJSONObject(j).getString("size").equals("extralarge")) {
-                    imageHolder.setExtraLargeImage(images.getJSONObject(j).getString("#text"));
-                } else if (images.getJSONObject(j).getString("size").equals("mega")) {
-                    imageHolder.setMegaImage(images.getJSONObject(j).getString("#text"));
+        RoundButton search = new RoundButton("Search Artist",Util.orange_color,20,20);
+        search.setBounds((int) (0.02 * getWidth()) + 420,(int) (0.01 * getHeight()),
+                200,(int) (0.08 * getHeight()));
+        search.setFont(Util.myFont);
+        search.addActionListener(e -> {
+            if (content.getText().isEmpty()) {
+                WarningFrame wf = new WarningFrame("Empty Search",
+                        "You have to write some Artist!");
+            } else {
+                if (!albumsList.isEmpty()) {
+                    albumsList.clear();
                 }
+                fillAlbumList(content.getText());
+                topAlbumsNum = 0;
+                setAlbum();
+
+                topAlbumsImage.setVisible(true);
+                topAlbumsNumLabel.setVisible(true);
+                topAlbumsNameLabel.setVisible(true);
+                topAlbumsName.setVisible(true);
+                topAlbumsPlayCountLabel.setVisible(true);
+                topAlbumsPlayCount.setVisible(true);
+                topAlbumsArtistNameLabel.setVisible(true);
+                topAlbumsArtistName.setVisible(true);
+                topAlbumsURLLabel.setVisible(true);
+                topAlbumsURL.setVisible(true);
+                topAlbumsArtistURLLabel.setVisible(true);
+                topAlbumsArtistURL.setVisible(true);
+                topAlbumsNext.setVisible(true);
+                topAlbumsBack.setVisible(true);
             }
+        });
 
-            albumsList.add(new Album(
-                    album.getString("name"),
-                    Long.parseLong(album.getString("playcount")),
-                    Long.parseLong(album.getString("listeners")),
-                    album.getString("mbid"),
-                    album.getString("url"),
-                    //Long.parseLong(album.getString("streamable")),
-                    //imageHolder
-            ));
-            albumsList.get(i).print();
-
-
-        }
+        // για αρχικοποίηση
+        String artist = "Skrillex";
+        fillAlbumList(artist);
 
         //---Top Album Image---
         URL url;
         BufferedImage image;
         try {
-            url = new URL(albumsList.get(topAlbumsNum).getImageHolder().getMegaImage());
+            url = new URL(albumsList.get(topAlbumsNum).getImageHolder().getExtraLargeImage());
             image = ImageIO.read(url);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -90,28 +93,27 @@ public class TopAlbumsContent extends JPanel implements Content {
         // Optional: Center align the image in the JLabel
         topAlbumsImage.setHorizontalAlignment(JLabel.CENTER);
         topAlbumsImage.setVerticalAlignment(JLabel.CENTER);
-        topAlbumsImage.setBounds((int)(0.02 * getWidth()),
-                (int)(0.05 * getHeight()),icon.getIconWidth(),
+        topAlbumsImage.setBounds((int) (0.02 * getWidth()),
+                (int) (0.12 * getHeight()), icon.getIconWidth(),
                 icon.getIconHeight());
 
 
         //---Top Album Number---
-        //topAlbumsNumLabel = new JLabel(String.valueOf(topAlbumsNum + 1));
+        topAlbumsNumLabel = new JLabel(String.valueOf(topAlbumsNum + 1));
         topAlbumsNumLabel.setFont(Util.headerFont);
         topAlbumsNumLabel.setForeground(Util.blue_dark_color);
-        topAlbumsNumLabel.setBounds((int)(0.5 * getWidth()) - 25,
-                (int)(0.9 * getHeight()),50,50);
-
+        topAlbumsNumLabel.setBounds((int) (0.5 * getWidth()) - 25,
+                (int) (0.9 * getHeight()), 50, 50);
 
 
         //---Next Button---
-        RoundButton topAlbumsNext = new RoundButton(
-                "Next", Util.orange_color, 20,20);
+        topAlbumsNext = new RoundButton(
+                "Next", Util.orange_color, 20, 20);
         topAlbumsNext.setFocusable(false);
         topAlbumsNext.setFont(Util.myFont);
         topAlbumsNext.setBounds(
-                (int)(0.98 * getWidth()) - 100,
-                (int)(0.9 * getHeight()),100,50);
+                (int) (0.98 * getWidth()) - 100,
+                (int) (0.9 * getHeight()), 100, 50);
         //Info code
         topAlbumsNext.addActionListener(e -> {
             if (!(topAlbumsNum + 1 < albumsList.size())) {
@@ -123,12 +125,12 @@ public class TopAlbumsContent extends JPanel implements Content {
         });
 
         //---Back Button---
-        RoundButton topAlbumsBack = new RoundButton(
-                "Back",Util.orange_color, 20,20);
+        topAlbumsBack = new RoundButton(
+                "Back", Util.orange_color, 20, 20);
         topAlbumsBack.setFocusable(false);
         topAlbumsBack.setFont(Util.myFont);
-        topAlbumsBack.setBounds((int)(0.02 * getWidth()),
-                (int)(0.9 * getHeight()),100,50);
+        topAlbumsBack.setBounds((int) (0.02 * getWidth()),
+                (int) (0.9 * getHeight()), 100, 50);
         //Info code
         topAlbumsBack.addActionListener(e -> {
             if (!(topAlbumsNum - 1 > -1)) {
@@ -141,52 +143,189 @@ public class TopAlbumsContent extends JPanel implements Content {
 
         //---Top Album Name---
         //UI code
-        JLabel topAlbumsNameLabel = new JLabel("Name          :");
+        topAlbumsNameLabel = new JLabel("Album Name    :");
         topAlbumsNameLabel.setBounds(icon.getIconWidth() + 40,
-                (int)(0.05 * getHeight()),150,50);
+                (int) (0.12 * getHeight()), 150, 50);
         topAlbumsNameLabel.setFont(Util.myFont);
         topAlbumsNameLabel.setForeground(Util.blue_dark_color);
         //Info code
         topAlbumsName = new JLabel(albumsList.get(topAlbumsNum).getName());
         topAlbumsName.setBounds(icon.getIconWidth() + 190,
-                (int)(0.05 * getHeight()),400,50);
+                (int) (0.12 * getHeight()), 400, 50);
         topAlbumsName.setFont(Util.myFont);
         topAlbumsName.setForeground(Util.blue_dark_color);
 
-        //---Top Albums Play Count---exei album play count?
-        JLabel topAlbumsPlayCountLabel = new JLabel("Play Count :");
+        //---Top Albums Play Count---
+        topAlbumsPlayCountLabel = new JLabel("Play Count     :");
         topAlbumsPlayCountLabel.setBounds(icon.getIconWidth() + 40,
-                (int)(0.05 * getHeight())+50,150,50);
+                (int) (0.12 * getHeight()) + 50, 150, 50);
         topAlbumsPlayCountLabel.setFont(Util.myFont);
         topAlbumsPlayCountLabel.setForeground(Util.blue_dark_color);
+
         //Info code
         topAlbumsPlayCount = new JLabel(String.valueOf(albumsList.get(topAlbumsNum).getPlayCount()));
         topAlbumsPlayCount.setBounds(icon.getIconWidth() + 190,
-                (int)(0.05 * getHeight())+50,400,50);
+                (int) (0.12 * getHeight()) + 50, 400, 50);
         topAlbumsPlayCount.setFont(Util.myFont);
         topAlbumsPlayCount.setForeground(Util.blue_dark_color);
 
+        //---Top Album Artis Name---
+        topAlbumsArtistNameLabel = new JLabel("Artist Name    :");
+        topAlbumsArtistNameLabel.setBounds(icon.getIconWidth() + 40,
+                (int) (0.12 * getHeight()) + 100, 150, 50);
+        topAlbumsArtistNameLabel.setFont(Util.myFont);
+        topAlbumsArtistNameLabel.setForeground(Util.blue_dark_color);
 
+        //Info code
+        topAlbumsArtistName = new JLabel(albumsList.get(topAlbumsNum).getArtistName());
+        topAlbumsArtistName.setBounds(icon.getIconWidth() + 190,
+                (int) (0.12 * getHeight()) + 100, 400, 50);
+        topAlbumsArtistName.setFont(Util.myFont);
+        topAlbumsArtistName.setForeground(Util.blue_dark_color);
 
         //---Top Albums URL---
-        JLabel topAlbumsURLLabel = new JLabel("URL :");
-        topAlbumsURLLabel.setBounds((int)(0.02 * getWidth()),
-                icon.getIconHeight()+50,100,50);
+        topAlbumsURLLabel = new JLabel("Album URL :");
+        topAlbumsURLLabel.setBounds((int) (0.02 * getWidth()),
+                icon.getIconHeight() + 100, 150, 50);
         topAlbumsURLLabel.setFont(Util.myFont);
         topAlbumsURLLabel.setForeground(Util.blue_dark_color);
+
         //Info code
-        topAlbumsURL = new JLabel(albumsList.get(topAlbumsNum).getUrl());
-        topAlbumsURL.setBounds((int)(0.02 * getWidth()) + 100,
-                icon.getIconHeight()+50,1200,50);
+        topAlbumsURL = new JLabel(albumsList.get(topAlbumsNum).getURL());
+        topAlbumsURL.setBounds((int) (0.02 * getWidth()) + 150,
+                icon.getIconHeight() + 100, 1200, 50);
         topAlbumsURL.setFont(Util.myFont);
         topAlbumsURL.setForeground(Util.blue_dark_color);
 
+        //---Top Albums Artist URL---
+        topAlbumsArtistURLLabel = new JLabel("Artist URL  :");
+        topAlbumsArtistURLLabel.setBounds((int) (0.02 * getWidth()),
+                icon.getIconHeight() + 150, 150, 50);
+        topAlbumsArtistURLLabel.setFont(Util.myFont);
+        topAlbumsArtistURLLabel.setForeground(Util.blue_dark_color);
 
+        //Info code
+        topAlbumsArtistURL = new JLabel(albumsList.get(topAlbumsNum).getArtistURL());
+        topAlbumsArtistURL.setBounds((int) (0.02 * getWidth()) + 150,
+                icon.getIconHeight() + 150, 1200, 50);
+        topAlbumsArtistURL.setFont(Util.myFont);
+        topAlbumsArtistURL.setForeground(Util.blue_dark_color);
+
+        topAlbumsImage.setVisible(false);
+        topAlbumsNumLabel.setVisible(false);
+        topAlbumsNameLabel.setVisible(false);
+        topAlbumsName.setVisible(false);
+        topAlbumsPlayCountLabel.setVisible(false);
+        topAlbumsPlayCount.setVisible(false);
+        topAlbumsArtistNameLabel.setVisible(false);
+        topAlbumsArtistName.setVisible(false);
+        topAlbumsURLLabel.setVisible(false);
+        topAlbumsURL.setVisible(false);
+        topAlbumsArtistURLLabel.setVisible(false);
+        topAlbumsArtistURL.setVisible(false);
+        topAlbumsNext.setVisible(false);
+        topAlbumsBack.setVisible(false);
+
+        add(content);
+        add(search);
+        add(topAlbumsImage);
         add(topAlbumsNumLabel);
         add(topAlbumsNameLabel);
+        add(topAlbumsName);
         add(topAlbumsPlayCountLabel);
+        add(topAlbumsPlayCount);
+        add(topAlbumsArtistNameLabel);
+        add(topAlbumsArtistName);
         add(topAlbumsURLLabel);
+        add(topAlbumsURL);
+        add(topAlbumsArtistURLLabel);
+        add(topAlbumsArtistURL);
         add(topAlbumsNext);
         add(topAlbumsBack);
+    }
+
+    private void setAlbum() {
+        //---Top Track Image---
+        URL url;
+        BufferedImage image;
+        ImageIcon icon;
+        try {
+            url = new URL(albumsList.get(topAlbumsNum).getImageHolder().getExtraLargeImage());
+            image = ImageIO.read(url);
+            icon = new ImageIcon(image);
+        } catch (IOException e) {
+            icon = new ImageIcon("img/error_warning.png");
+        }
+        topAlbumsImage.setIcon(icon);
+        topAlbumsImage.setHorizontalAlignment(JLabel.CENTER);
+        topAlbumsImage.setVerticalAlignment(JLabel.CENTER);
+        topAlbumsImage.setBounds((int) (0.02 * getWidth()),
+                (int) (0.12 * getHeight()), icon.getIconWidth(),
+                icon.getIconHeight());
+
+        //---Top Track Number---
+        topAlbumsNumLabel.setText(String.valueOf(topAlbumsNum + 1));
+
+        //---Top Track Name---
+        topAlbumsName.setText(albumsList.get(topAlbumsNum).getName());
+
+        //---Top Track Play Count---
+        topAlbumsPlayCount.setText(String.valueOf(albumsList.get(topAlbumsNum).getPlayCount()));
+
+        //---Top Albums Artists---
+        topAlbumsArtistName.setText(String.valueOf(albumsList.get(topAlbumsNum).getArtistName()));
+
+        //---Top Album URL---
+        topAlbumsURL.setText(albumsList.get(topAlbumsNum).getURL());
+
+        //---Top Album Artist URL---
+        topAlbumsArtistURL.setText(albumsList.get(topAlbumsNum).getArtistURL());
+    }
+
+    public void fillAlbumList(String artist) {
+        GetTopAlbums topAlbums = new GetTopAlbums();
+        JSONObject jsonObject = topAlbums.getTopAlbumsByArtist(artist);
+        System.out.println(jsonObject);
+
+        try {
+            JSONObject topAlbumsObj = jsonObject.getJSONObject("topalbums");
+
+            //JSONObject attr = artists.getJSONObject("@attr");
+
+            JSONArray albumsArray = topAlbumsObj.getJSONArray("album");
+            for (int i = 0; i < albumsArray.length(); i++) {
+                JSONObject album = albumsArray.getJSONObject(i);
+
+                JSONArray images = album.getJSONArray("image");
+                ImageHolder imageHolder = new ImageHolder();
+                for (int j = 0; j < images.length(); j++) {
+                    if (images.getJSONObject(j).getString("size").equals("small")) {
+                        imageHolder.setSmallImage(images.getJSONObject(j).getString("#text"));
+                    } else if (images.getJSONObject(j).getString("size").equals("medium")) {
+                        imageHolder.setMediumImage(images.getJSONObject(j).getString("#text"));
+                    } else if (images.getJSONObject(j).getString("size").equals("large")) {
+                        imageHolder.setLargeImage(images.getJSONObject(j).getString("#text"));
+                    } else if (images.getJSONObject(j).getString("size").equals("extralarge")) {
+                        imageHolder.setExtraLargeImage(images.getJSONObject(j).getString("#text"));
+                    }/* else if (images.getJSONObject(j).getString("size").equals("mega")) {
+                    imageHolder.setMegaImage(images.getJSONObject(j).getString("#text"));
+                }*/
+                }
+
+                albumsList.add(new Album(
+                        album.getString("name"),
+                        album.getLong("playcount"),
+                        album.getString("url"),
+                        album.getJSONObject("artist").getString("mbid"),
+                        album.getJSONObject("artist").getString("name"),
+                        album.getJSONObject("artist").getString("url"),
+                        imageHolder
+                ));
+                //albumsList.get(i).print();
+            }
+        } catch (Exception e) {
+            WarningFrame wf = new WarningFrame("Artist not found",
+                    "The artist you supplied could not be found");
+        }
     }
 }

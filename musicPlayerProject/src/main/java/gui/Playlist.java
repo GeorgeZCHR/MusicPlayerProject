@@ -201,8 +201,8 @@ public class Playlist extends JPanel {
         for (int i = 1; i < currentNames.size(); i++) {
             RoundButton nameButton = (RoundButton)(((JPanel)getComponents()[i]).getComponent(0));
             RoundButton likeButton = (RoundButton)(((JPanel)((JPanel)getComponents()[i]).getComponent(1)).getComponent(0));
-            for (int j = 0; j < allSongNames.size(); j++) {
-                if (nameButton.getText().equals(frame.getAllSongs().get(j).getName())) {
+            for (int j = 0; j < frame.getAllSongNames().size(); j++) {
+                if (nameButton.getText().equals(frame.getAllSongNames().get(j))) {
                     if (!frame.getAllSongs().get(j).isHearted()) {
                         likeButton.setText("♡");
                     } else {
@@ -380,4 +380,8 @@ public class Playlist extends JPanel {
     public String getTitle() { return title; }
 
     public List<String> getCurrentNames() { return currentNames; }
+
+    public void addNewNames(List<String> newSongs) {
+        currentNames.addAll(newSongs);
+    }
 }

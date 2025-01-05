@@ -11,6 +11,7 @@ public class Util {
     public static final int TOP_ARTISTS_CONTENT = 3;
     public static final int TOP_TRACKS_CONTENT = 4;
     public static final int TOP_ALBUMS_CONTENT = 5;
+    public static final int SEARCH_RESULTS_CONTENT = 6;
     public static final Color blue_dark_color = new Color(0x264653);
     public static final Color blue_color = new Color(0x2a9d8f);
     public static final Color orange_light_color = new Color(0xe9c46a);
@@ -53,5 +54,13 @@ public class Util {
         sp.setOpaque(false);
         sp.getViewport().setOpaque(false);
         return sp;
+    }
+
+    public static boolean isUnderHour(long duration) {
+        return duration < 3600; // is shorter than 1 hour
+    }
+
+    public static String getDurationInHumanTime(long duration) {
+        return (duration / 60) + ":" + (duration % 60);
     }
 }

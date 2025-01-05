@@ -1,11 +1,16 @@
 package general;
 import components.FirestoreManager;
+import components.SongPlayer_Agg;
 import components.User;
 import containers.*;
 import contents.*;
 import gui.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -33,6 +38,7 @@ public class MusicPlayerFrame extends JFrame {
     private RoundButton menuShower = new RoundButton("≡",Util.orange_color,20,20);
     private boolean showing = true;
     private JComboBox playlistSelector;
+    private CustomTextField searchBar = new CustomTextField(Util.orange_color,20,20);
     //----------------
     //---Menu---
     private RectButton createPlaylist = new RectButton("Create Playlist",Util.orange_color);
@@ -42,7 +48,7 @@ public class MusicPlayerFrame extends JFrame {
     private RectButton discoverTopTracks = new RectButton("Discover Top Tracks",Util.orange_color);
     private RectButton discoverTopAlbums = new RectButton("Discover Top Albums",Util.orange_color);
     //----------------
-    //---Content---
+    //---Contents---
     private OpeningContent openingContent = new OpeningContent(null,this);
     private MusicContent musicContent = new MusicContent(null,this);
     private CreatePlaylistContent createPLContent = new CreatePlaylistContent(null,this);
@@ -50,6 +56,7 @@ public class MusicPlayerFrame extends JFrame {
     private TopArtistsContent topArtistsContent = new TopArtistsContent(null);
     private TopTracksContent topTracksContent = new TopTracksContent(null);
     private TopAlbumsContent topAlbumsContent = new TopAlbumsContent(null);
+    private SearchResultsContent searchResultsContent = new SearchResultsContent(null,this);
     //----------------
         public MusicPlayerFrame(User user, FirestoreManager fr, int width, int height) {
             this.user = user;
@@ -82,6 +89,7 @@ public class MusicPlayerFrame extends JFrame {
         createContent(topArtistsContent,Util.blue_color.brighter(),false);
         createContent(topTracksContent,Util.blue_color.brighter(),false);
         createContent(topAlbumsContent,Util.blue_color.brighter(),false);
+        createContent(searchResultsContent,Util.blue_color.brighter(),false);
 
         loadSongs("music/");
         fillAllSongsNames();
@@ -105,6 +113,64 @@ public class MusicPlayerFrame extends JFrame {
         menuShower.setFocusable(false);
         menuShower.setFont(Util.headerFont);
         menuShower.addActionListener(e -> changeMenu());
+
+        //---Search Bar---
+        searchBar.setBounds((int)(header.getWidth() * 0.1),(int)(header.getHeight() * 0.1),
+                (int)(header.getWidth() * 0.18),(int)(header.getHeight() * 0.8));
+        searchBar.setFont(Util.myFont);
+        searchBar.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {}
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    System.out.println("Search Bar Text : " + searchBar.getText());
+                    SongPlayer_Agg player = new SongPlayer_Agg();
+                    JSONObject results = player.searchArtist(searchBar.getText());
+                    //System.out.println(results);
+                    List<TrackFromAPI> tracksFromAPI = new ArrayList<>();
+                    if (results != null) {
+                        JSONArray tracks = results.getJSONArray("data");
+                        for (int i = 0; i < tracks.length(); i++) {
+                            JSONObject track = tracks.getJSONObject(i);
+                            if (Util.isUnderHour(track.getInt("duration"))) {
+                                tracksFromAPI.add(new TrackFromAPI(
+                                        track.getString("title"),
+                                        track.getJSONObject("user").getString("name"),
+                                        track.getString("id"),
+                                        track.getString("orig_filename"),
+                                        track.getInt("duration")
+                                        )
+                                );
+                            }
+                        }
+
+                        showContent(Util.SEARCH_RESULTS_CONTENT);
+
+                        List<String> songsWithArtists = new ArrayList<>();
+                        for (TrackFromAPI trackFromAPI : tracksFromAPI) {
+                            songsWithArtists.add(trackFromAPI.getTitle() + " by " +
+                                    trackFromAPI.getArtist() + " [" +
+                                    Util.getDurationInHumanTime(trackFromAPI.getDuration()) + "]");
+                        }
+
+                        for (int i = 0; i < searchResultsContent.getComponents().length; i++) {
+                            if (searchResultsContent.getComponents()[i] instanceof JScrollPane) {
+                                JScrollPane sp = (JScrollPane)searchResultsContent.getComponents()[i];
+                                SongSelector songSelector = ((SongSelector)sp.getViewport().getView());
+                                songSelector.clearAll();
+                                songSelector.addSongs(songsWithArtists);
+                                searchResultsContent.setTracksFromAPI(tracksFromAPI);
+                                break;
+                            }
+                        }
+                    }
+                    searchBar.setText("");
+                }
+            }
+        });
 
         //---Playlist Selector ComboBox---
         playlistSelector = new JComboBox();
@@ -207,16 +273,18 @@ public class MusicPlayerFrame extends JFrame {
                 return topTracksContent;
             case Util.TOP_ALBUMS_CONTENT:
                 return topAlbumsContent;
+            case Util.SEARCH_RESULTS_CONTENT:
+                return searchResultsContent;
         }
         return null;
     }
 
-    private void fillAllSongsNames() {
+    public void fillAllSongsNames() {
+        allSongsNames.clear();
         for (int i = 0; i < allSongs.size(); i++) {
             allSongsNames.add(allSongs.get(i).getName());
         }
     }
-
     public void setCurrentPlaylistNames(List<String> songNames) {
         currentPlaylistNames = new ArrayList<>(songNames);
         currentPLSongs.clear();
@@ -257,7 +325,7 @@ public class MusicPlayerFrame extends JFrame {
         panel.setVisible(visible);
     }
 
-    private void showContent(int content) {
+    public void showContent(int content) {
         openingContent.setVisible(false);
         musicContent.setVisible(false);
         createPLContent.setVisible(false);
@@ -265,6 +333,7 @@ public class MusicPlayerFrame extends JFrame {
         topArtistsContent.setVisible(false);
         topTracksContent.setVisible(false);
         topAlbumsContent.setVisible(false);
+        searchResultsContent.setVisible(false);
         musicContent.clearMusicContent();
         switch (content) {
             case Util.MUSIC_CONTENT:
@@ -291,6 +360,10 @@ public class MusicPlayerFrame extends JFrame {
                 topAlbumsContent.setVisible(true);
                 currentContent = Util.TOP_ALBUMS_CONTENT;
                 break;
+            case Util.SEARCH_RESULTS_CONTENT:
+                searchResultsContent.setVisible(true);
+                currentContent = Util.SEARCH_RESULTS_CONTENT;
+                break;
         }
     }
 
@@ -302,11 +375,13 @@ public class MusicPlayerFrame extends JFrame {
         topArtistsContent.init();
         topTracksContent.init();
         topAlbumsContent.init();
+        searchResultsContent.init();
     }
 
     public void addComponents() {
         header.add(menuShower);
         header.add(playlistSelector);
+        header.add(searchBar);
 
         menu.add(musicContentButton);
         menu.add(createPlaylist);
@@ -325,13 +400,13 @@ public class MusicPlayerFrame extends JFrame {
         this.add(topArtistsContent);
         this.add(topTracksContent);
         this.add(topAlbumsContent);
+        this.add(searchResultsContent);
     }
 
     public void loadSongs(String folderPath) {
         List<String> pathsOfSongs = new ArrayList(SongLoader.loadFromFolder(folderPath));
         for (String path : pathsOfSongs) {
-            if (path.substring(path.lastIndexOf(".")).equals(".mp3") ||
-                    path.substring(path.lastIndexOf(".")).equals(".wav") ||
+            if (    path.substring(path.lastIndexOf(".")).equals(".wav") ||
                     path.substring(path.lastIndexOf(".")).equals(".au")){
                 allSongs.add(new Song(path,folderPath));
             } else {
