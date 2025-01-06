@@ -13,7 +13,6 @@ import java.util.List;
 
 public class Playlist extends JPanel {
     private String title;
-    private List<JPanel> records = new ArrayList<>();
     private int cornerRadius;
     private Color panelColor;
     private List<String> allSongNames = new ArrayList<>();
@@ -65,7 +64,6 @@ public class Playlist extends JPanel {
 
             add(playlistUpperComponents);
         }
-
 
         addNewRecords(currentNames);
         playlistCounter++;
@@ -198,7 +196,11 @@ public class Playlist extends JPanel {
     }
 
     public void checkHearts() {
-        for (int i = 1; i < currentNames.size(); i++) {
+        int index = 0;
+        if (!main) {
+            index = 1;
+        }
+        for (int i = index; i < currentNames.size(); i++) {
             RoundButton nameButton = (RoundButton)(((JPanel)getComponents()[i]).getComponent(0));
             RoundButton likeButton = (RoundButton)(((JPanel)((JPanel)getComponents()[i]).getComponent(1)).getComponent(0));
             for (int j = 0; j < frame.getAllSongNames().size(); j++) {
@@ -218,8 +220,10 @@ public class Playlist extends JPanel {
     public void update() {
         frame.setCurrentPlaylistNames(currentNames);
         frame.setCurSong(0);
-        frame.getCurPlaylist().checkHearts();
-        frame.getCurPlaylist().setRecordBackgroundColor(Util.orange_dark_color,frame.getCurSongNum());
+        if (frame.getCurPlaylist() != null) {
+            frame.getCurPlaylist().checkHearts();
+            frame.getCurPlaylist().setRecordBackgroundColor(Util.orange_dark_color,frame.getCurSongNum());
+        }
         validate();
         repaint();
     }
@@ -298,6 +302,12 @@ public class Playlist extends JPanel {
 
             record.add(buttonPanel, BorderLayout.EAST);
             add(record);
+            /*if (playlistCounter == 0) {
+                validate();
+                repaint();
+            } else {
+                update();
+            }*/
         }
     }
 
@@ -333,7 +343,7 @@ public class Playlist extends JPanel {
         }
         int pos = getPositionFromName(nameButton.getText());
         SettingsDropDown settingsDropDown = new SettingsDropDown(
-                Util.blue_color,this.cornerRadius,nameButton.getText());
+                Util.blue_color,this.cornerRadius,nameButton.getText(),this.frame);
         Rectangle rec = this.frame.getCurPlaylist().getBounds();
         settingsDropDown.setBounds(rec.width + 200,rec.y + 50,100,200);
         MusicContent mc = (MusicContent)this.frame.getContent(Util.MUSIC_CONTENT);
@@ -345,16 +355,21 @@ public class Playlist extends JPanel {
             }
         } else {
             if (somethingIsOpen) {
-                for (int k = 0; k < mc.getComponentCount(); k++) {
-                    if (mc.getComponent(k).toString().equals(settingsDropDown.toString())) {
-                        mc.remove(k);
-                        break;
-                    }
-                }
-                mc.repaint();
+                closeSettingsDropDown();
                 settingsOpened.set(pos,!settingsOpened.get(pos));
             }
         }
+    }
+
+    public void closeSettingsDropDown() {
+        MusicContent mc = (MusicContent)this.frame.getContent(Util.MUSIC_CONTENT);
+        for (int k = 0; k < mc.getComponents().length; k++) {
+            if (mc.getComponents()[k].getClass().getName().equals("gui.SettingsDropDown")) {
+                mc.remove(k);
+                break;
+            }
+        }
+        mc.repaint();
     }
 
     private void removeSongFromPlaylist(ActionEvent e) {
