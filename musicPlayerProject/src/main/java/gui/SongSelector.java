@@ -38,10 +38,15 @@ public class SongSelector extends JPanel{
             song.setFont(new Font(Font.SANS_SERIF,Font.BOLD,20));
             song.setFocusable(false);
             song.addActionListener(e -> {
-                RoundButton songNameButton = (RoundButton)(songs.get(finalI).getComponent(0));
+                RoundButton songNameButton = (RoundButton)e.getSource();
                 if (isSelected.get(finalI)) {
                     removeSongFromName(songNameButton.getText());
-                    selectedIndexes.remove(finalI);
+                    for(int j = 0; j < selectedIndexes.size(); j++) {
+                        if (selectedIndexes.get(j) == finalI) {
+                            selectedIndexes.remove(j);
+                            break;
+                        }
+                    }
                     songNameButton.setColor(panelColor);
                     songNameButton.setForeground(panelColor.darker());
                 } else {

@@ -46,42 +46,60 @@ public class SearchResultsContent extends JPanel implements Content{
         addButton.setFocusable(false);
         addButton.setFont(Util.myFont);
         addButton.addActionListener(e -> {
-            SongPlayer_Agg playerAgg = new SongPlayer_Agg();
-            List<String> newSongs = new ArrayList<>();
-            for (int i = 0; i < songSelector.getSelectedIndexes().size(); i++) {
-                String id = tracksFromAPI.get(songSelector.getSelectedIndexes().get(i)).getId();
-                String originalTitle = tracksFromAPI.get(songSelector.getSelectedIndexes().get(i)).getOriginalTitle();
-                long startTime = System.nanoTime();
-                String songWithFolder = playerAgg.downloadSongToFolder("music/",id,originalTitle);
-                long endTime = System.nanoTime();
-                System.out.println("Conversion time : "+Util.getDurationInHumanTime((endTime-startTime)/1000000000));
-                if (songWithFolder != null) {
-                    Song newSong = new Song(songWithFolder,"music/");
-                    mpf.getAllSongs().add(newSong);
-                    newSongs.add(newSong.getName());
+            // Show the loading content immediately
+            mpf.showContent(Util.LOADING_CONTENT);
+
+            // Create a SwingWorker to perform the time-consuming task
+            SwingWorker<Void, Void> worker = new SwingWorker<>() {
+                @Override
+                protected Void doInBackground() {
+                    SongPlayer_Agg playerAgg = new SongPlayer_Agg();
+                    List<String> newSongs = new ArrayList<>();
+
+                    for (int i = 0; i < songSelector.getSelectedIndexes().size(); i++) {
+                        String id = tracksFromAPI.get(songSelector.getSelectedIndexes().get(i)).getId();
+                        String originalTitle = tracksFromAPI.get(songSelector.getSelectedIndexes().get(i)).getOriginalTitle();
+
+                        long startTime = System.nanoTime();
+                        String songWithFolder = playerAgg.downloadSongToFolder("music/", id, originalTitle);
+                        long endTime = System.nanoTime();
+                        System.out.println("Conversion time : " + Util.getDurationInHumanTime((endTime - startTime) / 1000000000));
+
+                        if (songWithFolder != null) {
+                            Song newSong = new Song(songWithFolder, "music/");
+                            mpf.getAllSongs().add(newSong);
+                            newSongs.add(newSong.getName());
+                        }
+                    }
+
+                    mpf.fillAllSongsNames();
+                    mpf.setCurrentPlaylistNames(mpf.getAllSongNames());
+                    mpf.setCurSong(0);
+
+                    mpf.getCurPlaylist().addNewNames(newSongs);
+                    mpf.getCurPlaylist().addNewRecords(newSongs);
+                    mpf.getCurPlaylist().update();
+                    songSelector.clearSelectedSongs();
+
+                    CreatePlaylistContent cpc = (CreatePlaylistContent) mpf.getContent(Util.CREATE_PLAYLIST_CONTENT);
+                    for (int i = 0; i < cpc.getComponents().length; i++) {
+                        if (cpc.getComponents()[i] instanceof JScrollPane) {
+                            JScrollPane sp = (JScrollPane) cpc.getComponents()[i];
+                            SongSelector ss = ((SongSelector) sp.getViewport().getView());
+                            ss.clearAll();
+                            ss.addSongs(mpf.getAllSongNames());
+                            break;
+                        }
+                    }
+                    return null;
                 }
-            }
-            mpf.fillAllSongsNames();
-            mpf.setCurrentPlaylistNames(mpf.getAllSongNames());
-            mpf.setCurSong(0);
 
-            mpf.getCurPlaylist().addNewNames(newSongs);
-            mpf.getCurPlaylist().addNewRecords(newSongs);
-            mpf.getCurPlaylist().update();
-            songSelector.clearSelectedSongs();
-
-            CreatePlaylistContent cpc = (CreatePlaylistContent) mpf.getContent(Util.CREATE_PLAYLIST_CONTENT);
-            for (int i = 0; i < cpc.getComponents().length; i++) {
-                if (cpc.getComponents()[i] instanceof JScrollPane) {
-                    JScrollPane sp = (JScrollPane)cpc.getComponents()[i];
-                    SongSelector ss = ((SongSelector)sp.getViewport().getView());
-                    ss.clearAll();
-                    ss.addSongs(mpf.getAllSongNames());
-                    break;
+                @Override
+                protected void done() {
+                    mpf.showContent(Util.MUSIC_CONTENT);
                 }
-            }
-
-            mpf.showContent(Util.MUSIC_CONTENT);
+            };
+            worker.execute();
         });
 
         add(sp);

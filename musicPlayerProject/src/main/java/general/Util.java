@@ -1,7 +1,10 @@
 package general;
 import gui.CustomScrollBarUI;
+import org.json.JSONObject;
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Util {
     public static final int OPENING_CONTENT = -1;
@@ -12,6 +15,8 @@ public class Util {
     public static final int TOP_TRACKS_CONTENT = 4;
     public static final int TOP_ALBUMS_CONTENT = 5;
     public static final int SEARCH_RESULTS_CONTENT = 6;
+    public static final int ABOUT_ME_CONTENT = 7;
+    public static final int LOADING_CONTENT = 8;
     public static final Color blue_dark_color = new Color(0x264653);
     public static final Color blue_color = new Color(0x2a9d8f);
     public static final Color orange_light_color = new Color(0xe9c46a);
@@ -62,5 +67,21 @@ public class Util {
 
     public static String getDurationInHumanTime(long duration) {
         return (duration / 60) + ":" + (duration % 60);
+    }
+
+    public static void writeExampleUserCredentials() {
+        JSONObject userCredentials = new JSONObject();
+
+        userCredentials.put("email", "blablabla");
+        userCredentials.put("password", "blablabla");
+
+        String filePath = "userCredentials.json";
+
+        try (FileWriter fileWriter = new FileWriter(filePath)) {
+            fileWriter.write(userCredentials.toString(4));
+            System.out.println("JSON file created: " + filePath);
+        } catch (IOException e) {
+            System.err.println("Error writing JSON file: " + e.getMessage());
+        }
     }
 }

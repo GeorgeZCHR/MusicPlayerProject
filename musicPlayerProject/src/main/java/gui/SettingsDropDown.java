@@ -1,4 +1,5 @@
 package gui;
+import general.MusicPlayerFrame;
 import general.Util;
 import javax.swing.*;
 import java.awt.*;
@@ -8,10 +9,13 @@ public class SettingsDropDown extends JPanel {
     private Color color;
     private int cornerRadius;
     private String songName;
-    public SettingsDropDown(Color color, int cornerRadius, String songName) {
+    private MusicPlayerFrame mpf;
+    public SettingsDropDown(Color color, int cornerRadius,
+                            String songName, MusicPlayerFrame mpf) {
         this.color = color;
         this.cornerRadius = cornerRadius;
         this.songName = songName;
+        this.mpf = mpf;
         setOpaque(false);
         setLayout(null);
 
@@ -22,6 +26,7 @@ public class SettingsDropDown extends JPanel {
         addButton.setFont(Util.myFont);
         addButton.setFocusable(false);
         addButton.addActionListener(e -> {
+            mpf.getCurPlaylist().closeSettingsDropDown();
             System.out.println("Trying to add " + this.songName + "!");
         });
 
@@ -32,6 +37,7 @@ public class SettingsDropDown extends JPanel {
         removeButton.setFont(Util.myFont);
         removeButton.setFocusable(false);
         removeButton.addActionListener(e -> {
+            mpf.getCurPlaylist().closeSettingsDropDown();
             System.out.println("Trying to remove " + this.songName + "!");
         });
 
@@ -42,10 +48,11 @@ public class SettingsDropDown extends JPanel {
         editButton.setFont(Util.myFont);
         editButton.setFocusable(false);
         editButton.addActionListener(e -> {
+            mpf.getCurPlaylist().closeSettingsDropDown();
             System.out.println("Trying to edit " + this.songName + "!");
         });
 
-        add(addButton);
+        //add(addButton);
         add(removeButton);
         add(editButton);
     }

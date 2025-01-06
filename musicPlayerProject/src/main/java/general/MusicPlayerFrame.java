@@ -34,8 +34,11 @@ public class MusicPlayerFrame extends JFrame {
     private Playlist curPlaylist;
     private Song currentSong;
     private int currentSongNum = 0;
+    public ProfileDropDown profileDropDown = new ProfileDropDown(Util.orange_color,20,this);
+    public boolean profileShowing = false;
     //---Header---
     private RoundButton menuShower = new RoundButton("≡",Util.orange_color,20,20);
+    private OvalButton profileButton = new OvalButton("",Util.orange_color);
     private boolean showing = true;
     private JComboBox playlistSelector;
     private CustomTextField searchBar = new CustomTextField(Util.orange_color,20,20);
@@ -57,20 +60,26 @@ public class MusicPlayerFrame extends JFrame {
     private TopTracksContent topTracksContent = new TopTracksContent(null);
     private TopAlbumsContent topAlbumsContent = new TopAlbumsContent(null);
     private SearchResultsContent searchResultsContent = new SearchResultsContent(null,this);
+    private AboutMeContent aboutMeContent = new AboutMeContent(null,this);
+    private LoadingContent loadingContent = new LoadingContent(null,this);
     //----------------
-        public MusicPlayerFrame(User user, FirestoreManager fr, int width, int height) {
-            this.user = user;
-            this.fr = fr;
+    public MusicPlayerFrame(User user, FirestoreManager fr, int width, int height) {
+        this.user = user;
+        this.fr = fr;
         this.width = width;
         this.height = height;
-        realW = width - 16;  // For Windows 10
-        realH = height - 39; // For Windows 10
+
+        this.pack();
+        Insets insets = this.getInsets();
 
         this.setTitle("MusicPlayer");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(this.width,this.height);
         this.setLayout(null);
         this.setIconImage(image);
+
+        realW = this.width - insets.left - insets.right;
+        realH = this.height - insets.top - insets.bottom;
 
         //---Header, Footer, Menu, Contents---
         header.setBounds(0,0,realW,50);
@@ -90,6 +99,8 @@ public class MusicPlayerFrame extends JFrame {
         createContent(topTracksContent,Util.blue_color.brighter(),false);
         createContent(topAlbumsContent,Util.blue_color.brighter(),false);
         createContent(searchResultsContent,Util.blue_color.brighter(),false);
+        createContent(aboutMeContent,Util.blue_color.brighter(),false);
+        createContent(loadingContent,Util.blue_color.brighter(),false);
 
         loadSongs("music/");
         fillAllSongsNames();
@@ -174,7 +185,7 @@ public class MusicPlayerFrame extends JFrame {
 
         //---Playlist Selector ComboBox---
         playlistSelector = new JComboBox();
-        playlistSelector.setBounds((int)(header.getWidth() * 0.74),(int)(header.getHeight() * 0.1),
+        playlistSelector.setBounds((int)(header.getWidth() * 0.6),(int)(header.getHeight() * 0.1),
                 (int)(header.getWidth() * 0.24),(int)(header.getHeight() * 0.8));
         playlistSelector.addActionListener(e -> {
             for (int i = 0; i < allPlaylists.size(); i++) {
@@ -194,6 +205,30 @@ public class MusicPlayerFrame extends JFrame {
             }
         });
         playlistSelector.addItem(musicContent.mainPlaylist.getTitle());
+
+        //---Login Logout Register Button---
+        ImageIcon accountIcon = new ImageIcon("img/circle-user-orange.png");
+        Image image = accountIcon.getImage(); // resize the icon
+        Image scaledImage = image.getScaledInstance(35, 35, Image.SCALE_SMOOTH); // scale it
+        accountIcon = new ImageIcon(scaledImage);
+
+        profileButton.setIcon(accountIcon);
+        profileButton.setBounds((int)(header.getWidth() * 0.9),(int)(header.getHeight() * 0.1),
+                (int)(header.getWidth() * 0.04),(int)(header.getHeight() * 0.8));
+        profileButton.setFocusable(false);
+        profileButton.setFont(Util.songNameFont);
+        profileButton.addActionListener(e -> {
+            if (profileShowing) {
+                profileDropDown.setVisible(false);
+            } else {
+                profileDropDown.setVisible(true);
+            }
+            profileShowing = !profileShowing;
+        });
+
+        profileDropDown.setBounds((int)(header.getWidth() * 0.85),header.getHeight() + 5,
+                (int)(header.getWidth() * 0.13),204);
+        profileDropDown.setVisible(false);
 
         //---Footer---
         // todo
@@ -237,7 +272,7 @@ public class MusicPlayerFrame extends JFrame {
         showing = !showing;
     }
 
-    private JPanel getCurrentContent() {
+    public JPanel getCurrentContent() {
         switch (currentContent) {
             case Util.OPENING_CONTENT:
                 return openingContent;
@@ -253,6 +288,12 @@ public class MusicPlayerFrame extends JFrame {
                 return topTracksContent;
             case Util.TOP_ALBUMS_CONTENT:
                 return topAlbumsContent;
+            case Util.SEARCH_RESULTS_CONTENT:
+                return searchResultsContent;
+            case Util.ABOUT_ME_CONTENT:
+                return aboutMeContent;
+            case Util.LOADING_CONTENT:
+                return loadingContent;
         }
         return null;
     }
@@ -275,6 +316,10 @@ public class MusicPlayerFrame extends JFrame {
                 return topAlbumsContent;
             case Util.SEARCH_RESULTS_CONTENT:
                 return searchResultsContent;
+            case Util.ABOUT_ME_CONTENT:
+                return aboutMeContent;
+            case Util.LOADING_CONTENT:
+                return loadingContent;
         }
         return null;
     }
@@ -334,6 +379,9 @@ public class MusicPlayerFrame extends JFrame {
         topTracksContent.setVisible(false);
         topAlbumsContent.setVisible(false);
         searchResultsContent.setVisible(false);
+        aboutMeContent.setVisible(false);
+        loadingContent.setVisible(false);
+        loadingContent.stopTimer();
         musicContent.clearMusicContent();
         switch (content) {
             case Util.MUSIC_CONTENT:
@@ -364,6 +412,15 @@ public class MusicPlayerFrame extends JFrame {
                 searchResultsContent.setVisible(true);
                 currentContent = Util.SEARCH_RESULTS_CONTENT;
                 break;
+            case Util.ABOUT_ME_CONTENT:
+                aboutMeContent.setVisible(true);
+                currentContent = Util.ABOUT_ME_CONTENT;
+                break;
+            case Util.LOADING_CONTENT:
+                loadingContent.setVisible(true);
+                currentContent = Util.LOADING_CONTENT;
+                loadingContent.startTimer();
+                break;
         }
     }
 
@@ -376,12 +433,15 @@ public class MusicPlayerFrame extends JFrame {
         topTracksContent.init();
         topAlbumsContent.init();
         searchResultsContent.init();
+        aboutMeContent.init();
+        loadingContent.init();
     }
 
     public void addComponents() {
         header.add(menuShower);
         header.add(playlistSelector);
         header.add(searchBar);
+        header.add(profileButton);
 
         menu.add(musicContentButton);
         menu.add(createPlaylist);
@@ -393,6 +453,7 @@ public class MusicPlayerFrame extends JFrame {
         this.add(header);
         this.add(footer);
         this.add(menu);
+        this.add(profileDropDown);
         this.add(openingContent);
         this.add(musicContent);
         this.add(createPLContent);
@@ -401,6 +462,8 @@ public class MusicPlayerFrame extends JFrame {
         this.add(topTracksContent);
         this.add(topAlbumsContent);
         this.add(searchResultsContent);
+        this.add(aboutMeContent);
+        this.add(loadingContent);
     }
 
     public void loadSongs(String folderPath) {
