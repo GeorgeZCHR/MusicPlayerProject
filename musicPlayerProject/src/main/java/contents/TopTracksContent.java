@@ -18,11 +18,14 @@ import java.util.List;
 public class TopTracksContent extends JPanel implements Content{
     private List<Track> trackList;
     private int topTrackNum = 0;
-    private JLabel topTrackImage, topTrackNumLabel;
-    private JLabel topTrackName;
-    private JLabel topTrackPlayCount;
-    private JLabel topTrackListeners;
-    private JLabel topTrackURL;
+    public JLabel topTrackImage, topTrackNumLabel, topTrackNameLabel;
+    public JLabel topTrackName, topTrackPlayCountLabel, topTrackListenersLabel;
+    public JLabel topTrackPlayCount, topTrackURLLabel;
+    public JLabel topTrackListeners;
+    public JLabel topTrackURL;
+    public BufferedImage image;
+    public ImageIcon icon;
+    public RoundButton topTracksNext,topTracksBack;
 
     public TopTracksContent(LayoutManager layout) { super(layout); }
 
@@ -82,7 +85,6 @@ public class TopTracksContent extends JPanel implements Content{
 
         //---Top Track Image---
         URL url;
-        BufferedImage image;
         try {
             //System.out.println(trackList.get(topTrackNum).getImageHolder().getMegaImage());
             url = new URL(trackList.get(topTrackNum).getImageHolder().getExtraLargeImage());
@@ -90,7 +92,7 @@ public class TopTracksContent extends JPanel implements Content{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        ImageIcon icon = new ImageIcon(image);
+        icon = new ImageIcon(image);
         topTrackImage = new JLabel(icon);
         // Optional: Center align the image in the JLabel
         topTrackImage.setHorizontalAlignment(JLabel.CENTER);
@@ -107,7 +109,7 @@ public class TopTracksContent extends JPanel implements Content{
                 (int)(0.9 * getHeight()),50,50);
 
         //---Next Button---
-        RoundButton topTracksNext = new RoundButton(
+        topTracksNext = new RoundButton(
                 "Next", Util.orange_color, 20,20);
         topTracksNext.setFocusable(false);
         topTracksNext.setFont(Util.myFont);
@@ -124,7 +126,7 @@ public class TopTracksContent extends JPanel implements Content{
         });
 
         //---Back Button---
-        RoundButton topTracksBack = new RoundButton(
+        topTracksBack = new RoundButton(
                 "Back",Util.orange_color, 20,20);
         topTracksBack.setFocusable(false);
         topTracksBack.setFont(Util.myFont);
@@ -140,7 +142,7 @@ public class TopTracksContent extends JPanel implements Content{
         });
 
         //---Top Track Name---
-        JLabel topTrackNameLabel = new JLabel("Name          :");
+        topTrackNameLabel = new JLabel("Name          :");
         topTrackNameLabel.setBounds(icon.getIconWidth() + 40,
                 (int)(0.05 * getHeight()),150,50);
         topTrackNameLabel.setFont(Util.myFont);
@@ -152,7 +154,7 @@ public class TopTracksContent extends JPanel implements Content{
         topTrackName.setForeground(Util.blue_dark_color);
 
         //---Top Track Play Count---
-        JLabel topTrackPlayCountLabel = new JLabel("Play Count :");
+        topTrackPlayCountLabel = new JLabel("Play Count :");
         topTrackPlayCountLabel.setBounds(icon.getIconWidth() + 40,
                 (int)(0.05 * getHeight())+50,150,50);
         topTrackPlayCountLabel.setFont(Util.myFont);
@@ -164,7 +166,7 @@ public class TopTracksContent extends JPanel implements Content{
         topTrackPlayCount.setForeground(Util.blue_dark_color);
 
         //---Top Track Listeners---
-        JLabel topTrackListenersLabel = new JLabel("Listeners   :");
+        topTrackListenersLabel = new JLabel("Listeners   :");
         topTrackListenersLabel.setBounds(icon.getIconWidth() + 40,
                 (int)(0.05 * getHeight())+100,150,50);
         topTrackListenersLabel.setFont(Util.myFont);
@@ -176,7 +178,7 @@ public class TopTracksContent extends JPanel implements Content{
         topTrackListeners.setForeground(Util.blue_dark_color);
 
         //---Top Track URL---
-        JLabel topTrackURLLabel = new JLabel("URL :");
+        topTrackURLLabel = new JLabel("URL :");
         topTrackURLLabel.setBounds((int)(0.02 * getWidth()),
                 icon.getIconHeight()+50,100,50);
         topTrackURLLabel.setFont(Util.myFont);

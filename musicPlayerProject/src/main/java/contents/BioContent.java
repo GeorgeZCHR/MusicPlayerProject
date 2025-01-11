@@ -11,11 +11,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class BioContent extends JPanel implements Content {
-    CustomTextField artistInput = new CustomTextField(Util.orange_color,20,20);
-    private RoundButton viewMoreButton = new RoundButton(
+    public JLabel artistLabel;
+    public CustomTextField artistInput = new CustomTextField(Util.orange_color,20,20);
+    public RoundButton viewMoreButton = new RoundButton(
             "View More Bio", Util.orange_color,20,20);
-    private JScrollPane bioTextAreaSP;
-    private JTextArea bioTextArea = new JTextArea();
+    public RoundButton searchBio;
+    public JScrollPane bioTextAreaSP;
+    public JTextArea bioTextArea = new JTextArea();
     private boolean isArtistBioEmpty = true;
     private boolean isArtistBioValid = false;
     private String wikiURL;
@@ -25,7 +27,7 @@ public class BioContent extends JPanel implements Content {
     @Override
     public void init() {
         //---Artist Label---
-        JLabel artistLabel = new JLabel("Enter the artist's name:");
+        artistLabel = new JLabel("Enter the artist's name:");
         artistLabel.setFont(Util.myFont);
         artistLabel.setForeground(Util.blue_dark_color);
         artistLabel.setBounds((int)(0.02 * getWidth()),
@@ -37,7 +39,7 @@ public class BioContent extends JPanel implements Content {
         artistInput.setFont(Util.myFont);
 
         //---Search Bio Button---
-        RoundButton searchBio = new RoundButton(
+        searchBio = new RoundButton(
                 "Search",Util.orange_color,20,20);
         searchBio.setFocusable(false);
         searchBio.setFont(Util.myFont);

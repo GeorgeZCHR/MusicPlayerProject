@@ -3,12 +3,18 @@ package contents;
 import general.MusicPlayerFrame;
 import general.Util;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 
 public class AboutMeContent extends JPanel implements Content {
     private MusicPlayerFrame mpf;
-    private JLabel accountImage,name,password,email,admin;
+    public JLabel accountImage,name,password,email,admin;
+    public JLabel nameLabel, passwordLabel, emailLabel, adminLabel;
+    public BufferedImage image;
+    public ImageIcon icon;
 
     public AboutMeContent(LayoutManager layout, MusicPlayerFrame mpf) {
         super(layout);
@@ -18,14 +24,21 @@ public class AboutMeContent extends JPanel implements Content {
     @Override
     public void init() {
 
+        try {
+            image = ImageIO.read(new File("img/circle-user-blue.png"));
+            icon = new ImageIcon(image);
+        } catch (Exception e) {
+            image = null;
+            icon = new ImageIcon("img/circle-user-blue.png");
+        }
         //---Account Image---
-        accountImage = new JLabel(new ImageIcon("img/circle-user-blue.png"));
+        accountImage = new JLabel(icon);
         accountImage.setBounds((int)(0.02 * getWidth()),(int)(0.02 * getHeight()),
                 256,256);
         //accountImage.setToolTipText("Account");
 
         //---Name Label---
-        JLabel nameLabel = new JLabel("Username : ");
+        nameLabel = new JLabel("Username : ");
         nameLabel.setBounds((int)(0.02 * getWidth()),280,150,50);
         nameLabel.setFont(Util.myFont);
         nameLabel.setForeground(Util.blue_dark_color);
@@ -36,7 +49,7 @@ public class AboutMeContent extends JPanel implements Content {
         name.setForeground(Util.blue_dark_color);
 
         //---Password Label---
-        JLabel passwordLabel = new JLabel("Password : ");
+        passwordLabel = new JLabel("Password : ");
         passwordLabel.setBounds((int)(0.02 * getWidth()),330,150,50);
         passwordLabel.setFont(Util.myFont);
         passwordLabel.setForeground(Util.blue_dark_color);
@@ -47,7 +60,7 @@ public class AboutMeContent extends JPanel implements Content {
         password.setForeground(Util.blue_dark_color);
 
         //---Email Label---
-        JLabel emailLabel = new JLabel("Email        : ");
+        emailLabel = new JLabel("Email        : ");
         emailLabel.setBounds((int)(0.02 * getWidth()),380,150,50);
         emailLabel.setFont(Util.myFont);
         emailLabel.setForeground(Util.blue_dark_color);
@@ -58,7 +71,7 @@ public class AboutMeContent extends JPanel implements Content {
         email.setForeground(Util.blue_dark_color);
 
         //---Admin Label---
-        JLabel adminLabel = new JLabel("Admin       : ");
+        adminLabel = new JLabel("Admin       : ");
         adminLabel.setBounds((int)(0.02 * getWidth()),430,150,50);
         adminLabel.setFont(Util.myFont);
         adminLabel.setForeground(Util.blue_dark_color);

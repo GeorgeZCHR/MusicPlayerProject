@@ -20,9 +20,13 @@ import java.util.List;
 public class TopArtistsContent extends JPanel implements Content {
     private List<Artist> artistList;
     private int topArtistNum = 0;
-    private JLabel topArtistImage, topArtistNumLabel;
-    private JLabel topArtistName, topArtistPlayCount;
-    private JLabel topArtistListeners, topArtistURL;
+    public JLabel topArtistImage, topArtistNumLabel, topArtistNameLabel;
+    public JLabel topArtistName, topArtistPlayCount, topArtistPlayCountLabel;
+    public JLabel topArtistListeners, topArtistURL, topArtistListenersLabel;
+    public JLabel topArtistURLLabel;
+    public RoundButton topArtistsNext, topArtistsBack;
+    public ImageIcon icon;
+    public BufferedImage image;
 
     public TopArtistsContent(LayoutManager layout) { super(layout); }
     @Override
@@ -70,14 +74,13 @@ public class TopArtistsContent extends JPanel implements Content {
 
         //---Top Artist Image---
         URL url;
-        BufferedImage image;
         try {
             url = new URL(artistList.get(topArtistNum).getImageHolder().getMegaImage());
             image = ImageIO.read(url);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        ImageIcon icon = new ImageIcon(image);
+        icon = new ImageIcon(image);
         topArtistImage = new JLabel(icon);
         // Optional: Center align the image in the JLabel
         topArtistImage.setHorizontalAlignment(JLabel.CENTER);
@@ -94,7 +97,7 @@ public class TopArtistsContent extends JPanel implements Content {
                 (int)(0.9 * getHeight()),50,50);
 
         //---Next Button---
-        RoundButton topArtistsNext = new RoundButton(
+        topArtistsNext = new RoundButton(
                 "Next", Util.orange_color, 20,20);
         topArtistsNext.setFocusable(false);
         topArtistsNext.setFont(Util.myFont);
@@ -111,7 +114,7 @@ public class TopArtistsContent extends JPanel implements Content {
         });
 
         //---Back Button---
-        RoundButton topArtistsBack = new RoundButton(
+        topArtistsBack = new RoundButton(
                 "Back",Util.orange_color, 20,20);
         topArtistsBack.setFocusable(false);
         topArtistsBack.setFont(Util.myFont);
@@ -127,7 +130,7 @@ public class TopArtistsContent extends JPanel implements Content {
         });
 
         //---Top Artist Name---
-        JLabel topArtistNameLabel = new JLabel("Name          :");
+        topArtistNameLabel = new JLabel("Name          :");
         topArtistNameLabel.setBounds(icon.getIconWidth() + 40,
                 (int)(0.05 * getHeight()),150,50);
         topArtistNameLabel.setFont(Util.myFont);
@@ -139,7 +142,7 @@ public class TopArtistsContent extends JPanel implements Content {
         topArtistName.setForeground(Util.blue_dark_color);
 
         //---Top Artist Play Count---
-        JLabel topArtistPlayCountLabel = new JLabel("Play Count :");
+        topArtistPlayCountLabel = new JLabel("Play Count :");
         topArtistPlayCountLabel.setBounds(icon.getIconWidth() + 40,
                 (int)(0.05 * getHeight())+50,150,50);
         topArtistPlayCountLabel.setFont(Util.myFont);
@@ -151,7 +154,7 @@ public class TopArtistsContent extends JPanel implements Content {
         topArtistPlayCount.setForeground(Util.blue_dark_color);
 
         //---Top Artist Listeners---
-        JLabel topArtistListenersLabel = new JLabel("Listeners   :");
+        topArtistListenersLabel = new JLabel("Listeners   :");
         topArtistListenersLabel.setBounds(icon.getIconWidth() + 40,
                 (int)(0.05 * getHeight())+100,150,50);
         topArtistListenersLabel.setFont(Util.myFont);
@@ -163,7 +166,7 @@ public class TopArtistsContent extends JPanel implements Content {
         topArtistListeners.setForeground(Util.blue_dark_color);
 
         //---Top Artist URL---
-        JLabel topArtistURLLabel = new JLabel("URL :");
+        topArtistURLLabel = new JLabel("URL :");
         topArtistURLLabel.setBounds((int)(0.02 * getWidth()),
                 icon.getIconHeight()+50,100,50);
         topArtistURLLabel.setFont(Util.myFont);

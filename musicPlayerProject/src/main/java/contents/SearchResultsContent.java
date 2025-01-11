@@ -13,7 +13,8 @@ import java.util.ArrayList;
 
 public class SearchResultsContent extends JPanel implements Content{
     private MusicPlayerFrame mpf;
-    private JScrollPane sp;
+    public JScrollPane sp;
+    public RoundButton clearButton, addButton;
     private List<TrackFromAPI> tracksFromAPI = new ArrayList<>();
     public SearchResultsContent(LayoutManager layout, MusicPlayerFrame mpf) {
         super(layout);
@@ -32,7 +33,7 @@ public class SearchResultsContent extends JPanel implements Content{
         ),Util.blue_color,getBackground());
 
         //---Clear Button---
-        RoundButton clearButton = new RoundButton("Clear", Util.orange_color, 20, 20);
+        clearButton = new RoundButton("Clear", Util.orange_color, 20, 20);
         clearButton.setBounds((int)(0.02 * getWidth()),(int)(0.9 * getHeight()),
                 (int)(0.47 * getWidth()),(int)(0.08 * this.getHeight()));
         clearButton.setFocusable(false);
@@ -40,7 +41,7 @@ public class SearchResultsContent extends JPanel implements Content{
         clearButton.addActionListener(e -> songSelector.clearSelectedSongs());
 
         //---Add Button---
-        RoundButton addButton = new RoundButton("Add", Util.orange_color, 20, 20);
+        addButton = new RoundButton("Add", Util.orange_color, 20, 20);
         addButton.setBounds((int)(0.51 * getWidth()),(int)(0.9 * getHeight()),
                 (int)(0.47 * getWidth()),(int)(0.08 * this.getHeight()));
         addButton.setFocusable(false);

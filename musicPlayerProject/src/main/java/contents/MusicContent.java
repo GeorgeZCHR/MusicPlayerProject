@@ -18,14 +18,13 @@ public class MusicContent extends JPanel implements Content {
     private int framePosition = 0;
     private boolean isHearted = false;
     private boolean songFinished = false;
-    private JLabel songNameLabel = new JLabel();
+    public JLabel songNameLabel = new JLabel();
     public OvalButton playPauseButton = new OvalButton("", Util.orange_color);
     public OvalButton nextButton = new OvalButton("",Util.orange_color);
     public OvalButton previousButton = new OvalButton("",Util.orange_color);
-    private JProgressBar progressBar;
+    public JProgressBar progressBar;
     public Playlist mainPlaylist;
-    private JScrollPane mainPlaylistSP;
-    private JComboBox playlistSelector;
+    public JScrollPane mainPlaylistSP;
     public MusicContent(LayoutManager layout, MusicPlayerFrame mpf) {
         super(layout);
         this.mpf = mpf;
@@ -39,29 +38,29 @@ public class MusicContent extends JPanel implements Content {
         mainPlaylist.setRecordBackgroundColor(Util.orange_dark_color,mpf.getCurSongNum());
 
         mainPlaylistSP = Util.createScrollPane(mainPlaylist,new Rectangle(
-                        (int)(getWidth() * 0.5) - 250,
-                        (int)(getHeight() * 0.01),500,300),
+                (int)(getWidth() * 0.02),(int)(getHeight() * 0.01),
+                (int)(getWidth() * 0.96),(int)(getHeight() * 0.5165)),
                 Util.blue_color,getBackground());
         mpf.getAllPlaylists().add(mainPlaylistSP);
 
         mpf.setCurPlaylist(mainPlaylist);
 
         //---Play/Pause Button---
-        playPauseButton.setBounds((getWidth()/2) - 30,
-                (int)(0.85 * getHeight()), 60,60);
+        playPauseButton.setBounds((int)(getWidth() * 0.5) - (int)(getWidth() * 0.0368),
+                (int)(0.85 * getHeight()), (int)(getWidth() * 0.0736),(int)(0.1033 * getHeight()));
         playPauseButton.setFocusable(false);
         playPauseButton.setText("▶");
         playPauseButton.setFont(Util.myFont);
         playPauseButton.addActionListener(e -> playPauseMusic());
 
-        //---Title Label---
+        /*//---Title Label---
         songNameLabel.setBounds((getWidth()/2) - 250,
                 (int)(0.55 * getHeight()), 500,50);
-        songNameLabel.setFont(Util.songNameFont);
+        songNameLabel.setFont(Util.songNameFont);*/
 
         //---Next Song Button---
-        nextButton.setBounds((int)(getWidth() * 0.75) - 30,
-                (int)(0.85 * getHeight()), 60,60);
+        nextButton.setBounds((int)(getWidth() * 0.75) - (int)(getWidth() * 0.0368),
+                (int)(0.85 * getHeight()),(int)(getWidth() * 0.0736),(int)(0.1033 * getHeight()));
         nextButton.setVisible(false);
         nextButton.setFocusable(false);
         nextButton.setText("⏩");
@@ -69,8 +68,8 @@ public class MusicContent extends JPanel implements Content {
         nextButton.addActionListener(e -> nextSong());
 
         //---Previous Song Button---
-        previousButton.setBounds((int)(getWidth() * 0.25) - 30,
-                (int)(0.85 * getHeight()), 60,60);
+        previousButton.setBounds((int)(getWidth() * 0.25) - (int)(getWidth() * 0.0368),
+                (int)(0.85 * getHeight()),(int)(getWidth() * 0.0736),(int)(0.1033 * getHeight()));
         previousButton.setVisible(false);
         previousButton.setFocusable(false);
         previousButton.setText("⏪");
@@ -83,9 +82,8 @@ public class MusicContent extends JPanel implements Content {
 
         //---Song Bar Slider---
         progressBar = new JProgressBar(0, 100);
-        progressBar.setBounds((int)(getWidth() * 0.02),
-                (int)(getHeight() * 0.75),
-                (int)(getWidth() * 0.96), 16);
+        progressBar.setBounds((int)(getWidth() * 0.02),(int)(getHeight() * 0.75),
+                (int)(getWidth() * 0.96),(int)(getHeight() * 0.0276));
         progressBar.setValue(0);
         progressBar.setStringPainted(true);
         progressBar.setVisible(false);
@@ -115,7 +113,7 @@ public class MusicContent extends JPanel implements Content {
         add(playPauseButton);
         add(nextButton);
         add(previousButton);
-        add(songNameLabel);
+       /* add(songNameLabel);*/
         add(mainPlaylistSP);
     }
 
@@ -215,20 +213,8 @@ public class MusicContent extends JPanel implements Content {
             } catch (UnsupportedAudioFileException | LineUnavailableException | IOException e) {
                 e.printStackTrace();
             }
-            //songSliderLength = clip.getFrameLength();
         }
     }
-
-    /*public void toggleHeart() {
-        if (mpf.getCurrentSong().isHearted()) {
-            heartButton.setText("\u2661");
-            mpf.getCurrentSong().setHearted(false);
-        } else {
-            heartButton.setText("\uFE0F");
-            mpf.getCurrentSong().setHearted(true);
-        }
-        mpf.getCurrentSong().addRemoveHeartFromName();
-    }*/
 
     public void nextSong() {
         if (clip != null) {
@@ -299,13 +285,7 @@ public class MusicContent extends JPanel implements Content {
         clip.start();
     }
 
-    public JLabel getSongNameLabel() {
+ /*   public JLabel getSongNameLabel() {
         return songNameLabel;
-    }
-    public Clip getClip() {
-        return clip;
-    }
-    public JComboBox getPlaylistSelector() {
-        return playlistSelector;
-    }
+    }*/
 }
