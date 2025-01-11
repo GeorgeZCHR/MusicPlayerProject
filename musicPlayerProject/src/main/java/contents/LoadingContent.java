@@ -8,7 +8,7 @@ import java.awt.*;
 
 public class LoadingContent extends JPanel implements Content{
     private MusicPlayerFrame mpf;
-    private JLabel waitingLabel;
+    public JLabel waitingLabel;
     private Timer timer;
     private int counter = 0;
 

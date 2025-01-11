@@ -12,8 +12,9 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.ImageIcon;
-import java.awt.LayoutManager;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -23,13 +24,17 @@ public class TopAlbumsContent extends JPanel implements Content {
 
     private List<Album> albumsList = new ArrayList<>();
     private int topAlbumsNum = 0;
-    private JLabel topAlbumsImage, topAlbumsNumLabel;
-    private JLabel topAlbumsName, topAlbumsPlayCount;
-    private JLabel topAlbumsArtistName, topAlbumsURL, topAlbumsArtistURL;
-    private RoundButton topAlbumsNext, topAlbumsBack;
-    private JLabel topAlbumsNameLabel, topAlbumsPlayCountLabel;
-    private JLabel topAlbumsArtistNameLabel, topAlbumsURLLabel;
-    private JLabel topAlbumsArtistURLLabel;
+    public JLabel topAlbumsImage, topAlbumsNumLabel;
+    public JLabel topAlbumsName, topAlbumsPlayCount;
+    public JLabel topAlbumsArtistName, topAlbumsURL, topAlbumsArtistURL;
+    public RoundButton topAlbumsNext, topAlbumsBack;
+    public JLabel topAlbumsNameLabel, topAlbumsPlayCountLabel;
+    public JLabel topAlbumsArtistNameLabel, topAlbumsURLLabel;
+    public JLabel topAlbumsArtistURLLabel;
+    public CustomTextField content;
+    public RoundButton search;
+    public BufferedImage image;
+    public ImageIcon icon;
 
     public TopAlbumsContent(LayoutManager layout) {
         super(layout);
@@ -37,12 +42,12 @@ public class TopAlbumsContent extends JPanel implements Content {
 
     @Override
     public void init() {
-        CustomTextField content = new CustomTextField(Util.orange_color,20,20);
+        content = new CustomTextField(Util.orange_color,20,20);
         content.setBounds((int) (0.02 * getWidth()),
                 (int) (0.01 * getHeight()), 400,(int) (0.08 * getHeight()));
         content.setFont(Util.myFont);
 
-        RoundButton search = new RoundButton("Search Artist",Util.orange_color,20,20);
+        search = new RoundButton("Search Artist",Util.orange_color,20,20);
         search.setBounds((int) (0.02 * getWidth()) + 420,(int) (0.01 * getHeight()),
                 200,(int) (0.08 * getHeight()));
         search.setFont(Util.myFont);
@@ -81,14 +86,13 @@ public class TopAlbumsContent extends JPanel implements Content {
 
         //---Top Album Image---
         URL url;
-        BufferedImage image;
         try {
             url = new URL(albumsList.get(topAlbumsNum).getImageHolder().getExtraLargeImage());
             image = ImageIO.read(url);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        ImageIcon icon = new ImageIcon(image);
+        icon = new ImageIcon(image);
         topAlbumsImage = new JLabel(icon);
         // Optional: Center align the image in the JLabel
         topAlbumsImage.setHorizontalAlignment(JLabel.CENTER);
@@ -254,7 +258,12 @@ public class TopAlbumsContent extends JPanel implements Content {
             image = ImageIO.read(url);
             icon = new ImageIcon(image);
         } catch (IOException e) {
-            icon = new ImageIcon("img/error_warning.png");
+            try {
+                image = ImageIO.read(new File("img/error_warning.png"));
+                icon = new ImageIcon(image.getScaledInstance(300,300, Image.SCALE_SMOOTH));
+            } catch (Exception ex) {
+                icon = new ImageIcon("img/error_warning.png");
+            }
         }
         topAlbumsImage.setIcon(icon);
         topAlbumsImage.setHorizontalAlignment(JLabel.CENTER);

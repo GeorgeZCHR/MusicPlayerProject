@@ -9,8 +9,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -23,7 +26,6 @@ public class MusicPlayerFrame extends JFrame {
     private JPanel footer = new JPanel(null);
     private List<Song> allSongs = new ArrayList<>();
     private List<String> allSongsNames = new ArrayList<>();
-    private Timer timer, sliderUpdateTimer;
     private Image image = (new ImageIcon("img/GIAM_Icon_AcademyOfMusic_RGB.png")).getImage();
     private int menuOptionCounter = 0;
     private int totalSeconds = 0;
@@ -37,13 +39,14 @@ public class MusicPlayerFrame extends JFrame {
     public ProfileDropDown profileDropDown = new ProfileDropDown(Util.orange_color,20,this);
     public boolean profileShowing = false;
     //---Header---
+    private ImageIcon accountIcon;
     private RoundButton menuShower = new RoundButton("≡",Util.orange_color,20,20);
     private OvalButton profileButton = new OvalButton("",Util.orange_color);
-    private boolean showing = true;
     private JComboBox playlistSelector;
     private CustomTextField searchBar = new CustomTextField(Util.orange_color,20,20);
     //----------------
     //---Menu---
+    private boolean isMenuShowing = true;
     private RectButton createPlaylist = new RectButton("Create Playlist",Util.orange_color);
     private RectButton musicContentButton = new RectButton("Music",Util.orange_color);
     private RectButton searchArtistBio = new RectButton("Search Artist Bio",Util.orange_color);
@@ -82,14 +85,15 @@ public class MusicPlayerFrame extends JFrame {
         realH = this.height - insets.top - insets.bottom;
 
         //---Header, Footer, Menu, Contents---
-        header.setBounds(0,0,realW,50);
+        header.setBounds(0,0,realW,(int)(0.074 * realH));
         header.setBackground(Util.blue_dark_color);
 
-        footer.setBounds(0,realH - header.getHeight(),realW,50);
+        footer.setBounds(0,realH - header.getHeight(),realW,(int)(0.074 * realH));
         footer.setBackground(Util.blue_dark_color);
 
-        menu.setBounds(0,header.getHeight(),250,footer.getY());
+        menu.setBounds(0,header.getHeight(),(int)(0.3672 * realH),footer.getY() - (int)(0.3672 * realH));
         menu.setBackground(Util.blue_color);
+        menu.setLayout(new BoxLayout(menu,BoxLayout.Y_AXIS));
 
         createContent(openingContent,Util.blue_color.brighter(),true);
         createContent(musicContent,Util.blue_color.brighter(),false);
@@ -207,7 +211,7 @@ public class MusicPlayerFrame extends JFrame {
         playlistSelector.addItem(musicContent.mainPlaylist.getTitle());
 
         //---Login Logout Register Button---
-        ImageIcon accountIcon = new ImageIcon("img/circle-user-orange.png");
+        accountIcon = new ImageIcon("img/circle-user-orange.png");
         Image image = accountIcon.getImage(); // resize the icon
         Image scaledImage = image.getScaledInstance(35, 35, Image.SCALE_SMOOTH); // scale it
         accountIcon = new ImageIcon(scaledImage);
@@ -233,11 +237,14 @@ public class MusicPlayerFrame extends JFrame {
         //---Footer---
         // todo
 
-        // Create a timer that updates every 1000 milliseconds (1 second)
-        timer = new Timer(1000, e -> {
-            musicContent.getSongNameLabel().setText(currentSong.getName());
+        Timer resizeTimer = new Timer(25, e -> resizeComponents());
+        resizeTimer.setRepeats(false);
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                resizeTimer.restart();
+            }
         });
-        timer.start();
 
         //---Add Components---
         addComponents();
@@ -246,30 +253,280 @@ public class MusicPlayerFrame extends JFrame {
         this.setVisible(true);
     }
 
+    public void resizeComponents() {
+        /*Content Pane Width  : 1064
+        Content Pane Height : 681
+
+        Header Width  : 1064
+        Header Height : 50
+
+        Footer Width  : 1064
+        Footer Height : 50
+
+        Content Width  : 816
+        Content Height : 581*/
+        int totalW = getContentPane().getSize().width;
+        int totalH = getContentPane().getSize().height;
+
+        header.setBounds(0,0,totalW,(int)(0.074 * totalH));
+        footer.setBounds(0,totalH - header.getHeight(),totalW,(int)(0.074 * totalH));
+        if (isMenuShowing) {
+            menu.setBounds(0,header.getHeight(),(int)(0.282 * totalW),footer.getY() - (int)(0.074 * totalH));
+            System.out.println("Menu getting orig size");
+        } else {
+            menu.setBounds(0,0,0,0);
+            System.out.println("Menu getting 0 size");
+        }
+        menu.repaint();
+        menu.revalidate();
+
+        resizeHeaderComponents();
+        //resizeFooterComponents(); if needed
+
+        //---openingContent---
+        openingContent.setBounds(
+                menu.getWidth(),header.getHeight(),
+                totalW - menu.getWidth(),
+                totalH - (header.getHeight() + footer.getHeight()));
+        int contentW = openingContent.getWidth();
+        int contentH = openingContent.getHeight();
+        openingContent.openingLabel.setBounds((int)(contentW * 0.02),(int)(contentH * 0.02),
+                (int)(contentW * 0.96),(int)(0.0861 * contentH));
+
+        //---musicContent---
+        musicContent.setBounds(
+                menu.getWidth(),header.getHeight(),
+                totalW - menu.getWidth(),
+                totalH - (header.getHeight() + footer.getHeight()));
+        musicContent.progressBar.setBounds((int)(contentW * 0.02),(int)(contentH * 0.75),
+                (int)(contentW * 0.96),(int)(contentH * 0.0276));
+        musicContent.playPauseButton.setBounds((int)(contentW * 0.5) - (int)(contentW * 0.0368),
+                (int)(0.85 * contentH), (int)(contentW * 0.0736),(int)(0.1033 * contentH));
+        musicContent.nextButton.setBounds((int)(contentW * 0.75) - (int)(contentW * 0.0368),
+                (int)(0.85 * contentH),(int)(contentW * 0.0736),(int)(0.1033 * contentH));
+        musicContent.previousButton.setBounds((int)(contentW * 0.25) - (int)(contentW * 0.0368),
+                (int)(0.85 * contentH),(int)(contentW * 0.0736),(int)(0.1033 * contentH));
+        /*musicContent.songNameLabel.setBounds((int)(contentW * 0.5) - (int)(contentW * 0.3064),
+                (int)(0.55 * contentH), (int)(contentW * 0.6128),(int)(0.0861 * contentH));*/
+        musicContent.mainPlaylistSP.setBounds((int)(contentW * 0.02),(int)(contentH * 0.01),
+                (int)(contentW * 0.96),(int)(contentH * 0.5165));
+
+        //---createPLContent---
+        createPLContent.setBounds(
+                menu.getWidth(),header.getHeight(),
+                totalW - menu.getWidth(),
+                totalH - (header.getHeight() + footer.getHeight()));
+        createPLContent.playlistNameLabel.setBounds((int)(0.02 * contentW),(int)(0.02 * contentH),
+                (int)(0.1839 * contentW),(int)(0.0861 * contentH));
+        createPLContent.playlistNameText.setBounds((int)(0.5 * contentW) - (int)(0.3003 * contentW),
+                (int)(0.02 * contentH),(int)(0.6005 * contentW),(int)(0.0861 * contentH));
+        createPLContent.jLabel.setBounds((int)(0.02 * contentW),(int)(0.1 * contentH),
+                (int)(0.96 * contentW),(int)(0.0861 * contentH));
+        createPLContent.create.setBounds((int)(0.98 * contentW - (int)(0.1471 * contentW)),
+                (int)(0.98 * contentH - (int)(0.0861 * contentH)),(int)(0.1471 * contentW),(int)(0.0861 * contentH));
+        createPLContent.clear.setBounds((int)(0.02 * contentW),(int)(0.98 * contentH - (int)(0.0861 * contentH)),
+                (int)(0.1471 * contentW),(int)(0.0861 * contentH));
+        createPLContent.sp.setBounds((int)(0.02 * contentW),(int)(0.1205 * contentH),
+                (int)(0.93 * contentW),(int)(0.76 * contentH));
+
+        //---bioContent---
+        bioContent.setBounds(
+                menu.getWidth(),header.getHeight(),
+                totalW - menu.getWidth(),
+                totalH - (header.getHeight() + footer.getHeight()));
+        bioContent.artistLabel.setBounds((int)(0.02 * contentW),(int)(0.02 * contentH),
+                (int)(0.3064 * contentW),(int)(0.0861 * contentH));
+        bioContent.artistInput.setBounds((int)(0.5 * contentW) - (int)(0.1839 * contentW),
+                (int)(0.02 * contentH),(int)(0.4902 * contentW),(int)(0.0861 * contentH));
+        bioContent.searchBio.setBounds((int)(0.02 * contentW),(int)(0.11 * contentH),
+                (int)(0.2451 * contentW),(int)(0.0861 * contentH));
+        bioContent.bioTextAreaSP.setBounds((int)(0.02 * contentW),(int)(0.2 * contentH),
+                (int)(0.96 * contentW),(int)(0.8 * contentH));
+        bioContent.viewMoreButton.setBounds((int)(0.98 * contentW) - (int)(0.2451 * contentW),
+                (int)(0.11 * contentH),(int)(0.2451 * contentW),(int)(0.0861 * contentH));
+
+        //---topArtistsContent---
+        topArtistsContent.setBounds(
+                menu.getWidth(),header.getHeight(),
+                totalW - menu.getWidth(),
+                totalH - (header.getHeight() + footer.getHeight()));
+        topArtistsContent.icon = new ImageIcon(topArtistsContent.image.getScaledInstance(
+                (int)(0.3676 * contentW),(int)(0.5164 * contentH),Image.SCALE_SMOOTH));
+        topArtistsContent.topArtistImage.setBounds((int)(0.02 * contentW),(int)(0.05 * contentH),
+                topArtistsContent.icon.getIconWidth(), topArtistsContent.icon.getIconHeight());
+        topArtistsContent.topArtistNumLabel.setBounds((int)(0.5 * contentW) - (int)(0.0307 * contentW),
+                (int)(0.9 * contentH),(int)(0.0613 * contentW),(int)(0.0861 * contentH));
+        topArtistsContent.topArtistNameLabel.setBounds(topArtistsContent.icon.getIconWidth() + (int)(0.0491 * contentW),
+                (int)(0.05 * contentH),(int)(0.1839 * contentW),(int)(0.0861 * contentH));
+        topArtistsContent.topArtistName.setBounds(topArtistsContent.icon.getIconWidth() + (int)(0.2329 * contentW),
+                (int)(0.05 * contentH),(int)(0.4902 * contentW),(int)(0.0861 * contentH));
+        topArtistsContent.topArtistPlayCountLabel.setBounds(topArtistsContent.icon.getIconWidth() + (int)(0.0491 * contentW),
+                (int)(0.05 * contentH)+(int)(0.0861 * contentH),(int)(0.1839 * contentW),(int)(0.0861 * contentH));
+        topArtistsContent.topArtistPlayCount.setBounds(topArtistsContent.icon.getIconWidth() + (int)(0.2329 * contentW),
+                (int)(0.05 * contentH)+(int)(0.0861 * contentH),(int)(0.4902 * contentW),(int)(0.0861 * contentH));
+        topArtistsContent.topArtistListenersLabel.setBounds(topArtistsContent.icon.getIconWidth() + (int)(0.0491 * contentW),
+                (int)(0.05 * contentH)+(int)(0.1722 * contentH),(int)(0.1839 * contentW),(int)(0.0861 * contentH));
+        topArtistsContent.topArtistListeners.setBounds(topArtistsContent.icon.getIconWidth() + (int)(0.2329 * contentW),
+                (int)(0.05 * contentH)+(int)(0.1722 * contentH),(int)(0.4902 * contentW),(int)(0.0861 * contentH));
+        topArtistsContent.topArtistURLLabel.setBounds((int)(0.02 * contentW),
+                topArtistsContent.icon.getIconHeight()+(int)(0.0861 * contentH),(int)(0.1226 * contentW),(int)(0.0861 * contentH));
+        topArtistsContent.topArtistURL.setBounds((int)(0.02 * contentW) + (int)(0.1226 * contentW),
+                topArtistsContent.icon.getIconHeight()+(int)(0.0861 * contentH),contentW,(int)(0.0861 * contentH));
+        topArtistsContent.topArtistsNext.setBounds((int)(0.98 * contentW) - (int)(0.1226 * contentW),
+                (int)(0.9 * contentH),(int)(0.1226 * contentW),(int)(0.0861 * contentH));
+        topArtistsContent.topArtistsBack.setBounds((int)(0.02 * contentW),
+                (int)(0.9 * contentH),(int)(0.1226 * contentW),(int)(0.0861 * contentH));
+
+        //---topTracksContent---
+        topTracksContent.setBounds(
+                menu.getWidth(),header.getHeight(),
+                totalW - menu.getWidth(),
+                totalH - (header.getHeight() + footer.getHeight()));
+        topTracksContent.icon = new ImageIcon(topTracksContent.image.getScaledInstance(
+                (int)(0.3676 * contentW),(int)(0.5164 * contentH),Image.SCALE_SMOOTH));
+        topTracksContent.topTrackImage.setBounds((int)(0.02 * contentW),(int)(0.05 * contentH),
+                topTracksContent.icon.getIconWidth(), topTracksContent.icon.getIconHeight());
+        topTracksContent.topTrackNumLabel.setBounds((int)(0.5 * contentW) - (int)(0.0307 * contentW),
+                (int)(0.9 * contentH),(int)(0.0613 * contentW),(int)(0.0861 * contentH));
+        topTracksContent.topTrackNameLabel.setBounds(topTracksContent.icon.getIconWidth() + (int)(0.0491 * contentW),
+                (int)(0.05 * contentH),(int)(0.1839 * contentW),(int)(0.0861 * contentH));
+        topTracksContent.topTrackName.setBounds(topTracksContent.icon.getIconWidth() + (int)(0.2329 * contentW),
+                (int)(0.05 * contentH),(int)(0.4902 * contentW),(int)(0.0861 * contentH));
+        topTracksContent.topTrackPlayCountLabel.setBounds(topTracksContent.icon.getIconWidth() + (int)(0.0491 * contentW),
+                (int)(0.05 * contentH)+(int)(0.0861 * contentH),(int)(0.1839 * contentW),(int)(0.0861 * contentH));
+        topTracksContent.topTrackPlayCount.setBounds(topTracksContent.icon.getIconWidth() + (int)(0.2329 * contentW),
+                (int)(0.05 * contentH)+(int)(0.0861 * contentH),(int)(0.4902 * contentW),(int)(0.0861 * contentH));
+        topTracksContent.topTrackListenersLabel.setBounds(topTracksContent.icon.getIconWidth() + (int)(0.0491 * contentW),
+                (int)(0.05 * contentH)+(int)(0.1722 * contentH),(int)(0.1839 * contentW),(int)(0.0861 * contentH));
+        topTracksContent.topTrackListeners.setBounds(topTracksContent.icon.getIconWidth() + (int)(0.2329 * contentW),
+                (int)(0.05 * contentH)+(int)(0.1722 * contentH),(int)(0.4902 * contentW),(int)(0.0861 * contentH));
+        topTracksContent.topTrackURLLabel.setBounds((int)(0.02 * contentW),
+                topTracksContent.icon.getIconHeight()+(int)(0.0861 * contentH),(int)(0.1226 * contentW),(int)(0.0861 * contentH));
+        topTracksContent.topTrackURL.setBounds((int)(0.02 * contentW) + (int)(0.1226 * contentW),
+                topTracksContent.icon.getIconHeight()+(int)(0.0861 * contentH),contentW,(int)(0.0861 * contentH));
+        topTracksContent.topTracksNext.setBounds((int)(0.98 * contentW) - (int)(0.1226 * contentW),
+                (int)(0.9 * contentH),(int)(0.1226 * contentW),(int)(0.0861 * contentH));
+        topTracksContent.topTracksBack.setBounds((int)(0.02 * contentW),
+                (int)(0.9 * contentH),(int)(0.1226 * contentW),(int)(0.0861 * contentH));
+
+        //---topAlbumsContent---
+        topAlbumsContent.setBounds(
+                menu.getWidth(),header.getHeight(),
+                totalW - menu.getWidth(),
+                totalH - (header.getHeight() + footer.getHeight()));
+        topAlbumsContent.content.setBounds((int) (0.02 * contentW),
+                (int) (0.01 * contentH), (int) (0.4902 * contentW),(int) (0.08 * contentH));
+        topAlbumsContent.search.setBounds((int) (0.02 * contentW) + (int) (0.5148 * contentW),(int) (0.01 * contentH),
+                (int) (0.2451 * contentW),(int) (0.08 * contentH));
+        topAlbumsContent.icon = new ImageIcon(topAlbumsContent.image.getScaledInstance(
+                (int)(0.3676 * contentW),(int)(0.5164 * contentH),Image.SCALE_SMOOTH));
+        topAlbumsContent.topAlbumsImage.setBounds((int) (0.02 * contentW),(int)(0.12 * contentH),
+                topAlbumsContent.icon.getIconWidth(),topAlbumsContent.icon.getIconHeight());
+        topAlbumsContent.topAlbumsNumLabel.setBounds((int) (0.5 * contentW) - (int) (0.0307 * contentW),
+                (int) (0.9 * contentH), (int) (0.0613 * contentW), (int) (0.0861 * contentH));
+        topAlbumsContent.topAlbumsNext.setBounds((int) (0.98 * contentW) - (int) (0.1226 * contentW),
+                (int) (0.9 * contentH), (int) (0.1226 * contentW), (int) (0.0861 * contentH));
+        topAlbumsContent.topAlbumsBack.setBounds((int) (0.02 * contentW),
+                (int) (0.9 * contentH), (int) (0.1226 * contentW), (int) (0.0861 * contentH));
+        topAlbumsContent.topAlbumsNameLabel.setBounds(topAlbumsContent.icon.getIconWidth() + (int) (0.0491 * contentW),
+                (int) (0.12 * contentH), (int) (0.1838 * contentW), (int) (0.0861 * contentH));
+        topAlbumsContent.topAlbumsName.setBounds(topAlbumsContent.icon.getIconWidth() + (int) (0.2329 * contentW),
+                (int) (0.12 * contentH), (int) (0.4902 * contentW), (int) (0.0861 * contentH));
+        topAlbumsContent.topAlbumsPlayCountLabel.setBounds(topAlbumsContent.icon.getIconWidth() + (int) (0.0491 * contentW),
+                (int) (0.12 * contentH) + (int) (0.0861 * contentH), (int) (0.1838 * contentW), (int) (0.0861 * contentH));
+        topAlbumsContent.topAlbumsPlayCount.setBounds(topAlbumsContent.icon.getIconWidth() + (int) (0.2329 * contentW),
+                (int) (0.12 * contentH) + (int) (0.0861 * contentH), (int) (0.4902 * contentW), (int) (0.0861 * contentH));
+        topAlbumsContent.topAlbumsArtistNameLabel.setBounds(topAlbumsContent.icon.getIconWidth() + (int) (0.0491 * contentW),
+                (int) (0.12 * contentH) + (int) (0.1721 * contentH), (int) (0.1838 * contentW), (int) (0.0861 * contentH));
+        topAlbumsContent.topAlbumsArtistName.setBounds(topAlbumsContent.icon.getIconWidth() + (int) (0.2329 * contentW),
+                (int) (0.12 * contentH) + (int) (0.1721 * contentH), (int) (0.4902 * contentW), (int) (0.0861 * contentH));
+        topAlbumsContent.topAlbumsURLLabel.setBounds((int) (0.02 * contentW),
+                topAlbumsContent.icon.getIconHeight() + (int) (0.1721 * contentH), (int) (0.1838 * contentW), (int) (0.0861 * contentH));
+        topAlbumsContent.topAlbumsURL.setBounds((int) (0.02 * contentW) + (int) (0.1838 * contentW),
+                topAlbumsContent.icon.getIconHeight() + (int) (0.1721 * contentH), contentW, (int) (0.0861 * contentH));
+        topAlbumsContent.topAlbumsArtistURLLabel.setBounds((int) (0.02 * contentW),
+                topAlbumsContent.icon.getIconHeight() + (int) (0.2582 * contentH), (int) (0.1838 * contentW), (int) (0.0861 * contentH));
+        topAlbumsContent.topAlbumsArtistURL.setBounds((int) (0.02 * contentW) + (int) (0.1838 * contentW),
+                topAlbumsContent.icon.getIconHeight() + (int)(0.2582 * contentH), contentW, (int) (0.0861 * contentH));
+
+        //---searchResultsContent---
+        searchResultsContent.setBounds(
+                menu.getWidth(),header.getHeight(),
+                totalW - menu.getWidth(),
+                totalH - (header.getHeight() + footer.getHeight()));
+        searchResultsContent.sp.setBounds((int)(0.02 * contentW),(int)(0.02 * contentH),
+                (int)(0.96 * contentW),(int)(0.86 * contentH));
+        searchResultsContent.clearButton.setBounds((int)(0.02 * contentW),(int)(0.9 * contentH),
+                (int)(0.47 * contentW),(int)(0.08 * contentH));
+        searchResultsContent.addButton.setBounds((int)(0.51 * contentW),(int)(0.9 * contentH),
+                (int)(0.47 * contentW),(int)(0.08 * contentH));
+
+        //---aboutMeContent---
+        aboutMeContent.setBounds(
+                menu.getWidth(),header.getHeight(),
+                totalW - menu.getWidth(),
+                totalH - (header.getHeight() + footer.getHeight()));
+        aboutMeContent.icon = new ImageIcon(aboutMeContent.image.getScaledInstance(
+                (int)(0.3138 * contentW),(int)(0.4407 * contentH),Image.SCALE_SMOOTH));
+        aboutMeContent.accountImage.setBounds((int)(0.02 * contentW),(int)(0.02 * contentH),
+                aboutMeContent.icon.getIconWidth(),aboutMeContent.icon.getIconHeight());
+        aboutMeContent.nameLabel.setBounds((int)(0.02 * contentW),(int)(0.482 * contentH),
+                (int)(0.1839 * contentW),(int)(0.0861 * contentH));
+        aboutMeContent.name.setBounds((int)(0.02 * contentW) + (int)(0.1961 * contentW),(int)(0.482 * contentH),
+                (int)(0.3677 * contentW),(int)(0.0861 * contentH));
+        aboutMeContent.passwordLabel.setBounds((int)(0.02 * contentW),(int)(0.568 * contentH),
+                (int)(0.1839 * contentW),(int)(0.0861 * contentH));
+        aboutMeContent.password.setBounds((int)(0.02 * contentW) + (int)(0.1961 * contentW),(int)(0.568 * contentH),
+                (int)(0.3677 * contentW),(int)(0.0861 * contentH));
+        aboutMeContent.emailLabel.setBounds((int)(0.02 * contentW),(int)(0.6541 * contentH),
+                (int)(0.1839 * contentW),(int)(0.0861 * contentH));
+        aboutMeContent.email.setBounds((int)(0.02 * contentW) + (int)(0.1961 * contentW),(int)(0.6541 * contentH),
+                (int)(0.3677 * contentW),(int)(0.0861 * contentH));
+        aboutMeContent.adminLabel.setBounds((int)(0.02 * contentW),(int)(0.7402 * contentH),
+                (int)(0.1839 * contentW),(int)(0.0861 * contentH));
+        aboutMeContent.admin.setBounds((int)(0.02 * contentW) + (int)(0.1961 * contentW),(int)(0.7402 * contentH),
+                (int)(0.3677 * contentW),(int)(0.0861 * contentH));
+
+        //---loadingContent---
+        loadingContent.setBounds(
+                menu.getWidth(),header.getHeight(),
+                totalW - menu.getWidth(),
+                totalH - (header.getHeight() + footer.getHeight()));
+        loadingContent.waitingLabel.setBounds((int)(0.5 * contentW) - (int)(0.0613 * contentW),
+                (int)(0.5 * contentH),(int)(0.1226 * contentW),(int)(0.0861 * contentH));
+
+        System.out.println("---Resize Completed---\n");
+        realW = totalW;
+        realH = totalH;
+    }
+
+    public void resizeHeaderComponents() {
+        int width = header.getWidth();
+        int height = header.getHeight();
+
+        menuShower.setBounds((int)(width * 0.02),(int)(height * 0.1),(int)(width * 0.06),(int)(height * 0.8));
+        searchBar.setBounds((int)(width * 0.1),(int)(height * 0.1),(int)(width * 0.18),(int)(height * 0.8));
+        playlistSelector.setBounds((int)(width * 0.6),(int)(height * 0.1),(int)(width * 0.24),(int)(height * 0.8));
+        playlistSelector.repaint();
+        playlistSelector.revalidate();
+        accountIcon = new ImageIcon(image.getScaledInstance((int)(0.0329 * width), (int)(0.7 * height), Image.SCALE_SMOOTH));
+        profileButton.setBounds((int)(width* 0.9),(int)(height * 0.1),(int)(width * 0.04),(int)(height * 0.8));
+    }
+
     public void goTo(String song) {
         musicContent.goTo(song);
     }
 
     private void changeMenu() {
-        JPanel content = getCurrentContent();
-        if (content == null) {
-            return;
-        }
-        if (showing) {
+        if (isMenuShowing) {
             menuShower.setText("⦀");
             menu.setVisible(false);
-            content.setBounds(
-                    0,header.getHeight(),realW,
-                    realH - (header.getHeight() + footer.getHeight()));
         } else {
             menuShower.setText("≡");
             menu.setVisible(true);
-            content.setBounds(
-                    menu.getWidth(),header.getHeight(),
-                    realW - menu.getWidth(),
-                    realH - (header.getHeight() + footer.getHeight()));
         }
-        showing = !showing;
+        isMenuShowing = !isMenuShowing;
+        resizeComponents();
     }
 
     public JPanel getCurrentContent() {
@@ -354,11 +611,12 @@ public class MusicPlayerFrame extends JFrame {
     }
 
     private void createMenuOption(JButton button, int content) {
-        button.setBounds(0,menuOptionCounter * 50,250,50);
+        button.setMaximumSize(new Dimension(Integer.MAX_VALUE,(int)(0.074 * realH)));
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
         button.setFocusable(false);
         button.setFont(Util.myFont);
         button.addActionListener(e -> showContent(content));
-        menuOptionCounter++;
+        menu.add(button);
     }
 
     private void createContent(JPanel panel,Color color, boolean visible) {
