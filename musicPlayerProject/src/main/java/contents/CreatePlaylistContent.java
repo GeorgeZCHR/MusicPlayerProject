@@ -74,6 +74,8 @@ public class CreatePlaylistContent extends JPanel implements Content {
                     mpf.getAllPlaylists().add(jScrollPane);
                     mpf.getPlaylistSelector().addItem(playlist.getTitle());
 
+                    mpf.fr.addPlaylist(mpf.user.getEmail(),playlist.getTitle(),songSelectorForPlaylist.getSelectedSongs());
+
                     playlistNameText.setText("");
                     songSelectorForPlaylist.clearSelectedSongs();
                     WarningFrame wf = new WarningFrame("Playlist created",

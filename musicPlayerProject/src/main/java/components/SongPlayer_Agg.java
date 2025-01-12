@@ -47,6 +47,15 @@ public class SongPlayer_Agg {
         try {
             URL url = new URL(API_BASE_URL + "/tracks/" + id + "/stream");
 
+            // Replace for Firestore to work ˜/[]
+            mp3SongNamePath = mp3SongNamePath.replace("˜","");
+            mp3SongNamePath = mp3SongNamePath.replace("","");
+            mp3SongNamePath = mp3SongNamePath.replace("/","");
+            mp3SongNamePath = mp3SongNamePath.replace("[","");
+            mp3SongNamePath = mp3SongNamePath.replace("]","");
+            // Replace for some functions to work ,
+            mp3SongNamePath = mp3SongNamePath.replace(",","");
+
             // Replace with your input MP3 file and desired output WAV file
             String outputWAV = folder + mp3SongNamePath.substring(0,mp3SongNamePath.lastIndexOf(".")) + ".wav";
 

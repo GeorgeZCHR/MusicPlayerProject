@@ -8,6 +8,7 @@ import com.google.firebase.cloud.FirestoreClient;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +66,9 @@ public class FirestoreManager {
                         userMap.get("password").toString(),
                         userMap.get("email").toString(),
                         Boolean.parseBoolean(userMap.get("admin").toString()),
-                        extractSongs(userMap.get("songs").toString())
+                        extractSongs(userMap.get("songs").toString()),
+                        extractLovedList(userMap.get("loved").toString()),
+                        extractPlaylists(userMap.get("playlists").toString())
                 );
             }
         } catch (Exception e) {
@@ -74,12 +77,57 @@ public class FirestoreManager {
         return null;
     }
 
-    public void addSong(String email,String songName) {
+    public void addSong(String email,String songName, boolean loved) {
         DocumentReference docRef = db.collection("users").document(email);
 
-        // Update the songs array by adding a new song
-        ApiFuture<WriteResult> future = docRef
-                .update("songs", FieldValue.arrayUnion(songName));
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("songs", FieldValue.arrayUnion(songName)); // Add songs to the array
+        updates.put("loved." + songName, loved); // Update the loved map
+
+
+        // Perform the updates
+        ApiFuture<WriteResult> future = docRef.update(updates);
+        try {
+            // Wait for the update operation to complete
+            future.get();
+            System.out.println(songName+" updated from base!");
+        } catch (Exception e) {
+            // Handle any errors
+            System.err.println("Error updating document: " + e.getMessage());
+        }
+    }
+    public void addSongs(String email,List<String> songNames,Map<String,Boolean> lovedMap) {
+        DocumentReference docRef = db.collection("users").document(email);
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("songs", FieldValue.arrayUnion(songNames.toArray()));// Add songs to the array
+        for (int i = 0; i < songNames.size(); i++) {
+            updates.put("loved." + songNames.get(i), lovedMap.get(songNames.get(i)));
+        }
+        //updates.put("loved", Fie); // Update the loved map
+
+        // Perform the updates
+        ApiFuture<WriteResult> future = docRef.update(updates);
+        try {
+            // Wait for the update operation to complete
+            future.get();
+            System.out.println("\nSongs array updated from base!\n");
+        } catch (Exception e) {
+            // Handle any errors
+            System.err.println("Error updating document: " + e.getMessage());
+        }
+    }
+
+    public void updateLovedList(String email,List<String> songNames,List<Boolean> lovedList) {
+        DocumentReference docRef = db.collection("users").document(email);
+
+        Map<String, Object> updates = new HashMap<>();
+        for (int i = 0; i < songNames.size(); i++) {
+            updates.put("loved." + songNames.get(i), lovedList.get(i));
+        }
+
+        // Perform the updates
+        ApiFuture<WriteResult> future = docRef.update(updates);
         try {
             // Wait for the update operation to complete
             future.get();
@@ -89,6 +137,22 @@ public class FirestoreManager {
             System.err.println("Error updating document: " + e.getMessage());
         }
     }
+
+    public void updateLoved(String email,String songName,Boolean loved) {
+        DocumentReference docRef = db.collection("users").document(email);
+
+        // Perform the update
+        ApiFuture<WriteResult> future = docRef.update("loved."+songName,loved);
+        try {
+            // Wait for the update operation to complete
+            future.get();
+            System.out.println(songName + "'s loved updated from base!");
+        } catch (Exception e) {
+            // Handle any errors
+            System.err.println("Error updating document: " + e.getMessage());
+        }
+    }
+
 
     public void setNewUser(User user) {
         DocumentReference docRef = db.collection("users")
@@ -106,12 +170,12 @@ public class FirestoreManager {
         }
     }
 
-    public void deleteSong(String email, String songName) {
+    public void deleteSongs(String email, List<String> songNames) {
         DocumentReference docRef = db.collection("users")
                 .document(email);
 
         ApiFuture<WriteResult> future = docRef
-                .update("songs", FieldValue.arrayRemove(songName));
+                .update("songs", FieldValue.arrayRemove(songNames.toArray()));
         try {
             // Wait for the update operation to complete
             future.get();
@@ -119,6 +183,26 @@ public class FirestoreManager {
         } catch (Exception e) {
             // Handle any errors
             System.err.println("Error updating document: " + e.getMessage());
+        }
+    }
+
+    public void deleteSongs(String email) {
+        DocumentReference docRef = db.collection("users")
+                .document(email);
+        User user = getUser(email);
+        if (!user.getSongs().isEmpty()) {
+            ApiFuture<WriteResult> future = docRef
+                    .update("songs", FieldValue.arrayRemove(user.getSongs().toArray()));
+            try {
+                // Wait for the update operation to complete
+                future.get();
+                System.out.println("All Songs deleted from base!");
+            } catch (Exception e) {
+                // Handle any errors
+                System.err.println("Error updating document: " + e.getMessage());
+            }
+        } else {
+            System.out.println(user.getUsername()+" have 0 songs\nDeletion cannot happen.");
         }
     }
 
@@ -138,13 +222,72 @@ public class FirestoreManager {
         }
     }
 
+    public void updateUser(String email) {
+        DocumentReference docRef = db.collection("users").document(email);
+
+        // Update the document
+        /*ApiFuture<WriteResult> future = docRef
+                .update("songs", FieldValue.arrayUnion(songName));*/
+
+        try {
+            // Wait for the delete operation to complete
+            //future.get();
+            System.out.println("User with email '"+ email + "' updated successfully!");
+        } catch (Exception e) {
+            // Handle any errors
+            System.err.println("Error updating document: " + e.getMessage());
+        }
+    }
+
+    public void addPlaylist(String email,String playlistName,List<String> songsNames) {
+        DocumentReference docRef = db.collection("users").document(email);
+        if (playlistName.isEmpty()) {
+            System.out.println("You are trying to add a nameless playlist.\nIt must have at least 1 char for title.");
+            return;
+        }
+        if (songsNames.isEmpty()) {
+            System.out.println("You are trying to add an empty playlist.\nIt must have at least 1 song inside.");
+            return;
+        }
+
+        ApiFuture<WriteResult> future = docRef
+                .update("playlists." + playlistName, FieldValue.arrayUnion(songsNames.toArray()));
+
+        try {
+            // Wait for the delete operation to complete
+            future.get();
+            System.out.println("Playlist : "+playlistName+" with songs :"+songsNames+" was added to base!");
+        } catch (Exception e) {
+            // Handle any errors
+            System.err.println("Error updating document: " + e.getMessage());
+        }
+    }
+
+    public void deletePlaylist(String email,String playlistName) {
+        DocumentReference docRef = db.collection("users").document(email);
+
+        ApiFuture<WriteResult> future = docRef
+                .update("playlists." + playlistName, FieldValue.delete());
+
+        try {
+            // Wait for the delete operation to complete
+            future.get();
+            System.out.println("Playlist : "+playlistName+" was deleted from base!");
+        } catch (Exception e) {
+            // Handle any errors
+            System.err.println("Error updating document: " + e.getMessage());
+        }
+    }
+
     public List<String> extractSongs(String input) {
         // Find the indices of '[' and ']'
         int start = input.indexOf('[');
         int end = input.indexOf(']');
 
         // Extract the substring containing the songs
-        if (start != -1 && end != -1 && start < end) {
+        if (input.equals("[]")) {
+            return new ArrayList<>();
+        } else if (start != -1 && end != -1 && start < end)  {
             String songsString = input.substring(start + 1, end);
 
             // Split the string by commas and trim whitespace
@@ -158,5 +301,57 @@ public class FirestoreManager {
         }
         // Return an empty list if the format is incorrect
         return new ArrayList<>();
+    }
+
+    public Map<String,Boolean> extractLovedList(String input) {
+        int start = input.indexOf('{');
+        int end = input.indexOf('}');
+
+        Map<String,Boolean> map = new HashMap<>();
+        if (input.equals("{}")) {
+            return map;
+        } else if (start != -1 && end != -1 && start < end) {
+            String lovedString = input.substring(start + 1, end);
+
+            String[] lovedArray = lovedString.split(",");
+            for (int i = 0; i < lovedArray.length; i++) {
+                String[] lovedArray2 = lovedArray[i].trim().split("=");
+                boolean temp = lovedArray2[1].equals("true");
+                map.put(lovedArray2[0],temp);
+            }
+            return map;
+        }
+        // Return an empty list if the format is incorrect
+        return map;
+    }
+
+    public Map<String,List<String>> extractPlaylists(String input) {
+        int start = input.indexOf('{');
+        int end = input.indexOf('}');
+
+        Map<String,List<String>> map = new HashMap<>();
+        if (input.equals("{}")) {
+            return map;
+        } else if (start != -1 && end != -1 && start < end) {
+            String playlistsString = input.substring(start + 1, end); // removes {}
+
+            String[] playlistsArray = playlistsString.split("]");
+            for (int i = 0; i < playlistsArray.length; i++) {
+                String[] playlistArray = playlistsArray[i].split("=");
+                if (playlistArray[0].contains(",")) {
+                    playlistArray[0] = playlistArray[0].replace(",","").trim();
+                }
+                playlistArray[1] = playlistArray[1].replace("[","");
+                String[] names = playlistArray[1].split(",");
+                List<String> nameList = new ArrayList<>();
+                for (int j = 0; j < names.length; j++) {
+                    nameList.add(names[j].trim());
+                }
+                map.put(playlistArray[0],nameList);
+            }
+            return map;
+        }
+        // Return an empty list if the format is incorrect
+        return map;
     }
 }
