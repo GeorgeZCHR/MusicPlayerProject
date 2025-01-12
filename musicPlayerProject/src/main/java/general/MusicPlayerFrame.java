@@ -16,6 +16,7 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class MusicPlayerFrame extends JFrame {
     private int currentContent = Util.OPENING_CONTENT;
@@ -108,6 +109,12 @@ public class MusicPlayerFrame extends JFrame {
 
         loadSongs("music/");
         fillAllSongsNames();
+        fr.deleteSongs(user.getEmail());
+        Map<String,Boolean> lovedMap = fr.getUser(user.getEmail()).getLovedMap();
+        for (int i = 0; i < allSongs.size(); i ++) {
+            allSongs.get(i).setHearted(lovedMap.get(allSongs.get(i).getName()));
+        }
+        fr.addSongs(user.getEmail(),allSongsNames,lovedMap);
         setCurrentPlaylistNames(allSongsNames);
         currentSong = currentPLSongs.get(currentSongNum);
 
@@ -209,6 +216,7 @@ public class MusicPlayerFrame extends JFrame {
             }
         });
         playlistSelector.addItem(musicContent.mainPlaylist.getTitle());
+        addPlaylistsFromBase();
 
         //---Login Logout Register Button---
         accountIcon = new ImageIcon("img/circle-user-orange.png");
@@ -251,6 +259,30 @@ public class MusicPlayerFrame extends JFrame {
 
         this.setLocationRelativeTo(null);
         this.setVisible(true);
+    }
+
+    public void addPlaylistsFromBase() {
+        user = fr.getUser(user.getEmail());
+        for (Map.Entry<String, List<String>> playlistMap : user.getPlaylistsMap().entrySet()) {
+            String playlistName = playlistMap.getKey();
+            List<String> songNames = playlistMap.getValue();
+
+            Playlist playlist = new Playlist(playlistName, Util.orange_color, 20,
+                    songNames, this, false);
+            playlist.setRecordBackgroundColor(Util.orange_dark_color, getCurSongNum());
+            playlist.checkHearts();
+
+            JScrollPane jScrollPane = Util.createScrollPane(playlist, new Rectangle(
+                            (int) (getContent(Util.MUSIC_CONTENT).getWidth() * 0.5) - 250,
+                            (int) (getContent(Util.MUSIC_CONTENT).getHeight() * 0.01),
+                            500, 300),
+                    Util.blue_color, getContent(Util.MUSIC_CONTENT).getBackground());
+            jScrollPane.setVisible(false);
+
+            getContent(Util.MUSIC_CONTENT).add(jScrollPane);
+            allPlaylists.add(jScrollPane);
+            playlistSelector.addItem(playlist.getTitle());
+        }
     }
 
     public void resizeComponents() {

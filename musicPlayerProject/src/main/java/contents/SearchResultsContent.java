@@ -10,6 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class SearchResultsContent extends JPanel implements Content{
     private MusicPlayerFrame mpf;
@@ -56,6 +57,7 @@ public class SearchResultsContent extends JPanel implements Content{
                 protected Void doInBackground() {
                     SongPlayer_Agg playerAgg = new SongPlayer_Agg();
                     List<String> newSongs = new ArrayList<>();
+                    Map<String,Boolean> lovedMap = mpf.fr.getUser(mpf.user.getEmail()).getLovedMap();
 
                     for (int i = 0; i < songSelector.getSelectedIndexes().size(); i++) {
                         String id = tracksFromAPI.get(songSelector.getSelectedIndexes().get(i)).getId();
@@ -70,8 +72,19 @@ public class SearchResultsContent extends JPanel implements Content{
                             Song newSong = new Song(songWithFolder, "music/");
                             mpf.getAllSongs().add(newSong);
                             newSongs.add(newSong.getName());
+                            lovedMap.put(newSong.getName(),false);
                         }
                     }
+
+                    for (int i = 0; i < newSongs.size(); i++) {
+                        try {
+                            mpf.fr.addSong(mpf.user.getEmail(),newSongs.get(i),lovedMap.get(newSongs.get(i)));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    }
+
 
                     mpf.fillAllSongsNames();
                     mpf.setCurrentPlaylistNames(mpf.getAllSongNames());

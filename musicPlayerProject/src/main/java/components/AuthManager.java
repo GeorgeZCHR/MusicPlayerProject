@@ -18,6 +18,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class AuthManager extends JFrame {
     private static final String FIREBASE_API_KEY = "AIzaSyBe0CSxR3GiTWsLdFEEnnSplGep9SMRho4"; // Replace with your API key
@@ -185,7 +186,7 @@ public class AuthManager extends JFrame {
                 if (statusCode == 200) {
                     JOptionPane.showMessageDialog(this, "Registration successful");
                     String username = email.substring(0,email.indexOf("@"));
-                    user = new User(username,password,email,false,new ArrayList<>());
+                    user = new User(username,password,email,false,new ArrayList<>(),new HashMap<>(),new HashMap<>());
                     fr.setNewUser(user);
                     cardLayout.show(mainPanel, "login");
                 } else {

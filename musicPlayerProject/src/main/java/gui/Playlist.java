@@ -159,6 +159,7 @@ public class Playlist extends JPanel {
                 }
                 frame.getAllPlaylists().remove(i);
                 frame.getPlaylistSelector().removeItem(title);
+                frame.fr.deletePlaylist(frame.user.getEmail(),title);
                 break;
             }
         }
@@ -276,8 +277,18 @@ public class Playlist extends JPanel {
             buttonPanel.setLayout(new BorderLayout());
             buttonPanel.setOpaque(false);
 
+            String likeName = "♡";
+            for (int j = 0; j < frame.getAllSongs().size(); j++) {
+                if (newSongNames.get(i).equals(frame.getAllSongs().get(j).getName())) {
+                    if (frame.getAllSongs().get(j).isHearted()) {
+                        likeName = "♥";
+                    }
+                }
+            }
+
             RoundButton like = new RoundButton(
-                    "♡", panelColor, 20, 20);
+                    likeName, panelColor, 20, 20);
+
             like.setFont(Util.myFont);
             like.setFocusable(false);
             like.addActionListener(e -> addRemoveHeart(e));
@@ -322,9 +333,11 @@ public class Playlist extends JPanel {
                 if (!this.frame.getAllSongs().get(j).isHearted()) {
                     likeButton.setText("♥");
                     this.frame.getAllSongs().get(j).setHearted(true);
+                    frame.fr.updateLoved(frame.user.getEmail(),nameButton.getText(),true);
                 } else {
                     likeButton.setText("♡");
                     this.frame.getAllSongs().get(j).setHearted(false);
+                    frame.fr.updateLoved(frame.user.getEmail(),nameButton.getText(),false);
                 }
             }
         }
