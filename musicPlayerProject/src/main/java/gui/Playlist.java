@@ -106,6 +106,7 @@ public class Playlist extends JPanel {
                 if (!newSongNames.isEmpty()) {
                     currentNames.addAll(newSongNames);
                     addNewRecords(newSongNames);
+                    frame.fr.addPlaylistSongs(frame.user.getEmail(),this.title,newSongNames);
                     update();
                     songSelectorFrame.dispose();
                 } else {
@@ -402,6 +403,9 @@ public class Playlist extends JPanel {
             this.currentNames.remove(pos);
             remove(pos+1);
             update();
+            List<String> songsForDeletion = new ArrayList<>();
+            songsForDeletion.add(nameButton.getText());
+            frame.fr.removePlaylistSongs(frame.user.getEmail(),this.title,songsForDeletion);
         }
     }
 

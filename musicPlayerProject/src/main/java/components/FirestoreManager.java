@@ -279,6 +279,38 @@ public class FirestoreManager {
         }
     }
 
+    public void addPlaylistSongs(String email,String playlistName, List<String> songs) {
+        DocumentReference docRef = db.collection("users").document(email);
+
+        ApiFuture<WriteResult> future = docRef
+                .update("playlists." + playlistName, FieldValue.arrayUnion(songs.toArray()));
+
+        try {
+            // Wait for the delete operation to complete
+            future.get();
+            System.out.println("Songs : "+songs+" were added to "+playlistName+" to base!");
+        } catch (Exception e) {
+            // Handle any errors
+            System.err.println("Error updating document: " + e.getMessage());
+        }
+    }
+
+    public void removePlaylistSongs(String email,String playlistName, List<String> songs) {
+        DocumentReference docRef = db.collection("users").document(email);
+
+        ApiFuture<WriteResult> future = docRef
+                .update("playlists." + playlistName, FieldValue.arrayRemove(songs.toArray()));
+
+        try {
+            // Wait for the delete operation to complete
+            future.get();
+            System.out.println("Songs : "+songs+" were added to "+playlistName+" to base!");
+        } catch (Exception e) {
+            // Handle any errors
+            System.err.println("Error updating document: " + e.getMessage());
+        }
+    }
+
     public List<String> extractSongs(String input) {
         // Find the indices of '[' and ']'
         int start = input.indexOf('[');
